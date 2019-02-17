@@ -50,9 +50,10 @@ public class IntHeap<K> extends AbstractQueue<KeyCount<K>>
       return null;
     } else {
       KeyCount<K> firstElt = new KeyCount<>(keys[0], counts[0]);
-      keys[0] = null;
-      counts[0] = 0;
-      swap(0, size-1);
+      keys[0] = keys[size-1];
+      counts[0] = counts[size-1];
+      keys[size-1] = null;
+      counts[size-1] = 0;
       size--;
       heapDown(0);
       return firstElt;
@@ -71,15 +72,6 @@ public class IntHeap<K> extends AbstractQueue<KeyCount<K>>
     heapDown(0);
   }
 
-  private void swap(int i, int j) {
-    K iK = keys[i];
-    int iC = counts[i];
-    keys[i] = keys[j];
-    counts[i] = counts[j];
-    keys[j] = iK;
-    counts[j] = iC;
-  }
-
   private void append(K x, int c) {
     if (size >= keys.length) {
       expand(keys.length*2);
@@ -96,10 +88,15 @@ public class IntHeap<K> extends AbstractQueue<KeyCount<K>>
     int curIdx = ogIdx;
     int idxToSwap = curIdx*2+1;
     while(idxToSwap < size) {
-      if (idxToSwap+1 < size && compareVal(idxToSwap, idxToSwap + 1) > 0) {
-        idxToSwap++;
+      int childCount = counts[idxToSwap];
+      if (idxToSwap+1 < size) {
+        int altCount = counts[idxToSwap+1];
+        if (compareVal(childCount, altCount) > 0) {
+          idxToSwap++;
+          childCount = altCount;
+        }
       }
-      if (compareVal(idxToSwap, curIdx) < 0) {
+      if (compareVal(childCount, ogCount) < 0) {
         keys[curIdx] = keys[idxToSwap];
         counts[curIdx] = counts[idxToSwap];
         curIdx = idxToSwap;
@@ -112,22 +109,28 @@ public class IntHeap<K> extends AbstractQueue<KeyCount<K>>
     counts[curIdx] = ogCount;
   }
   private void heapUp(int curIdx) {
+    K ogKey = keys[curIdx];
+    int ogCount = counts[curIdx];
+
     while (curIdx > 0) {
       int parentIdx = (curIdx - 1)/2;
-      if (compareVal(curIdx, parentIdx) < 0){
-        swap(curIdx, parentIdx);
+      int parentCount = counts[parentIdx];
+      if (compareVal(ogCount, parentCount) < 0){
+        keys[curIdx] = keys[parentIdx];
+        counts[curIdx] = parentCount;
         curIdx = parentIdx;
       } else {
         break;
       }
     }
+    keys[curIdx] = ogKey;
+    counts[curIdx] = ogCount;
   }
-  private int compareVal(int i, int j) {
-    int diff = counts[i] - counts[j];
+  private int compareVal(int xVal, int yVal) {
     if (ascending) {
-      return diff;
+      return xVal - yVal;
     } else {
-      return -diff;
+      return yVal - xVal;
     }
   }
 
@@ -165,5 +168,22 @@ public class IntHeap<K> extends AbstractQueue<KeyCount<K>>
   public int size()
   {
     return size;
+  }
+
+  public boolean checkValid() {
+    for (int i = 0; i < size/2; i++) {
+      int curCount = counts[i];
+      if (2*i+1 < size) {
+        if (compareVal(curCount, counts[2*i+1]) > 0) {
+          return false;
+        }
+      }
+      if (2*i+2 < size) {
+        if (compareVal(curCount, counts[2*i+2]) > 0) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 }

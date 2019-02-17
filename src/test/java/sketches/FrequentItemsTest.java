@@ -6,6 +6,7 @@ import sketches.counters.KeyCount;
 import util.ZipfDataSource;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -19,14 +20,14 @@ public class FrequentItemsTest
 
     SpaceSavingSketch<Integer> ss = new SpaceSavingSketch<>(50);
     ExactCountersSketch<Integer> ec = new ExactCountersSketch<>();
-    int[] xs = zf.getInt();
+    ArrayList<Integer> xs = zf.get();
     for (int x : xs) {
       ss.add(x);
       ec.add(x);
     }
 
     int expectedError = ss.getError();
-    assertTrue(expectedError < xs.length / ss.getSize());
+    assertTrue(expectedError < xs.size()/ ss.getSize());
 
     for (KeyCount<Integer> x : ec.getItems()) {
       int trueCount = x.count;
@@ -41,7 +42,7 @@ public class FrequentItemsTest
     int sketchSize = 50;
 
     ExactCountersSketch<Integer> ec = new ExactCountersSketch<>();
-    int[] xs = zf.getInt();
+    ArrayList<Integer> xs = zf.get();
     for (int x : xs) {
       ec.add(x);
     }

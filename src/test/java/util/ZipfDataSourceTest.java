@@ -3,6 +3,7 @@ package util;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import static org.junit.Assert.*;
 
@@ -12,7 +13,7 @@ public class ZipfDataSourceTest
   public void testDistribution() throws IOException
   {
     ZipfDataSource zf = new ZipfDataSource(1.3, 0, 100000);
-    int[] xs = zf.getInt();
+    ArrayList<Integer> xs = zf.get();
     int n_to_check = 2;
     int[] counts = new int[n_to_check+1];
     for (int x : xs) {

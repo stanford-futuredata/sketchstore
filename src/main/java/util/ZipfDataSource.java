@@ -7,7 +7,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class ZipfDataSource implements DataSource
+public class ZipfDataSource implements DataSource<Integer>
 {
   private int UNIVERSE_SIZE = 10_000_000;
   private RandomGenerator rng;
@@ -21,20 +21,11 @@ public class ZipfDataSource implements DataSource
   }
 
   @Override
-  public ArrayList<String> get() throws IOException
+  public ArrayList<Integer> get()
   {
-    ArrayList<String> output = new ArrayList<>(length);
+    ArrayList<Integer> output = new ArrayList<>(length);
     for (int i = 0; i < length; i++) {
-      output.add(Integer.toString(zipf.sample()));
-    }
-    return output;
-  }
-
-  @Override
-  public int[] getInt() throws IOException {
-    int[] output = new int[length];
-    for (int i = 0; i < length; i++) {
-      output[i] = zipf.sample();
+      output.add(zipf.sample());
     }
     return output;
   }

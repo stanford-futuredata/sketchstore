@@ -15,6 +15,7 @@ public class IntHeapTest
       iHeap.offer(x, x);
     }
     assertEquals(9, iHeap.peek().count);
+    assertTrue(iHeap.checkValid());
   }
 
   @Test
@@ -32,6 +33,7 @@ public class IntHeapTest
     }
     assertEquals(9, nextSmallest.count);
     assertEquals(9, nextSmallest.key.intValue());
+    assertTrue(iHeap.checkValid());
   }
 
   @Test
@@ -45,5 +47,6 @@ public class IntHeapTest
     iHeap.replaceMin(33, 3);
     KeyCount<Integer> newSmallest = iHeap.peek();
     assertEquals(1, newSmallest.count);
+    assertTrue(iHeap.checkValid());
   }
 }

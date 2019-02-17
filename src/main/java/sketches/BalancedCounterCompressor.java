@@ -16,7 +16,7 @@ public class BalancedCounterCompressor<K> implements CounterCompressor<K>
     this.rng = rng;
   }
 
-  public Collection<KeyCount<K>> compress2(Collection<KeyCount<K>> xs, int newSize) {
+  public Collection<KeyCount<K>> compress(Collection<KeyCount<K>> xs, int newSize) {
     PriorityQueue<KeyCount<K>> orderedItems = new PriorityQueue<>(
         xs.size(),
         (a, b) -> -a.compareTo(b)
@@ -47,7 +47,7 @@ public class BalancedCounterCompressor<K> implements CounterCompressor<K>
     return buckets;
   }
 
-  public Collection<KeyCount<K>> compress(Collection<KeyCount<K>> xs, int newSize) {
+  public Collection<KeyCount<K>> compress2(Collection<KeyCount<K>> xs, int newSize) {
     IntHeap<K> orderedItems = new IntHeap<>(xs.size());
     orderedItems.setAscending(false);
     for (KeyCount<K> x : xs) {
