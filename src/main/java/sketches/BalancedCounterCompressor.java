@@ -4,7 +4,9 @@ import org.apache.commons.math3.random.RandomGenerator;
 import sketches.counters.IntHeap;
 import sketches.counters.KeyCount;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.PriorityQueue;
 
 public class BalancedCounterCompressor<K> implements CounterCompressor<K>
@@ -16,7 +18,7 @@ public class BalancedCounterCompressor<K> implements CounterCompressor<K>
     this.rng = rng;
   }
 
-  public Collection<KeyCount<K>> compress(Collection<KeyCount<K>> xs, int newSize) {
+  public List<KeyCount<K>> compress(List<KeyCount<K>> xs, int newSize) {
     PriorityQueue<KeyCount<K>> orderedItems = new PriorityQueue<>(
         xs.size(),
         (a, b) -> -a.compareTo(b)
@@ -44,7 +46,7 @@ public class BalancedCounterCompressor<K> implements CounterCompressor<K>
         buckets.offer(smallestBucket);
       }
     }
-    return buckets;
+    return new ArrayList<>(buckets);
   }
 
   public Collection<KeyCount<K>> compress2(Collection<KeyCount<K>> xs, int newSize) {

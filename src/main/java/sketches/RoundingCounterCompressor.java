@@ -5,6 +5,7 @@ import sketches.counters.KeyCount;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public class RoundingCounterCompressor<K> implements CounterCompressor<K>
 {
@@ -16,7 +17,7 @@ public class RoundingCounterCompressor<K> implements CounterCompressor<K>
   }
 
   @Override
-  public Collection<KeyCount<K>> compress(Collection<KeyCount<K>> xs, int newSize)
+  public List<KeyCount<K>> compress(List<KeyCount<K>> xs, int newSize)
   {
     ArrayList<KeyCount<K>> newCounters = new ArrayList<>(2*newSize);
     int totalCount = 0;

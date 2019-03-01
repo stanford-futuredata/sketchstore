@@ -3,6 +3,7 @@ package sketches;
 import sketches.counters.KeyCount;
 
 import java.util.Collection;
+import java.util.List;
 
 public interface FrequentItemsSketch<K>
 {
@@ -15,7 +16,7 @@ public interface FrequentItemsSketch<K>
       add(x.key, x.count);
     }
   }
-  Collection<KeyCount<K>> getItems();
+  List<KeyCount<K>> getItems();
   int getCount(K x);
   int getTotal();
 

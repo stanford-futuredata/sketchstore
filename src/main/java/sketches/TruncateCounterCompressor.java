@@ -4,14 +4,14 @@ import sketches.counters.IntHeap;
 import sketches.counters.KeyCount;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 public class TruncateCounterCompressor<K> implements CounterCompressor<K>
 {
   private int threshold = 0;
 
   @Override
-  public Collection<KeyCount<K>> compress(Collection<KeyCount<K>> xs, int newSize)
+  public List<KeyCount<K>> compress(List<KeyCount<K>> xs, int newSize)
   {
     IntHeap<K> orderedItems = new IntHeap<>(xs.size());
     orderedItems.setAscending(false);

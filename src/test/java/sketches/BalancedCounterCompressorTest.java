@@ -6,6 +6,7 @@ import sketches.counters.KeyCount;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -13,7 +14,7 @@ public class BalancedCounterCompressorTest
 {
   @Test
   public void testSimple() {
-    Collection<KeyCount<Integer>> xs = Arrays.asList(
+    List<KeyCount<Integer>> xs = Arrays.asList(
         new KeyCount<>(1, 10),
         new KeyCount<>(2, 10),
         new KeyCount<>(3, 5),

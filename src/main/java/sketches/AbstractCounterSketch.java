@@ -2,10 +2,7 @@ package sketches;
 
 import sketches.counters.KeyCount;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public abstract class AbstractCounterSketch<K> implements FrequentItemsSketch<K>
 {
@@ -16,7 +13,7 @@ public abstract class AbstractCounterSketch<K> implements FrequentItemsSketch<K>
   }
 
   @Override
-  public Collection<KeyCount<K>> getItems()
+  public List<KeyCount<K>> getItems()
   {
     ArrayList<KeyCount<K>> itemList = new ArrayList<>(countMap.size());
     for (Map.Entry<K, Integer> entry : countMap.entrySet()) {

@@ -1,18 +1,13 @@
 package runner;
 
 import org.apache.commons.math3.random.JDKRandomGenerator;
-import sketches.ApproxBalancedCounterCompressor;
-import sketches.BalancedCounterCompressor;
-import sketches.CounterCompressor;
-import sketches.ExactCountersSketch;
+import org.apache.commons.math3.random.MersenneTwister;
+import sketches.*;
 import sketches.counters.KeyCount;
-import sketches.RoundingCounterCompressor;
-import sketches.TruncateCounterCompressor;
 import util.CSVIntDataSource;
 import util.GroupedSeqDataSource;
 import util.ZipfDataSource;
 
-import java.security.Key;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,8 +19,8 @@ public class AccuracyBench
   public static void main(String[] args) throws Exception {
     System.out.println("Starting Accuracy Bench");
 //    System.in.read();
-//    singleSourceBench();
-    groupedSourceBench();
+    singleSourceBench();
+//    groupedSourceBench();
   }
 
   public static void groupedSourceBench() throws Exception {
@@ -76,7 +71,7 @@ public class AccuracyBench
   }
 
   public static void singleSourceBench() throws Exception {
-    ZipfDataSource zf = new ZipfDataSource(1.3, 0, 500000);
+    ZipfDataSource zf = new ZipfDataSource(1.3, 0, 200000);
     ArrayList<Integer> xs = zf.get();
     ExactCountersSketch<Integer> ec = new ExactCountersSketch<>();
     for (int x : xs) {
@@ -84,8 +79,9 @@ public class AccuracyBench
     }
 
     List<CounterCompressor<Integer>> compressors = Arrays.asList(
-        new BalancedCounterCompressor<>(new JDKRandomGenerator(0)),
-        new RoundingCounterCompressor<>(new JDKRandomGenerator(0)),
+        new BalancedCounterCompressor<>(new MersenneTwister(0)),
+        new HaircombCounterCompressor<>(new MersenneTwister(0)),
+        new RoundingCounterCompressor<>(new MersenneTwister(0)),
         new TruncateCounterCompressor<>()
     );
     int sketchSize = 30;

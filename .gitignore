@@ -3,3 +3,6 @@ cp.txt
 *.iml
 target/
 .idea/
+.ipynb_checkpoints
+__pycache__/
+.pytest_cache/
