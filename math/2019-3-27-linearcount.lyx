@@ -1,0 +1,357 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\begin_modules
+theorems-ams-bytype
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Section
+Incremental batch item count summarization
+\end_layout
+
+\begin_layout Standard
+We have a batch consisting of items 
+\begin_inset Formula $i$
+\end_inset
+
+ with weights 
+\begin_inset Formula $\delta_{i}$
+\end_inset
+
+ and total weight 
+\begin_inset Formula $\sum\delta_{i}=t$
+\end_inset
+
+ , rescaled so that 
+\begin_inset Formula $t\leq1$
+\end_inset
+
+.
+ For this batch, we can  store 
+\begin_inset Formula $s=1$
+\end_inset
+
+ counters 
+\begin_inset Formula $\left(i,w\right)$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Let the potential function be 
+\begin_inset Formula $\sum g\left(x_{i}\right)=\sum\gamma^{x_{i}}$
+\end_inset
+
+ for a parameter 
+\begin_inset Formula $\gamma$
+\end_inset
+
+ where 
+\begin_inset Formula $x_{i}$
+\end_inset
+
+ is the cumulative difference between the true weight for 
+\begin_inset Formula $i$
+\end_inset
+
+ and the tracked weight for all the batches so far.
+ The summarization rule will be to store 
+\begin_inset Formula $\left(\ell,w\right)$
+\end_inset
+
+ where 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+l & =\arg\max x_{i}+\delta_{i}\\
+w & =\min\left(rt,x_{l}+\delta_{l}\right)
+\end{align*}
+
+\end_inset
+
+In effect subtracting up to 
+\begin_inset Formula $rt$
+\end_inset
+
+ from the largest discrepancy.
+ Let 
+\begin_inset Formula $\Delta$
+\end_inset
+
+ be the total change in the potential 
+\begin_inset Formula $\sum\gamma^{x_{i}}$
+\end_inset
+
+ before and and this batch.
+\end_layout
+
+\begin_layout Lemma
+If 
+\begin_inset Formula $r>1$
+\end_inset
+
+ there exists a 
+\begin_inset Formula $\gamma>1$
+\end_inset
+
+ such that 
+\begin_inset Formula $\Delta\leq1$
+\end_inset
+
+ .
+\end_layout
+
+\begin_layout Proof
+Consider the two cases for 
+\begin_inset Formula $w=\min\left(rt,x_{l}+\delta_{l}\right)$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Proof
+Case 1: 
+\series bold
+
+\begin_inset Formula $x_{l}+\delta_{l}\geq rt$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Proof
+\begin_inset Formula 
+\begin{align*}
+\Delta & =\sum_{i\neq l}\left[g\left(x_{i}+\delta_{i}\right)-g\left(x_{i}\right)\right]+g\left(x_{l}+\delta_{l}-rt\right)-g\left(x_{l}\right)\\
+ & =\sum_{i\neq l}\gamma^{x_{i}}\left(\gamma^{\delta_{i}}-1\right)+\gamma^{x_{l}}\left(\gamma^{\delta_{l}-rt}-1\right)\\
+ & =\sum_{i\neq l}\gamma^{x_{i}+\delta_{i}}\left(1-\gamma^{-\delta_{i}}\right)+\gamma^{x_{l}+\delta_{l}}\left(\gamma^{-rt}-\gamma^{-\delta_{l}}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Proof
+Note that 
+\begin_inset Formula $e^{x}\geq1+x$
+\end_inset
+
+ for all real 
+\begin_inset Formula $x$
+\end_inset
+
+ and thus 
+\begin_inset Formula $-e^{x}\leq-1-x$
+\end_inset
+
+ and 
+\begin_inset Formula $\gamma^{x}=e^{x\log\gamma}\geq1+x\log\gamma$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Proof
+\begin_inset Formula 
+\begin{align*}
+ & \leq\sum_{i\neq l}\gamma^{x_{i}+\delta_{i}}\left(\delta_{i}\log\gamma\right)+\gamma^{x_{l}+\delta_{l}}\left(\gamma^{-rt}-1+\delta_{l}\log\gamma\right)\\
+ & \leq\boxed{\gamma^{x_{l}+\delta_{l}}\left(t\log\gamma+\gamma^{-rt}-1\right)}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Proof
+Case 2: 
+\begin_inset Formula $x_{l}+\delta_{l}<rt$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Proof
+\begin_inset Formula 
+\begin{align*}
+\Delta & =\sum_{i\neq l}\gamma^{x_{i}+\delta_{i}}\left(1-\gamma^{-\delta_{i}}\right)+\gamma^{0}-\gamma^{x_{l}+\delta_{l}}\left(\gamma^{-\delta_{l}}\right)\\
+ & \leq1+\sum_{i\neq l}\gamma^{x_{i}+\delta_{i}}\left(\delta_{i}\log\gamma\right)-\gamma^{x_{l}+\delta_{l}}\left(1-\delta_{l}\log\gamma\right)\\
+ & \leq\boxed{1+\gamma^{x_{l}+\delta_{l}}\left(t\log\gamma-1\right)}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Proof
+We need to find a value 
+\begin_inset Formula $\gamma$
+\end_inset
+
+ that allows 
+\begin_inset Formula $\Delta\leq1$
+\end_inset
+
+ in both cases.
+ Let 
+\begin_inset Formula $b=\log\gamma$
+\end_inset
+
+.
+ As long as 
+\begin_inset Formula $b\leq1$
+\end_inset
+
+ then 
+\begin_inset Formula $t\log\gamma-1\leq0$
+\end_inset
+
+.
+ We need to find 
+\begin_inset Formula $b$
+\end_inset
+
+ such that 
+\end_layout
+
+\begin_layout Proof
+\begin_inset Formula 
+\begin{align*}
+tb+e^{-rtb} & \leq1\\
+tb+\left(1-rtb+\frac{1}{2}r^{2}t^{2}b^{2}\right) & \leq1\\
+1-r+\frac{1}{2}r^{2}tb & \leq0\\
+b & \leq\frac{2}{t}\frac{r-1}{r^{2}}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Proof
+As long as 
+\begin_inset Formula $r>1$
+\end_inset
+
+ and 
+\begin_inset Formula $t<1$
+\end_inset
+
+ we can set 
+\begin_inset Formula $\boxed{0<\log\gamma\leq\min\left(1,2\frac{r-1}{r^{2}}\right)}$
+\end_inset
+
+ to ensure 
+\begin_inset Formula $\Delta\leq1$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Knowing that 
+\begin_inset Formula $\Delta\leq1$
+\end_inset
+
+ means that after 
+\begin_inset Formula $m$
+\end_inset
+
+ batches 
+\begin_inset Formula $\Delta\leq m$
+\end_inset
+
+ so 
+\begin_inset Formula $\max\gamma^{x_{i}}\leq\sum\gamma^{x_{i}}\leq m$
+\end_inset
+
+, 
+\begin_inset Formula $\boxed{\max x_{i}\leq\frac{1}{b}\log m}$
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
