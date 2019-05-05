@@ -2,7 +2,15 @@ cp.txt
 .DS_Store
 *.iml
 target/
+build/
 .idea/
+*.ipynb
 .ipynb_checkpoints
 __pycache__/
 .pytest_cache/
+output/
+*.png
+*.lyx~
+*.pdf
+*.so
+*.html
