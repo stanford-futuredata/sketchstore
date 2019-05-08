@@ -13,7 +13,8 @@ class TestCompressFreq(unittest.TestCase):
         self.assertEqual(1, i)
 
     def test_compress(self):
-        hc = c.HairCombCompressor(seed=0, unbiased=True)
+        new_size = 2
+        hc = c.HairCombCompressor(new_size, seed=0, unbiased=True)
         counts = defaultdict(int)
         counts.update({
             1: 10,
@@ -21,20 +22,35 @@ class TestCompressFreq(unittest.TestCase):
             3: 3,
             4: 2
         })
-        new_size = 2
-        new_counts = hc.compress(counts, new_size=new_size)
+        new_counts = hc.compress(counts)
         self.assertEqual(len(new_counts), new_size)
 
-        pps = c.PPSCompressor(seed=0, unbiased=True)
-        new_counts = pps.compress(counts, new_size=new_size)
+        pps = c.PPSCompressor(new_size, seed=0, unbiased=True)
+        new_counts = pps.compress(counts)
         self.assertEqual(10, new_counts[1])
 
-        tc = c.TruncationCompressor()
-        new_counts = tc.compress(counts, new_size=new_size)
+        tc = c.TruncationCompressor(new_size)
+        new_counts = tc.compress(counts)
         self.assertEqual(5, new_counts[2])
 
-        rs = c.RandomSampleCompressor(seed=0)
-        new_counts = rs.compress(counts, new_size=new_size)
+        rs = c.RandomSampleCompressor(new_size, seed=0)
+        new_counts = rs.compress(counts)
+
+    def test_incremental(self):
+        size = 2
+        ic = c.IncrementalRangeCompressor(size)
+        counts = defaultdict(int)
+        counts.update({
+            1: 10,
+            2: 5,
+            3: 3,
+            4: 2
+        })
+        s1 = ic.compress(counts)
+        self.assertEqual(10, s1[1])
+        self.assertEqual(5, s1[2])
+        s2 = ic.compress(counts)
+        self.assertEqual(6, s2[3])
 
     def test_unbiased(self):
         counts = defaultdict(int)
@@ -47,9 +63,9 @@ class TestCompressFreq(unittest.TestCase):
         new_size = 2
 
         ec = f.ExactCounterSketch()
-        pps = c.PPSCompressor(seed=0, unbiased=True)
+        pps = c.PPSCompressor(new_size, seed=0, unbiased=True)
         for i in range(100):
-            new_counts = pps.compress(counts, new_size=new_size)
+            new_counts = pps.compress(counts)
             ec.update(new_counts)
 
         total_counts = ec.get_dict()

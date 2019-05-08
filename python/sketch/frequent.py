@@ -3,6 +3,7 @@ from typing import Dict, Any
 import numpy as np
 import random
 import copy
+import probables
 
 
 class ExactCounterSketch:
@@ -20,6 +21,30 @@ class ExactCounterSketch:
         for k, v in counts.items():
             self.items[k] = self.items.get(k, 0.0) + v
 
+
+class CountMinSketch:
+    def __init__(self, size=100, seed=0, unbiased=False, max_val=100):
+        self.size = size
+        self.max_val = max_val
+        if unbiased:
+            self.cms = probables.countminsketch.CountMeanMinSketch(width=size, depth=5)
+        else:
+            self.cms = probables.countminsketch.CountMinSketch(width=size, depth=5)
+
+    def add(self, xs):
+        for x in xs:
+            self.cms.add(str(x))
+
+    def get_dict(self):
+        item_counts = dict()
+        for i in range(self.max_val):
+            item_counts[i] = self.cms.check(str(i))
+        return item_counts
+
+    def update(self, counts: Dict[Any, float]):
+        for k, v in counts.items():
+            self.cms.add(str(k), int(v))
+            
 
 class SpaceSavingSketch:
     def __init__(self, size=100, seed=0, unbiased=False):

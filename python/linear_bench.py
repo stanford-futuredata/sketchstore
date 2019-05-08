@@ -3,97 +3,86 @@ from collections import defaultdict
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+import json
+import pickle
 
 import sketch.compress_freq as cf
 import sketch.frequent as f
 
 
 class LinearBenchRunner:
-    def __init__(self):
-        self.size = 10
-        self.check_points = [1, 5, 10, 15, 20, 50]
-
-    def gen_results(
+    def __init__(
             self,
-            summary_name: str,
-            seg_count: int,
-            counts,
+            size=20,
+            num_segments=200,
     ):
-        results = []
-        for checkpoint in self.check_points:
-            cur_result = {
-                "merge_type": "linear",
-                "summary": summary_name,
-                "size": self.size,
-                "n_segments": seg_count,
-                "check_point": checkpoint,
-                "count": counts.get(checkpoint, 0.0)
-            }
-            results.append(cur_result)
-        return results
+        self.size = size
+        self.num_segments = num_segments
 
     def run(self):
         print("Linear Benchmark")
-        segments = gen_data(1000)
+        segments = gen_data(self.num_segments)
+
         compressors = [
-            cf.IncrementalRangeCompressor(),
-            cf.TruncationCompressor(),
-            cf.RandomSampleCompressor(),
-            cf.PPSCompressor(),
+            cf.TopValueCompressor(100),
+            cf.RandomSampleCompressor(self.size),
+            cf.TruncationCompressor(self.size),
+            cf.PPSCompressor(self.size),
+            # cf.HairCombCompressor(self.size),
+            cf.IncrementalRangeCompressor(self.size),
         ]
         compressor_names = [
-            "incremental",
-            "truncation",
+            "topvalue",
             "random_sample",
+            "truncation",
             "pps",
+            "incremental",
+        ]
+
+        sketches = [
+            lambda: f.SpaceSavingSketch(size=self.size, unbiased=False),
+            lambda: f.CountMinSketch(size=self.size, unbiased=False),
+            lambda: f.CountMinSketch(size=self.size, unbiased=True),
+        ]
+        sketch_names = [
+            "spacesaving",
+            "cms_min",
+            "cms_mean",
         ]
         results = []
-        ss_total = f.SpaceSavingSketch(size=self.size, unbiased=False)
-        ec_total = f.ExactCounterSketch()
 
-        compressed_totals = [
-            f.ExactCounterSketch() for i in range(len(compressors))
-        ]
         for cur_seg_idx, cur_seg in tqdm(enumerate(segments)):
-            ec_total.add(cur_seg)
-            ss_total.add(cur_seg)
-            results += self.gen_results(
-                "exact",
-                seg_count=cur_seg_idx + 1,
-                counts=ec_total.get_dict(),
-            )
-            results += self.gen_results(
-                "spacesaving",
-                seg_count=cur_seg_idx + 1,
-                counts=ss_total.get_dict(),
-            )
-
             ec_current = f.ExactCounterSketch()
             ec_current.add(cur_seg)
             exact_dict = ec_current.get_dict()
 
-            for compressor_idx in range(len(compressors)):
-                cur_compressor = compressors[compressor_idx]
+            for compressor_idx, cur_compressor in enumerate(compressors):
                 cur_compressor_name = compressor_names[compressor_idx]
-                cur_compressor_totals = compressed_totals[compressor_idx]
-                compressed_counts = cur_compressor.compress(
-                    item_dict=exact_dict,
-                    new_size=self.size,
-                )
-                cur_compressor_totals.update(compressed_counts)
-                results += self.gen_results(
-                    cur_compressor_name,
-                    seg_count=cur_seg_idx + 1,
-                    counts=cur_compressor_totals.get_dict()
-                )
+                compressed_counts = cur_compressor.compress(item_dict=exact_dict)
+                results.append({
+                    "seg_idx": cur_seg_idx,
+                    "method": cur_compressor_name,
+                    "counts": compressed_counts,
+                })
+
+            for sketch_idx, cur_sketch_constructor in enumerate(sketches):
+                cur_sketch_name = sketch_names[sketch_idx]
+                cur_sketch = cur_sketch_constructor()
+                cur_sketch.add(cur_seg)
+                compressed_counts = cur_sketch.get_dict()
+                results.append({
+                    "seg_idx": cur_seg_idx,
+                    "method": cur_sketch_name,
+                    "counts": compressed_counts,
+                })
         return results
 
 
 def main():
-    rr = LinearBenchRunner()
+    rr = LinearBenchRunner(size=20, num_segments=400)
     results = rr.run()
-    r_df = pd.DataFrame(results)
-    r_df.to_csv("output/linear_bench.csv", index=False)
+    with open("output/linear_bench.out", "w") as f:
+        f.write(repr(results))
 
 
 def gen_data(num_segments=10):
