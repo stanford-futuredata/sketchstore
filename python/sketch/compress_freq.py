@@ -1,27 +1,28 @@
 import math
 from collections import defaultdict
 from typing import Dict, Any, Mapping
+from sketch.frequent_cy import find_t
 
 import numpy as np
 import random
 
-
-def find_t(counts, s):
-    sum_rest = np.sum(counts)
-    cur_t = sum_rest / s
-    found_tail = False
-    tail_idx = 0
-    for tail_idx in range(len(counts)):
-        if tail_idx > 0:
-            sum_rest -= counts[tail_idx-1]
-        cur_t = sum_rest / (s-tail_idx)
-        if counts[tail_idx] < cur_t:
-            found_tail = True
-            break
-    if not found_tail:
-        cur_t = 0
-        tail_idx = len(counts)
-    return cur_t, tail_idx
+#
+# def find_t(counts, s):
+#     sum_rest = np.sum(counts)
+#     cur_t = sum_rest / s
+#     found_tail = False
+#     tail_idx = 0
+#     for tail_idx in range(len(counts)):
+#         if tail_idx > 0:
+#             sum_rest -= counts[tail_idx-1]
+#         cur_t = sum_rest / (s-tail_idx)
+#         if counts[tail_idx] < cur_t:
+#             found_tail = True
+#             break
+#     if not found_tail:
+#         cur_t = 0
+#         tail_idx = len(counts)
+#     return cur_t, tail_idx
 
 
 class IncrementalRangeCompressor:
@@ -151,8 +152,11 @@ class HairCombCompressor:
 
     def compress(
             self,
-            item_dict: Dict[Any, int],
+            item_dict: Dict[Any, float],
     ) -> Dict[Any, float]:
+        if self.size == 0:
+            return dict()
+
         item_list = sorted(item_dict.items(), key=lambda x: -x[1])
         n = len(item_list)
         counts = np.array([x[1] for x in item_list])
@@ -186,6 +190,9 @@ class PPSCompressor:
         self.threshold = 0
         self.tail_idx = 0
         self.unbiased = unbiased
+
+    def set_size(self, size):
+        self.size = size
 
     def compress(
             self,

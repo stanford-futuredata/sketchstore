@@ -145,8 +145,8 @@ In particular, we can minimize the MSE
 \begin_layout Standard
 \begin_inset Formula 
 \begin{align*}
-E\left[\epsilon_{Q,x}^{2}\right] & \leq\frac{1}{\left(\sum_{Q}n_{i}\right)^{2}}E\left[\left(\sum_{i\in Q}\hat{F}_{g_{i},x}-F_{g_{i},x}\right)^{2}\right]\\
- & \leq\frac{1}{\left(\sum_{Q}n_{i}\right)^{2}}\sum_{Q}E\left[\left(\hat{F}_{g_{i},x}-F_{g_{i},x}\right)^{2}\right]\\
+E\left[\epsilon_{Q,x}^{2}\right] & =\frac{1}{\left(\sum_{Q}n_{i}\right)^{2}}E\left[\left(\sum_{i\in Q}\hat{F}_{g_{i},x}-F_{g_{i},x}\right)^{2}\right]\\
+ & =\frac{1}{\left(\sum_{Q}n_{i}\right)^{2}}\sum_{Q}E\left[\left(\hat{F}_{g_{i},x}-F_{g_{i},x}\right)^{2}\right]\\
  & \leq\frac{1}{\left(\sum_{Q}n_{i}\right)^{2}}\sum_{Q}\frac{1}{4}\left(\frac{n_{i}^{2}}{s_{i}^{2}}\right)
 \end{align*}
 
@@ -493,6 +493,85 @@ L & =E_{Q_{j}\sim W}\left[\frac{\left(\sum_{i\in Q_{j}}b_{i}\right)^{2}+\sum_{i\
 \[
 \frac{\partial L}{\partial b_{i}}=\frac{1}{2}s_{i}^{-2}n_{i}\left[b_{i}\right]\frac{\partial n_{i}\left[b_{i}\right]}{\partial b_{i}}\left(\sum_{z|g_{i}\in Q_{z}}w_{z}\left(\sum_{j\in Q_{z}}n_{j}\right)^{-2}\right)+\sum_{z|g_{i}\in Q_{z}}w_{z}\frac{2\left(\sum_{i\in Q_{z}}b_{i}\right)}{\left(\sum_{i\in Q_{z}}n_{i}\right)^{2}}
 \]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Splitting Greedy Linear Balancing
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $o_{i}$
+\end_inset
+
+ be the probability of a query overlapping with the current window with
+ overlap size 
+\begin_inset Formula $i$
+\end_inset
+
+.
+ The current window has length 
+\begin_inset Formula $l$
+\end_inset
+
+ and current maximum error 
+\begin_inset Formula $h$
+\end_inset
+
+.
+ Let 
+\begin_inset Formula $p_{i}$
+\end_inset
+
+ be the probability of a specific query range of length 
+\begin_inset Formula $i$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+o_{i}=\begin{cases}
+\left(l-i+1\right)p_{i}+2\sum_{j=i+1}^{\infty}p_{j} & i<l\\
+\sum_{j=l}^{\infty}\left(j-l+1\right)p_{j} & i=l
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We can minimize the 
+\begin_inset Quotes eld
+\end_inset
+
+error density
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Formula $\rho$
+\end_inset
+
+.
+ SHOULD THIS BE SCALED DIFFERENTLY?
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\rho & =\sum_{i=1}^{\infty}o_{i}\frac{h}{i}\\
+ & =\sum_{i=1}^{l-1}\frac{h}{i}\left(\left(l-i+1\right)p_{i}+2\sum_{j=i+1}^{\infty}p_{j}\right)+\frac{h}{l}\left(\sum_{j=l}^{\infty}\left(j-l+1\right)p_{j}\right)\\
+ & =\sum_{i=1}^{l-1}\frac{h}{i}\left(l-i+1\right)p_{i}+\frac{h}{l}\sum_{i=l}^{\infty}\left(i-l+1\right)p_{i}+2\sum_{j=2}^{\infty}p_{j}\left(\sum_{i=j-1}^{l-1}\frac{h}{i}\right)
+\end{align*}
 
 \end_inset
 
