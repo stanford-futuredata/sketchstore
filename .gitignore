@@ -14,3 +14,7 @@ output/
 *.pdf
 *.so
 *.html
+*.html
+*.c
+*.cpython*
+*.prof

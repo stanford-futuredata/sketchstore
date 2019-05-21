@@ -1,6 +1,7 @@
 import unittest
 
-from storyboard.planner import FreqGroup, FreqProcessor
+from storyboard.planner import FreqGroup
+import storyboard.eval
 import storyboard.planner
 import numpy as np
 import math
@@ -22,7 +23,8 @@ class FreqPlannerTest(unittest.TestCase):
             )
 
         wp = storyboard.planner.WorkloadProperties(
-            pred_weights=[.3,.3],
+            pred_weights=[.2, .3],
+            pred_cardinalities=[2, 3],
             max_time_segments=1,
         )
         a_weights = storyboard.planner.get_a_weights_poiss(wp, groups)
@@ -31,25 +33,60 @@ class FreqPlannerTest(unittest.TestCase):
 
 
     def test_storyboard(self):
-        df = testdata.bench_gen.gen_data(
-            1000,
-            [(2, 0),
-             (5, 1)],
+        # df, dim_names = testdata.bench_gen.gen_data(
+        #     50000,
+        #     [(10, 1),
+        #      (5, 1),
+        #      (3, 1)],
+        #     f_skew=1.2,
+        #     f_card=100
+        # )
+        df, dim_names = testdata.bench_gen.gen_data(
+            50000,
+            [(3, 2),
+             (2, 1)],
             f_skew=1.2,
-            f_card=100
+            f_card=1000
         )
-        wp = storyboard.planner.WorkloadProperties(
-            pred_weights=[.3, .3],
-            max_time_segments=1,
-        )
-        fp = storyboard.planner.FreqProcessor(
-            total_size=30,
-            workload_prop=wp,
-        )
-        groups = fp.create_storyboard(
-            df_input=df,
-            dim_col_names=["d0", "d1"],
-            val_col_name="f"
-        )
-        self.assertEquals(10, len(groups))
-        print(groups)
+        n_dims = len(dim_names)
+
+        dim_cards = df.nunique()[dim_names].values
+        wps = [
+            storyboard.planner.WorkloadProperties(
+                pred_weights=[.1] * n_dims,
+                pred_cardinalities=dim_cards,
+                max_time_segments=1,
+            ),
+            storyboard.planner.WorkloadProperties(
+                pred_weights=[0] * n_dims,
+                pred_cardinalities=dim_cards,
+                max_time_segments=1,
+            ),
+            storyboard.planner.WorkloadProperties(
+                pred_weights=[1] * n_dims,
+                pred_cardinalities=dim_cards,
+                max_time_segments=1,
+            )
+        ]
+        fps = [
+            storyboard.planner.FreqProcessor(
+                total_size=300,
+                workload_prop=wp,
+            ) for wp in wps
+        ]
+        sbs = [
+            fp.create_storyboard(
+                df_input=df,
+                dim_col_names=dim_names,
+                val_col_name="f"
+            )
+            for fp in fps
+        ]
+        for groups in sbs:
+            print(",".join([str(g) for g in groups]))
+            eval = storyboard.eval.StoryboardVarianceEstimator(wps[0], 0)
+            res = eval.eval_error(groups)
+            print("evaluated: {}".format(str(res)))
+            res2 = eval.est_error(groups, n_trials=1000)
+            print("estimated: {}".format(res2))
+

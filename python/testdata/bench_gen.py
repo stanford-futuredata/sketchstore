@@ -13,14 +13,16 @@ def gen_data(n_rows, dim_params, f_skew=1.2, f_card=10):
     df["q"] = np.random.normal(size=n_rows).astype("float32")
     f_vals = np.random.zipf(a=f_skew, size=10*n_rows)
     df["f"] = f_vals[f_vals < f_card][:n_rows]
+    dim_names = []
     for i in range(len(dim_params)):
         dim_size, dim_skew = dim_params[i]
         w = gen_zipf_weights(dim_size, dim_skew)
         dname = "d{}".format(i)
+        dim_names.append(dname)
         df[dname] = np.random.choice(
             np.arange(dim_size),
             size=n_rows,
             replace=True,
             p=w
         )
-    return df
+    return df, dim_names

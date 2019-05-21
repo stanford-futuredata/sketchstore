@@ -270,7 +270,7 @@ Let
 
 \begin_layout Standard
 Using the inequality 
-\begin_inset Formula $e^{x}\leq1-x+x^{2}/2$
+\begin_inset Formula $e^{x}\leq1+x+x^{2}/2$
 \end_inset
 
  for 
@@ -320,37 +320,24 @@ As long as
 \end_layout
 
 \begin_layout Standard
-Case 2: suppose we have fewer than 
-\begin_inset Formula $s_{1}$
-\end_inset
-
- values 
-\begin_inset Formula $i\in B_{1}$
+Case 2: suppose we have some values in 
+\begin_inset Formula $i\in L_{2}\subseteq L_{1}$
 \end_inset
 
  values where 
-\begin_inset Formula $x_{i}+\delta_{i}\geq rt/s$
-\end_inset
-
-, that means for all 
-\begin_inset Formula $i\in B_{1}\setminus L_{1}$
-\end_inset
-
-, 
 \begin_inset Formula $x_{i}+\delta_{i}\leq rt/s$
 \end_inset
 
-
+:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula 
 \begin{align*}
 \Delta & \leq\Delta'+\sum_{i\in L_{2}}\left[g\left(0\right)-g\left(x_{i}+\delta_{i}-rt/s\right)\right]\\
- & \leq\sum_{i\in L_{2}}\left[1-1+\alpha\left(rt/s-x_{i}-\delta_{i}\right)\right]\\
+ & \leq0+\sum_{i\in L_{2}}\left[1-1+\alpha\left(rt/s-x_{i}-\delta_{i}\right)\right]\\
  & \leq\alpha rt\\
- & \leq\left(2s\left(\frac{r-1}{r}\right)\right)\\
- & \leq2s
+ & \leq2s\left(\frac{t}{t_{max}}\right)\left(\frac{r-1}{r}\right)
 \end{align*}
 
 \end_inset
@@ -373,14 +360,47 @@ Thus if we let
 \begin_layout Standard
 \begin_inset Formula 
 \begin{align*}
-e^{\alpha h} & \leq2sk\\
-\alpha h & \leq\ln\left(2sk\right)\\
-h & \leq\frac{1}{2}\frac{t}{s}\frac{r^{2}-1}{r}\ln\left(2sk\right)
+e^{\alpha h} & \leq2sk\left(\frac{r-1}{r}\right)\\
+\alpha h & \leq\ln\left(2sk\left(\frac{r-1}{r}\right)\right)
 \end{align*}
 
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\boxed{h\leq\frac{1}{2}\frac{t_{max}}{s}\frac{r^{2}}{r-1}\ln\left(2sk\left(\frac{r-1}{r}\right)\right)}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Plugging in 
+\begin_inset Formula $r=\frac{3}{2}$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\boxed{h\leq\frac{9}{4}\frac{t_{max}}{s}\ln\left(\frac{2}{3}sk\right)}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+I think this is tight: n=2k, s=k can grow very quickly
 \end_layout
 
 \end_body
