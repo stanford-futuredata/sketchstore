@@ -11,7 +11,7 @@ import pandas as pd
 
 
 class RawEvalTest(unittest.TestCase):
-    def test_empty(self):
+    def test_all(self):
         n_rows = 5000
         df, dim_names = testdata.bench_gen.gen_data(
             n_rows,
@@ -23,4 +23,22 @@ class RawEvalTest(unittest.TestCase):
         n_dims = len(dim_names)
         rq = storyboard.eval.RawQueryExecutor(df, dim_names, "f")
         res = rq.exec_query(filter=[None, None])
-        self.assertEqual(n_rows, sum(res.values))
+        self.assertEqual(n_rows, sum(res.values()))
+
+
+class StoryboardQueryEvalTest(unittest.TestCase):
+    def test_all(self):
+        dims = list(itertools.product([0,1], [0,1,2]))
+        g_sizes = [100, 10, 1, 200, 20, 2]
+        groups = []
+        for g_idx in range(len(dims)):
+            cur_dim = list(dims[g_idx])
+            g_size = g_sizes[g_idx]
+            cur_values = pd.Series(np.random.zipf(1.5, g_size)).value_counts()
+            groups.append(
+                FreqGroup(cur_dim, g_size, cur_values)
+            )
+
+        sq = storyboard.eval.StoryboardQueryExecutor(groups)
+        res = sq.exec_query(filter=[None, None])
+        self.assertEqual(sum(g_sizes), sum(res.values()))

@@ -10,8 +10,19 @@ class StoryboardQueryExecutor:
     def __init__(self, groups: List[FreqGroup]):
         self.groups = groups
 
-    def exec_query(self, filter: Sequence, topn:int=3):
-        pass
+    def exec_query(self, filter: Sequence):
+        n_dims = len(filter)
+        results = dict()
+        for cur_segment in self.groups:
+            matches = all((
+                filter[i] is None or filter[i] == cur_segment.dims[i]
+                for i in range(n_dims)
+            ))
+
+            if matches:
+                for k,v in cur_segment.vals.items():
+                    results[k] = results.get(k, 0) + v
+        return results
 
 
 class RawQueryExecutor:
@@ -28,7 +39,7 @@ class RawQueryExecutor:
                 cur_dim_name = self.dim_names[d_idx]
                 mask &= (self.df[cur_dim_name] == filter[d_idx])
         val_counts = self.df[mask][self.val_name].value_counts()
-        return val_counts
+        return dict(val_counts)
 
 
 class StoryboardVarianceEstimator:
@@ -54,6 +65,27 @@ class StoryboardVarianceEstimator:
         max_time = np.random.randint(0, self.wp.max_time_segments)
         time_range = (0, max_time)
         return dim_values, time_range
+
+    def eval_error(self, sq: StoryboardQueryExecutor, rq: RawQueryExecutor, max_item = 100, n_trials: int = 3):
+        trial_mses = []
+        trial_totals = []
+        for trail_idx in range(n_trials):
+            filter, _ = self.sample_query()
+            n_dims = len(filter)
+            sb_res = sq.exec_query(filter)
+            raw_res = rq.exec_query(filter)
+            sb_counts = np.array([sb_res.get(i,0) for i in range(max_item)])
+            raw_counts = np.array([raw_res.get(i,0) for i in range(max_item)])
+            trial_total = sum(raw_res.values())
+            trial_errors = (raw_counts - sb_counts)**2
+            trial_mses.append(np.mean(trial_errors))
+            trial_totals.append(trial_total)
+        trial_mses = np.array(trial_mses)
+        trial_totals = np.array(trial_totals)
+        # print(np.sqrt(trial_mses))
+        # print(trial_totals)
+        return np.sqrt(np.mean(trial_mses/trial_totals**2))
+
 
     def est_error(self, groups: List[FreqGroup], n_trials: int = 3):
         trial_totals = []
@@ -83,7 +115,7 @@ class StoryboardVarianceEstimator:
         # print(trial_totals)
         return np.sqrt(np.mean(trial_mses/trial_totals**2))
 
-    def eval_error(self, groups: List[FreqGroup]):
+    def calc_error(self, groups: List[FreqGroup]):
         num_dims = len(groups[0].dims)
         pred_cardinalities = self.wp.pred_cardinalities
         pred_weights = self.wp.pred_weights

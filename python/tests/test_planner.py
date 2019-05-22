@@ -10,7 +10,7 @@ import itertools
 import pandas as pd
 
 class FreqPlannerTest(unittest.TestCase):
-    def test_simple(self):
+    def test_weights(self):
         dims = list(itertools.product([0,1], [0,1,2]))
         g_sizes = [100, 10, 1, 200, 20, 2]
         groups = []
@@ -30,6 +30,40 @@ class FreqPlannerTest(unittest.TestCase):
         a_weights = storyboard.planner.get_a_weights_poiss(wp, groups)
         print(a_weights)
         self.assertGreater(a_weights[0], .5)
+
+    def test_query(self):
+        df, dim_names = testdata.bench_gen.gen_data(
+            50000,
+            [(3, 2),
+             (2, 1)],
+            f_skew=1.2,
+            f_card=1000
+        )
+        n_dims = len(dim_names)
+        dim_cards = df.nunique()[dim_names].values
+
+        wp = storyboard.planner.WorkloadProperties(
+            pred_weights=[.1] * n_dims,
+            pred_cardinalities=dim_cards,
+            max_time_segments=1,
+        )
+        fp = storyboard.planner.FreqProcessor(
+            total_size=300,
+            workload_prop=wp,
+        )
+        sb = fp.create_storyboard(
+            df_input=df,
+            dim_col_names=dim_names,
+            val_col_name="f"
+        )
+
+        rq = storyboard.eval.RawQueryExecutor(df, dim_names, "f")
+        sq = storyboard.eval.StoryboardQueryExecutor(sb)
+        q_filter = [1, None]
+        res1 = rq.exec_query(q_filter)
+        res2 = sq.exec_query(q_filter)
+        self.assertEqual(res1[1], res2[1])
+        self.assertAlmostEqual(1, sum(res1.values())/sum(res2.values()), 2)
 
 
     def test_storyboard(self):
@@ -85,8 +119,12 @@ class FreqPlannerTest(unittest.TestCase):
         for groups in sbs:
             print(",".join([str(g) for g in groups]))
             eval = storyboard.eval.StoryboardVarianceEstimator(wps[0], 0)
-            res = eval.eval_error(groups)
-            print("evaluated: {}".format(str(res)))
+            res = eval.calc_error(groups)
+            print("calculated: {}".format(str(res)))
             res2 = eval.est_error(groups, n_trials=1000)
             print("estimated: {}".format(res2))
 
+            sq = storyboard.eval.StoryboardQueryExecutor(groups)
+            rq = storyboard.eval.RawQueryExecutor(df, dim_names=dim_names, val_name="f")
+            res3 = eval.eval_error(sq=sq, rq=rq, max_item=100, n_trials=200)
+            print("evaluated: {}".format(res3))
