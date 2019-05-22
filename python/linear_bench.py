@@ -3,8 +3,6 @@ from collections import defaultdict
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-import json
-import pickle
 
 import sketch.compress_freq as cf
 import sketch.frequent as f
@@ -13,22 +11,24 @@ import sketch.frequent as f
 class LinearBenchRunner:
     def __init__(
             self,
-            size=20,
-            num_segments=200,
+            size,
+            segments
     ):
         self.size = size
-        self.num_segments = num_segments
+        self.segments = segments
 
     def run(self):
-        print("Linear Benchmark")
-        segments = gen_data(self.num_segments)
+        print("Running Linear Bench with size: {} on {} segs".format(
+            self.size,
+            len(self.segments)
+        ))
 
         compressors = [
-            cf.TopValueCompressor(100),
+            cf.TopValueCompressor(400),
             cf.RandomSampleCompressor(self.size),
             cf.TruncationCompressor(self.size),
-            cf.PPSCompressor(self.size),
-            # cf.HairCombCompressor(self.size),
+            # cf.PPSCompressor(self.size),
+            cf.HairCombCompressor(self.size),
             cf.IncrementalRangeCompressor(self.size),
         ]
         compressor_names = [
@@ -41,17 +41,17 @@ class LinearBenchRunner:
 
         sketches = [
             lambda: f.SpaceSavingSketch(size=self.size, unbiased=False),
-            lambda: f.CountMinSketch(size=self.size, unbiased=False),
-            lambda: f.CountMinSketch(size=self.size, unbiased=True),
+            lambda: f.CountMinSketchFast(size=self.size, unbiased=False, max_val=400),
+            # lambda: f.CountMinSketchOld(size=self.size, unbiased=True),
         ]
         sketch_names = [
             "spacesaving",
             "cms_min",
-            "cms_mean",
+            # "cms_mean",
         ]
         results = []
 
-        for cur_seg_idx, cur_seg in tqdm(enumerate(segments)):
+        for cur_seg_idx, cur_seg in tqdm(enumerate(self.segments)):
             ec_current = f.ExactCounterSketch()
             ec_current.add(cur_seg)
             exact_dict = ec_current.get_dict()
@@ -78,24 +78,47 @@ class LinearBenchRunner:
         return results
 
 
-def main():
-    rr = LinearBenchRunner(size=20, num_segments=400)
+def gen_data(num_segments=10, seg_size=1000, seed=0):
+    r = np.random.RandomState(seed=seed)
+    segments = []
+    for i in range(num_segments):
+        # seg_size = r.geometric(.001)
+        # shift = r.randint(10)
+        shift = 0
+        xs = r.zipf(1.1, size=seg_size)
+        segments.append(xs + shift)
+    return segments
+
+
+def run_single_bench():
+    segments = gen_data(num_segments=400, seg_size=1000, seed=0)
+    rr = LinearBenchRunner(size=32, segments=segments)
     results = rr.run()
     with open("output/linear_bench.out", "w") as f:
         f.write(repr(results))
 
 
-def gen_data(num_segments=10):
+def run_multi_grain():
+    workload_granularities = [8, 32, 128, 512, 2048]
+    total_size = 1024*512
+    total_space = 32*512
     r = np.random.RandomState(seed=0)
-    segments = []
-    for i in range(num_segments):
-        # seg_size = r.geometric(.001)
-        # shift = r.randint(10)
-        seg_size = 1000
-        shift = 0
-        xs = r.zipf(1.1, size=seg_size)
-        segments.append(xs + shift)
-    return segments
+    # x_stream = r.zipf(1.1, size=total_size)
+    df_in = pd.read_csv("notebooks/caida1M-dest-stream.csv")
+    x_stream = df_in["Destination"].values
+    data_name = "caida"
+    for cur_granularity in workload_granularities:
+        segments = np.array_split(x_stream, cur_granularity)
+        sketch_size= total_space // cur_granularity
+        rr = LinearBenchRunner(size=sketch_size, segments=segments)
+        print("Running Grain: {}".format(cur_granularity))
+        results = rr.run()
+        with open("output/grain_{}_{}.out".format(data_name,cur_granularity), "w") as f:
+            f.write(repr(results))
+
+def main():
+    # run_single_bench()
+    run_multi_grain()
 
 
 if __name__ == "__main__":

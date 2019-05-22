@@ -37,10 +37,8 @@ class IncrementalRangeCompressor:
             self,
             item_dict: Dict[Any, float],
     ) -> Dict[Any, float]:
-        seg_counts = np.array(list(item_dict.values()))
-        # n_segment = np.sum(seg_counts)
+        seg_counts = np.array(list(item_dict.values()), dtype=float)
         t,_ = find_t(seg_counts, self.size)
-        # t = n_segment / new_size
 
         keys_to_store = set()
         for k, v in item_dict.items():
@@ -48,9 +46,13 @@ class IncrementalRangeCompressor:
             if v > t:
                 keys_to_store.add(k)
 
+        # ordered_deficit = sorted(
+        #     [e for e in self.deltas.items()],
+        #     key=lambda e: -e[1]
+        # )
         ordered_deficit = sorted(
-            [e for e in self.deltas.items()],
-            key=lambda e: -e[1]
+            [e for e in item_dict.items()],
+            key=lambda e: -self.deltas.get(e[0])
         )
 
         for top_k, top_v in ordered_deficit:
@@ -63,9 +65,12 @@ class IncrementalRangeCompressor:
         items_to_store = dict()
         for cur_key in keys_to_store:
             deficit_amt = self.deltas[cur_key]
-            min_val = max(self.deltas[cur_key] - t, 0)
-            max_val = item_dict.get(cur_key, 0.0) + t
-            store_val = np.clip(deficit_amt, min_val, max_val)
+            if item_dict.get(cur_key, 0) >= t:
+                store_val = item_dict[cur_key]
+            else:
+                # min_val = max(self.deltas[cur_key] - t, 0)
+                max_val = item_dict.get(cur_key, 0.0) + t
+                store_val = np.clip(deficit_amt, 0, max_val)
             items_to_store[cur_key] = store_val
             self.deltas[cur_key] -= store_val
 

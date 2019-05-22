@@ -4,6 +4,7 @@ import numpy as np
 import random
 import copy
 import probables
+import bounter
 
 
 class ExactCounterSketch:
@@ -22,7 +23,23 @@ class ExactCounterSketch:
             self.items[k] = self.items.get(k, 0.0) + v
 
 
-class CountMinSketch:
+class CountMinSketchFast:
+    def __init__(self, size=100, seed=0, unbiased=False, max_val=100):
+        self.size = size
+        self.max_val = max_val
+        self.cms = bounter.count_min_sketch.CountMinSketch(width=size, depth=5)
+
+    def add(self, xs):
+        self.cms.update((str(x) for x in xs))
+
+    def get_dict(self):
+        item_counts = dict()
+        for i in range(self.max_val):
+            item_counts[i] = self.cms[str(i)]
+        return item_counts
+
+
+class CountMinSketchOld:
     def __init__(self, size=100, seed=0, unbiased=False, max_val=100):
         self.size = size
         self.max_val = max_val
