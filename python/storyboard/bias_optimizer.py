@@ -35,8 +35,8 @@ def opt_sequence(x_counts, sizes, n_iter=10):
     shifts = np.array([-1, 0, 1])
     for cur_iter in range(n_iter):
         _, opt_idx = heapq.heappop(pq)
-        #         print("bs:{}".format(bs))
-        #         print("ns:{}".format(n_adj))
+        print("bs:{}".format(bs))
+        print("ns:{}".format(n_adj))
         #         print("cost: {}".format(old_cost))
 
         new_costs = np.zeros(3)

@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 
 import sketch.compress_freq
+import storyboard.bias_optimizer as bopt
 
 
 class FreqGroup:
@@ -95,16 +96,24 @@ class FreqProcessor:
 
         a_weights = get_a_weights_poiss(self.workload_prop, group_item_counts)
         group_sizes = scale_a_weights(a_weights, self.total_size)
+        biases = bopt.opt_sequence(
+            x_counts=[g.vals for g in group_item_counts],
+            sizes=group_sizes,
+            n_iter=50,
+            # n_iter=0
+        )
 
         group_summaries = []
         for group_idx in range(len(group_item_counts)):
             cur_group = group_item_counts[group_idx]
             cur_size = group_sizes[group_idx]
+            cur_bias = biases[group_idx]
 
             pps = sketch.compress_freq.HairCombCompressor(
                 size=cur_size,
                 seed=group_idx,
-                unbiased=True
+                unbiased=True,
+                bias=cur_bias
             )
             new_counters = pps.compress(cur_group.vals)
             cur_summ = FreqGroup(

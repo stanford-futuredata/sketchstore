@@ -92,8 +92,14 @@ class FreqPlannerTest(unittest.TestCase):
             val_col_name="f"
         )
         eval = storyboard.eval.StoryboardVarianceEstimator(wp, 0)
-        res2 = eval.est_error(sb, n_trials=1000)
-        print("estimated: {}".format(res2))
+
+        # res2 = eval.est_error(sb, n_trials=1000)
+        # print("estimated: {}".format(res2))
+
+        sq = storyboard.eval.StoryboardQueryExecutor(sb)
+        rq = storyboard.eval.RawQueryExecutor(df, dim_names=dim_names, val_name="f")
+        res3 = eval.eval_error(sq=sq, rq=rq, max_item=100, n_trials=200)
+        print("evaluated: {}".format(res3))
 
     def test_storyboard(self):
         # df, dim_names = testdata.bench_gen.gen_data(
