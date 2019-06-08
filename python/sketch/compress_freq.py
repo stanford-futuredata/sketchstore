@@ -25,6 +25,13 @@ import random
 #     return cur_t, tail_idx
 
 
+def apply_bias(x_count, bias):
+    return np.clip(x_count - bias, a_min=0, a_max=None)
+    # x_new = x_count.copy()
+    # x_new[x_count <= bias] = 0
+    # return x_new
+
+
 class IncrementalRangeCompressor:
     def __init__(self, size):
         self.deltas = defaultdict(float)
@@ -147,13 +154,14 @@ class TruncationCompressor:
 
 
 class HairCombCompressor:
-    def __init__(self, size, seed=0, unbiased=True):
+    def __init__(self, size, seed=0, unbiased=True, bias=0):
         self.size = size
         self.random = random.Random()
         self.random.seed(seed)
         self.threshold = 0
         self.tail_idx = 0
-        self.unbiased = unbiased
+        # self.unbiased = unbiased
+        self.bias = bias
 
     def compress(
             self,
@@ -164,25 +172,28 @@ class HairCombCompressor:
 
         item_list = sorted(item_dict.items(), key=lambda x: -x[1])
         n = len(item_list)
-        counts = np.array([x[1] for x in item_list])
-        self.threshold, self.tail_idx = find_t(counts, self.size)
+        counts = np.array([x[1] for x in item_list], dtype=float)
+        b_counts = apply_bias(counts, bias=self.bias)
+        # print(b_counts)
+
+        self.threshold, self.tail_idx = find_t(b_counts, self.size)
         compressed_items = dict()
 
         for i in range(self.tail_idx):
             cur_item = item_list[i]
-            compressed_items[cur_item[0]] = float(cur_item[1])
+            compressed_items[cur_item[0]] = cur_item[1]
 
         rand_shift = self.random.uniform(0, self.threshold)
         running_sum = 0.0
         for i in range(self.tail_idx, n):
             cur_item = item_list[i]
-            running_sum += cur_item[1]
+            # running_sum += cur_item[1]
+            running_sum += b_counts[i]
+            if b_counts[i] == 0:
+                break
             if running_sum > rand_shift:
                 running_sum -= self.threshold
-                if self.unbiased:
-                    compressed_items[cur_item[0]] = float(self.threshold)
-                else:
-                    compressed_items[cur_item[0]] = float(cur_item[1])
+                compressed_items[cur_item[0]] = float(self.threshold)
 
         return compressed_items
 
@@ -204,7 +215,7 @@ class PPSCompressor:
             item_dict: Mapping[Any, float],
     ) -> Dict[Any, float]:
         item_list = sorted(item_dict.items(), key=lambda x: -x[1])
-        counts = np.array([x[1] for x in item_list])
+        counts = np.array([x[1] for x in item_list], dtype=float)
         self.threshold, self.tail_idx = find_t(counts, self.size)
         self.threshold = int(math.ceil(self.threshold))
         compressed_items = dict()

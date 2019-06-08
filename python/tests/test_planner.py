@@ -9,6 +9,7 @@ import testdata.bench_gen
 import itertools
 import pandas as pd
 
+
 class FreqPlannerTest(unittest.TestCase):
     def test_weights(self):
         dims = list(itertools.product([0,1], [0,1,2]))
@@ -65,6 +66,34 @@ class FreqPlannerTest(unittest.TestCase):
         self.assertEqual(res1[1], res2[1])
         self.assertAlmostEqual(1, sum(res1.values())/sum(res2.values()), 2)
 
+    def test_bias(self):
+        df, dim_names = testdata.bench_gen.gen_data(
+            50000,
+            [(3, 2),
+             (2, 1)],
+            f_skew=1.2,
+            f_card=1000,
+            seed=0
+        )
+        n_dims = len(dim_names)
+        dim_cards = df.nunique()[dim_names].values
+        wp = storyboard.planner.WorkloadProperties(
+            pred_weights=[.1] * n_dims,
+            pred_cardinalities=dim_cards,
+            max_time_segments=1,
+        )
+        fp = storyboard.planner.FreqProcessor(
+            total_size=300,
+            workload_prop=wp,
+        )
+        sb = fp.create_storyboard(
+            df_input=df,
+            dim_col_names=dim_names,
+            val_col_name="f"
+        )
+        eval = storyboard.eval.StoryboardVarianceEstimator(wp, 0)
+        res2 = eval.est_error(sb, n_trials=1000)
+        print("estimated: {}".format(res2))
 
     def test_storyboard(self):
         # df, dim_names = testdata.bench_gen.gen_data(

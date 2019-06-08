@@ -72,3 +72,18 @@ class TestCompressFreq(unittest.TestCase):
         self.assertAlmostEqual(1.0, total_counts[1] / 1000.0, places=5)
         self.assertAlmostEqual(1.0, total_counts[2] / 500.0, places=1)
 
+    def test_bias(self):
+        counts = defaultdict(int)
+        counts.update({
+            1: 10,
+            2: 5,
+            3: 3,
+            4: 2
+        })
+        new_size = 2
+        pps = c.HairCombCompressor(new_size, seed=0, unbiased=True, bias=1)
+        compressed = pps.compress(counts)
+        self.assertAlmostEqual(10, compressed[1], places=5)
+        self.assertAlmostEqual(17, sum(compressed.values()), places=5)
+
+

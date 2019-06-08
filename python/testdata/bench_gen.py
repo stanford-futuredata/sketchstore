@@ -7,9 +7,11 @@ def gen_zipf_weights(s, a=1):
     return ws / np.sum(ws)
 
 
-def gen_data(n_rows, dim_params, f_skew=1.2, f_card=10):
+def gen_data(n_rows, dim_params, f_skew=1.2, f_card=10, seed=None):
     df = pd.DataFrame()
     df["t"] = np.arange(n_rows)
+    if seed is not None:
+        np.random.seed(seed)
     df["q"] = np.random.normal(size=n_rows).astype("float32")
     f_vals = np.random.zipf(a=f_skew, size=10*n_rows)
     df["f"] = f_vals[f_vals < f_card][:n_rows]

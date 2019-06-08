@@ -106,14 +106,14 @@ class StoryboardVarianceEstimator:
                     trial_total += cur_segment.size
                     cur_err = min(cur_segment.vals.values())
                     # cur_err = cur_segment.size / len(cur_segment.vals.keys())
-                    trial_mse += cur_err**2
+                    trial_mse += .25*cur_err**2
             trial_mses.append(trial_mse)
             trial_totals.append(trial_total)
         trial_mses = np.array(trial_mses)
         trial_totals = np.array(trial_totals)
         # print(np.sqrt(trial_mses))
         # print(trial_totals)
-        return np.sqrt(np.mean(trial_mses/trial_totals**2))
+        return np.sqrt(np.mean(trial_mses/(trial_totals**2)))
 
     def calc_error(self, groups: List[FreqGroup]):
         num_dims = len(groups[0].dims)
@@ -134,7 +134,7 @@ class StoryboardVarianceEstimator:
                     cur_group_err = cur_segment.size / len(cur_segment.vals)
                     group_variances[idx_tuple] = (
                             group_variances.get(idx_tuple, 0)
-                            + cur_group_err * cur_group_err
+                            + .25*cur_group_err*cur_group_err
                     )
 
                 dim_set_mse = 0

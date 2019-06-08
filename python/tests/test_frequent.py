@@ -1,6 +1,6 @@
 import unittest
 
-from sketch.frequent import SpaceSavingSketch, CountMinSketch
+from sketch.frequent import SpaceSavingSketch, CountMinSketchFast
 
 
 class SketchTest(unittest.TestCase):
@@ -19,7 +19,7 @@ class SketchTest(unittest.TestCase):
 
     def test_countmin(self):
         xs = list(range(100)) + [1] * 50
-        cms = CountMinSketch(size=10, unbiased=True)
+        cms = CountMinSketchFast(size=16, unbiased=True)
         cms.add(xs)
         cms_counts = cms.get_dict()
         self.assertLessEqual(cms_counts[1], 55)
