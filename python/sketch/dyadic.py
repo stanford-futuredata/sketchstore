@@ -33,3 +33,13 @@ class DyadicFrequencyCompressor:
                 self.count_hierarchy[level_idx] = dict()
 
         return output_counts
+
+
+class DyadicQuantileCompressor:
+    def __init__(self, size, max_height):
+        self.size = size
+        self.max_height = max_height
+        self.count_hierarchy = {h: dict() for h in range(max_height+1)}
+        self.countdowns = [2**i for i in range(max_height+1)]
+        self.truncators = [TruncationCompressor(size=int(size*2**i)) for i in range(max_height+1)]
+        self.current_idx = 0

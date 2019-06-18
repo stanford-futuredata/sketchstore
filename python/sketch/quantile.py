@@ -2,8 +2,11 @@ from typing import Dict, Any
 
 
 class QuantileResultWrapper:
-    def __init__(self, x_counts=dict()):
-        self.items = x_counts
+    def __init__(self, x_counts=None):
+        if x_counts is None:
+            self.items = dict()
+        else:
+            self.items = x_counts
 
     def update(self, counts: Dict[Any, float]):
         for k, v in counts.items():

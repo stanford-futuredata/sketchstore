@@ -2,15 +2,29 @@ import unittest
 import numpy as np
 
 from sketch import compress_quant, quantile, quantile_cy
+from sketch.quantile import QuantileResultWrapper
+import sketch.kll
 
 
 class QuantileTest(unittest.TestCase):
     def test_simple(self):
-        xs = np.random.uniform(0, 1, 100)
+        xs = np.linspace(0, 1, 100)
         xs = np.sort(xs)
         s_comp = compress_quant.SkipCompressor(15)
         res = s_comp.compress(xs)
         self.assertEqual(100, sum(res.values()))
+
+        t_comp = compress_quant.SkipCompressor(2, biased=True)
+        res = t_comp.compress(xs)
+        r_keys = list(res.keys())
+        self.assertAlmostEqual(.25, r_keys[0], 2)
+
+    def test_ranktrack(self):
+        xs = np.array([0, 0.1, 0.2, 0.5, 0.9, 1])
+        rt = compress_quant.RankTracker(x_tracked=[0, 0.5, 1])
+        res = rt.compress(xs)
+        self.assertEqual(1, res[0.0])
+        self.assertEqual(2, res[1.0])
 
     def test_converge(self):
         n_total = 10000
@@ -42,10 +56,43 @@ class QuantileTest(unittest.TestCase):
         new_saved, _ = compress_quant.find_next_c(xs, saved, saved_weight, new_weight=new_weight)
         self.assertAlmostEqual(.25, new_saved, 2)
 
-    def test_compressor(self):
-        xs = np.linspace(0, 1, 1000).astype(float)
-        cc = compress_quant.CoopCompressor(2)
-        for i in range(3):
-            res = cc.compress(xs)
-            print(res)
+    def test_compressors(self):
+        n_seg = 100
+        n_per = 1000
+        s = 3
+        xs = np.linspace(0, 1, n_per).astype(float)
+        ccs = [
+            compress_quant.CoopCompressor(s),
+            compress_quant.SkipCompressor(s, biased=False),
+            compress_quant.SkipCompressor(s, biased=True),
+            compress_quant.RankTracker([.1, .5, .9]),
+            compress_quant.QRandomSampleCompressor(s)
+        ]
+        q_res = [QuantileResultWrapper() for _ in ccs]
+        names = [
+            "coop",
+            "skiprand",
+            "skipbias",
+            "ranktrack",
+            "random"
+        ]
+        expected_acc = [1, 1, 0, 3, 1]
+        for cc_idx in range(len(ccs)):
+            cur_cc = ccs[cc_idx]
+            cur_res_acc = q_res[cc_idx]
+            for i in range(n_seg):
+                new_res = cur_cc.compress(xs)
+                cur_res_acc.update(new_res)
+            # print(names[cc_idx])
+            # print(cur_res_acc.rank(.9))
+            self.assertAlmostEqual(.1, cur_res_acc.rank(.1)/(n_seg*n_per), expected_acc[cc_idx])
+            self.assertAlmostEqual(.9, cur_res_acc.rank(.9)/(n_seg*n_per), expected_acc[cc_idx])
 
+
+    def test_kll(self):
+        xs = np.random.uniform(0, 1, 1000)
+        ks = sketch.kll.KLL(k=2)
+        for x in xs:
+            ks.update(x)
+        ks.compress()
+        print(ks.compactors)
