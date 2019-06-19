@@ -24,25 +24,25 @@ class ExactCounterSketch:
 
 
 class CountMinSketchFast:
-    def __init__(self, size=100, seed=0, unbiased=False, max_val=100):
+    def __init__(self, size=100, seed=0, unbiased=False, x_to_track=None):
         self.size = size
-        self.max_val = max_val
+        if x_to_track is None:
+            x_to_track = range(100)
+        self.x_to_track = set(x_to_track)
         self.cms = bounter.count_min_sketch.CountMinSketch(width=size, depth=5)
 
     def add(self, xs):
         self.cms.update((str(x) for x in xs))
 
     def get_dict(self):
-        item_counts = dict()
-        for i in range(self.max_val):
-            item_counts[i] = self.cms[str(i)]
-        return item_counts
-
+        return {i: self.cms[str(i)] for i in self.x_to_track}
 
 class CountMinSketchOld:
-    def __init__(self, size=100, seed=0, unbiased=False, max_val=100):
+    def __init__(self, size=100, seed=0, unbiased=False, x_to_track=None):
         self.size = size
-        self.max_val = max_val
+        if x_to_track is None:
+            x_to_track = set(range(100))
+        self.x_to_track = x_to_track
         if unbiased:
             self.cms = probables.countminsketch.CountMeanMinSketch(width=size, depth=5)
         else:
@@ -53,10 +53,7 @@ class CountMinSketchOld:
             self.cms.add(str(x))
 
     def get_dict(self):
-        item_counts = dict()
-        for i in range(self.max_val):
-            item_counts[i] = self.cms.check(str(i))
-        return item_counts
+        return {i: self.cms.check(str(i)) for i in self.x_to_track}
 
     def update(self, counts: Dict[Any, float]):
         for k, v in counts.items():

@@ -15,11 +15,11 @@ class LinearBenchRunner:
             self,
             size,
             segments,
-            max_value_track=400
+            x_to_track
     ):
         self.size = size
         self.segments = segments
-        self.max_value_track = max_value_track
+        self.x_to_track = x_to_track
 
     def run(self):
         print("Running Linear Bench with size: {} on {} segs".format(
@@ -28,7 +28,7 @@ class LinearBenchRunner:
         ))
 
         compressors = [
-            cf.TopValueCompressor(self.max_value_track),
+            cf.TopValueCompressor(self.x_to_track),
             cf.RandomSampleCompressor(self.size),
             cf.TruncationCompressor(self.size),
             cf.HairCombCompressor(self.size),
@@ -52,7 +52,7 @@ class LinearBenchRunner:
 
         sketches = [
             # lambda: f.SpaceSavingSketch(size=self.size, unbiased=False),
-            lambda: f.CountMinSketchFast(size=self.size, unbiased=False, max_val=self.max_value_track),
+            lambda: f.CountMinSketchFast(size=self.size, unbiased=False, x_to_track=self.x_to_track)
             # lambda: f.CountMinSketchOld(size=self.size, unbiased=True),
         ]
         sketch_names = [
@@ -117,19 +117,37 @@ def run_single_bench():
         f.write(repr(results))
 
 
-def run_multi_grain():
+def run_multi_grain(dataset="caida"):
     workload_granularities = [8, 32, 128, 512, 2048]
     total_space = 64*2048
-    # r = np.random.RandomState(seed=0)
-    # total_size = 1024*512
-    # x_stream = r.zipf(1.1, size=total_size)
-    df_in = pd.read_csv("notebooks/caida1M-dest-stream.csv")
-    x_stream = df_in["Destination"].values
-    data_name = "caida"
+    if dataset == "caida":
+        df_in = pd.read_csv("notebooks/caida1M-dest-stream.csv")
+        x_stream = df_in["Destination"].values
+        data_name = "caida"
+        x_df = pd.read_csv("notebooks/caida1M-xtrack.csv")
+        x_to_track = x_df["x_track"].values
+    elif dataset == "caida10M":
+        df_in = pd.read_csv("/Users/edwardgan/Documents/Projects/datasets/caida-pcap/caida10M-ipdst.csv")
+        x_stream = df_in["ip.dst"].values
+        data_name = "caida10M"
+        x_df = pd.read_csv("/Users/edwardgan/Documents/Projects/datasets/caida-pcap/caida10M-ipdst-xtrack.csv")
+        x_to_track = x_df["x_track"].values
+    elif dataset == "zipf":
+        df_in = pd.read_csv("notebooks/zipf10M.csv", nrows=10_000_000)
+        x_stream = df_in["x"].values
+        # r = np.random.RandomState(seed=0)
+        # total_size = 2_000_000
+        # x_stream = r.zipf(1.1, size=total_size)
+        data_name = "zipf"
+        x_df = pd.read_csv("notebooks/zipf10M-xtrack.csv")
+        x_to_track = x_df["x_track"].values
+    x_to_track = np.sort(x_to_track)
+    print("Dataset: {}".format(dataset))
+    print("Tracking: {}".format(x_to_track[:20]))
     for cur_granularity in workload_granularities:
         segments = np.array_split(x_stream, cur_granularity)
         sketch_size = total_space // cur_granularity
-        rr = LinearBenchRunner(size=sketch_size, segments=segments)
+        rr = LinearBenchRunner(size=sketch_size, segments=segments, x_to_track=x_to_track)
         print("Running Grain: {}".format(cur_granularity))
         results = rr.run()
         with open("output/grain_{}_{}.out".format(data_name,cur_granularity), "w") as f:
@@ -143,15 +161,15 @@ def run_test_bench():
         [2,2,3,4],
         [3,3,4,5]
     ]
-    rr = LinearBenchRunner(size=2, segments=segments, max_value_track=5+1)
+    rr = LinearBenchRunner(size=2, segments=segments, x_to_track=range(6))
     results = rr.run()
     return results
 
 def main():
     # run_single_bench()
-    run_multi_grain()
     # run_test_bench()
-
+    # run_multi_grain(dataset="caida10M")
+    run_multi_grain(dataset="zipf")
 
 if __name__ == "__main__":
     main()

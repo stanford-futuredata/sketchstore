@@ -115,18 +115,14 @@ class RandomSampleCompressor:
 
 
 class TopValueCompressor:
-    def __init__(self, max_value):
-        self.max_value = max_value
+    def __init__(self, x_to_track):
+        self.x_to_track = set(x_to_track)
 
     def compress(
             self,
             item_dict: Dict[Any, int],
     ) -> Dict[Any, float]:
-        compressed_items = dict()
-        for k,v in item_dict.items():
-            if k <= self.max_value:
-                compressed_items[k] = v
-        return compressed_items
+        return {k: v for k, v in item_dict.items() if k in self.x_to_track}
 
 
 class TruncationCompressor:
