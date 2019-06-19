@@ -86,18 +86,26 @@ def loss(f):
 #     a=1
 #     return np.cosh(a*f)
 
-def find_next_c(xvals, saved, saved_weight, new_weight):
+def find_next_c(xvals, saved, saved_weight, new_weight, seg_start=None, seg_end=None):
     # print("finding")
     # print("range:{}-{}".format(xvals[0],xvals[-1]))
     # print("saved:{}".format(saved))
     d = np.asarray(sketch.quantile_cy.fast_delta(xvals, saved, saved_weight))
-    # l_diff = loss(d-new_weight) - loss(d)
+
+    x_left_idx = 0
+    x_right_idx = len(xvals)
+    if seg_start is not None:
+        x_left_idx = np.searchsorted(xvals, seg_start, side="left")
+    if seg_end is not None:
+        x_right_idx = np.searchsorted(xvals, seg_end, side="right")
+    d = d[x_left_idx:x_right_idx]
+
     scale_f = new_weight
     l_diff = loss((d-new_weight)/scale_f) - loss(d/scale_f)
     l_diff_suff = np.cumsum(l_diff[::-1])[::-1]
     l_diff_best = np.argmax(-l_diff_suff)
     # print("best:{}".format(xvals[l_diff_best]))
-    return xvals[l_diff_best], np.sum(loss(d/scale_f))
+    return xvals[x_left_idx+l_diff_best], np.sum(loss(d/scale_f))
 
 
 class CoopCompressor:
@@ -112,47 +120,44 @@ class CoopCompressor:
             xs
     ) -> Dict[Any, float]:
         x_segs = np.array_split(xs, self.size)
-        self.running_actual = snp.merge(self.running_actual, xs)
-        # self.running_actual = np.append(
-        #     self.running_actual,
-        #     xs
-        # )
-        # self.running_actual.sort()
+
+        self.running_actual = np.append(self.running_actual, xs)
+        self.running_actual.sort()
+
         to_save = dict()
         for cur_seg in x_segs:
             seg_start, seg_end = cur_seg[0], cur_seg[-1]
-
-            cur_actual = self.running_actual[
-                (self.running_actual >= seg_start)
-                & (self.running_actual <= seg_end)
-                ]
-            stored_mask = (
-                (self.running_stored >= seg_start)
-                & (self.running_stored <= seg_end)
-            )
-            cur_stored = self.running_stored[stored_mask]
-            cur_stored_weights = self.stored_weights[stored_mask]
-
             cur_seg_weight = len(cur_seg)
-            cur_to_save,_ = find_next_c(cur_actual, cur_stored, cur_stored_weights, cur_seg_weight)
+            # print("merging")
+            # print(len(cur_seg))
+            # print(len(self.running_actual))
+            # print(self.running_actual.dtype)
+            # print(cur_seg.dtype)
+            # self.running_actual = snp.merge(
+            #     self.running_actual, cur_seg
+            # )
+            # self.running_actual = np.append(self.running_actual, cur_seg)
+            # self.running_actual.sort()
+            # print("got here")
+
+            cur_to_save, _ = find_next_c(
+                self.running_actual,
+                self.running_stored,
+                self.stored_weights,
+                cur_seg_weight,
+                seg_start=seg_start,
+                seg_end=seg_end
+            )
+            # print("seg: {}-{}".format(seg_start, seg_end))
+            # print("saved: {}".format(cur_to_save))
+
             to_save[cur_to_save] = cur_seg_weight
-
-        new_saved = []
-        new_weights = []
-        for cur_save, cur_weight in to_save.items():
-            new_saved.append(cur_save)
-            new_weights.append(cur_weight)
-
-        self.running_stored = np.append(
-            self.running_stored,
-            new_saved
-        )
-        self.stored_weights = np.append(
-            self.stored_weights,
-            new_weights
-        )
-        arg_idx = np.argsort(self.running_stored)
-        self.running_stored = self.running_stored[arg_idx]
-        self.stored_weights = self.stored_weights[arg_idx]
+            to_save_idx = np.searchsorted(self.running_stored, cur_to_save)
+            self.running_stored = np.concatenate((
+                self.running_stored[:to_save_idx], [cur_to_save], self.running_stored[to_save_idx:]
+            ))
+            self.stored_weights = np.concatenate((
+                self.stored_weights[:to_save_idx], [cur_seg_weight], self.stored_weights[to_save_idx:]
+            ))
 
         return to_save

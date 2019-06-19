@@ -36,11 +36,15 @@ def dict_to_arrays(x_counts: Dict):
 def count_to_vec(x_to_track: Sequence, x_counts:Dict):
     x_keys, x_weight = dict_to_arrays(x_counts)
 
-    counts = np.zeros(len(x_to_track))
-    for i in range(len(x_to_track)):
-        cur_x = x_to_track[i]
-        counts[i] = np.sum(x_weight[x_keys <= cur_x])
-    return counts
+    bin_edges = np.concatenate([[-np.inf], x_to_track])
+    bin_weights, _ = np.histogram(-x_keys, -bin_edges[::-1], weights=x_weight)
+    return np.cumsum(bin_weights[::-1])
+
+    # counts = np.zeros(len(x_to_track))
+    # for i in range(len(x_to_track)):
+    #     cur_x = x_to_track[i]
+    #     counts[i] = np.sum(x_weight[x_keys <= cur_x])
+    # return counts
 
 
 class QuantileLinearBenchProcessor:
@@ -74,7 +78,10 @@ class QuantileLinearBenchProcessor:
                             if s_idx > c_start_idx or s_idx - 2**h < c_start_idx - 2**c_height
                         }
                         dyadic_values[(c_height, c_start_idx)] = cur_counts
-                        new_final_count = self.count_to_vec(combine_counts(dyadic_values.values()))
+                        new_final_count = count_to_vec(
+                            self.x_to_track,
+                            combine_counts(dyadic_values.values())
+                        )
                         if (c_start_idx-start_idx) >= len(cum_results):
                             cum_results.append(new_final_count)
                         else:
@@ -92,13 +99,15 @@ class QuantileLinearBenchProcessor:
 
 
 def run_grains(data_name):
-    grains = [8, 32, 128, 256, 512, 2048]
+    grains = [8, 32, 128, 512, 2048]
     methods = [
         "ranktrack",
         "coop",
         "skip",
         "pps",
-        "zero_est"
+        "zero_est",
+        "random_sample",
+        "dyadic_truncation"
     ]
     x_to_track = np.linspace(0,1,501)
     proc = QuantileLinearBenchProcessor(x_to_track=x_to_track)

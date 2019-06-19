@@ -24,6 +24,17 @@ class TestDyadicFrequency(unittest.TestCase):
         self.assertEqual(4, len(cum_counts[1][1]))
         self.assertEqual(4, cum_counts[1][1][4])
 
+    def test_quantile(self):
+        new_size = 2
+        dy = dyadic.DyadicQuantileCompressor(size=new_size, max_height=1)
+        xs = np.linspace(0, 1, 101)
+
+        cum_counts = []
+        for i in range(4):
+            new_counts = dy.compress(xs)
+            cum_counts.append(new_counts)
+            print(new_counts)
+
     def test_small(self):
         new_size = 2
         dy = dyadic.DyadicFrequencyCompressor(size=new_size, max_height=2)

@@ -8,6 +8,7 @@ import pickle
 
 import sketch.compress_quant as cq
 import sketch.quantile as q
+from sketch import dyadic
 
 
 class QuantileLinearBenchRunner:
@@ -34,14 +35,25 @@ class QuantileLinearBenchRunner:
             cq.RankTracker(x_tracked=self.x_to_track),
             cq.CoopCompressor(self.size),
             cq.SkipCompressor(self.size, biased=False),
-            cq.SkipCompressor(self.size, biased=True)
+            cq.SkipCompressor(self.size, biased=True),
+            cq.QRandomSampleCompressor(2*self.size)
         ]
         compressor_names = [
             "ranktrack",
             "coop",
             "pps",
-            "skip"
+            "skip",
+            "random_sample"
         ]
+
+        dyadic_height = int(math.log2(len(self.segments)))
+        dyadic_size = self.size/(dyadic_height+1)
+        print("Dyadic Height: {}, Size:{}".format(dyadic_height, dyadic_size))
+        dyadic_compressor = dyadic.DyadicQuantileCompressor(
+            size=dyadic_size,
+            max_height=dyadic_height
+        )
+
 
         results = []
 
@@ -55,6 +67,15 @@ class QuantileLinearBenchRunner:
                     "method": cur_compressor_name,
                     "counts": compressed_counts,
                 })
+
+            dyadic_summaries = dyadic_compressor.compress(cur_seg)
+            for summ_height, cur_dyadic_summ in enumerate(dyadic_summaries):
+                results.append({
+                    "seg_idx": (summ_height, cur_seg_idx),
+                    "method": "dyadic_truncation",
+                    "counts": cur_dyadic_summ
+                })
+
 
         return results
 
@@ -80,10 +101,10 @@ def run_single_bench():
 
 
 def run_multi_grain():
-    workload_granularities = [8, 32, 128, 256, 512, 2048]
-    # workload_granularities = [8, 32, 128, 256]
-    total_space = 128*32
-    x_stream = np.random.uniform(0,1,2_000_000)
+    # workload_granularities = [8, 32, 128, 512, 2048]
+    workload_granularities = [2048]
+    total_space = 512*32
+    x_stream = np.random.uniform(0,1,2_000_000).astype(float)
     data_name = "qrand"
     for cur_granularity in workload_granularities:
         segments = np.array_split(x_stream, cur_granularity)
