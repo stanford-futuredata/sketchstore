@@ -76,8 +76,12 @@
 
 \begin_body
 
+\begin_layout Section
+Error Upper Bound
+\end_layout
+
 \begin_layout Standard
-We have a batch 
+We have a segment 
 \begin_inset Formula $B$
 \end_inset
 
@@ -173,6 +177,15 @@ Let
 \end_inset
 
 .
+ 
+\begin_inset Formula $r$
+\end_inset
+
+ is the parameter 
+\begin_inset Formula $r>1$
+\end_inset
+
+ that determines our local approximation factor.
 \end_layout
 
 \begin_layout Standard
@@ -184,7 +197,7 @@ Define a potential function
 \begin_inset Formula $\alpha$
 \end_inset
 
- where 
+ 
 \end_layout
 
 \begin_layout Standard
@@ -325,8 +338,7 @@ Case 2: suppose we have some values in
 \begin{align*}
 \Delta & \leq\Delta'+\sum_{i\in L_{2}}\left[g\left(0\right)-g\left(x_{i}+\delta_{i}-rt/s\right)\right]\\
  & \leq0+\sum_{i\in L_{2}}\left[1-1+\alpha\left(rt/s-x_{i}-\delta_{i}\right)\right]\\
- & \leq\alpha rt\\
- & \leq2s\left(\frac{t}{t_{max}}\right)\left(\frac{r-1}{r}\right)
+ & \leq\alpha rt
 \end{align*}
 
 \end_inset
@@ -335,22 +347,26 @@ Case 2: suppose we have some values in
 \end_layout
 
 \begin_layout Standard
-Thus if we let 
-\begin_inset Formula $h$
+Let 
+\begin_inset Formula $\epsilon$
 \end_inset
 
  be the maximum discrepancy after 
 \begin_inset Formula $k$
 \end_inset
 
- batches
+ batches with weights 
+\begin_inset Formula $t_{i}$
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula 
 \begin{align*}
-e^{\alpha h} & \leq2sk\left(\frac{r-1}{r}\right)\\
-\alpha h & \leq\ln\left(2sk\left(\frac{r-1}{r}\right)\right)
+g\left(\epsilon\right) & \leq\alpha r\sum_{i=1}^{k}t_{i}\\
+\epsilon & \leq\boxed{\frac{1}{\alpha}\ln\left(\alpha r\sum_{i=1}^{k}t_{i}\right)}
 \end{align*}
 
 \end_inset
@@ -361,7 +377,30 @@ e^{\alpha h} & \leq2sk\left(\frac{r-1}{r}\right)\\
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\boxed{h\leq\frac{1}{2}\frac{t_{max}}{s}\frac{r^{2}}{r-1}\ln\left(2sk\left(\frac{r-1}{r}\right)\right)}
+\Delta\leq2s\left(\frac{t}{t_{max}}\right)\left(\frac{r-1}{r}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+e^{\alpha\epsilon} & \leq2s\frac{1}{t_{max}}\frac{r-1}{r}\sum_{i=1}^{k}t_{i}\\
+\alpha\epsilon & \leq\ln\left(2s\frac{r-1}{r}\frac{1}{t_{max}}\sum_{i=1}^{k}t_{i}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\boxed{\epsilon\leq\frac{1}{2}\frac{t_{max}}{s}\frac{r^{2}}{r-1}\ln\left(2s\frac{r-1}{r}\frac{1}{t_{max}}\sum_{i=1}^{k}t_{i}\right)}
 \]
 
 \end_inset
@@ -374,13 +413,13 @@ Plugging in
 \begin_inset Formula $r=\frac{3}{2}$
 \end_inset
 
-:
+ :
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\boxed{h\leq\frac{9}{4}\frac{t_{max}}{s}\ln\left(\frac{2}{3}sk\right)}
+\boxed{\epsilon\leq\frac{9}{4}\frac{t_{max}}{s}\ln\left(\frac{2}{3}\frac{s}{t_{max}}\sum_{i=1}^{k}t_{i}\right)}
 \]
 
 \end_inset
@@ -389,42 +428,11 @@ Plugging in
 \end_layout
 
 \begin_layout Section
-Heterogenous Derivation
+Counterexamples / Lower Bounds
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula 
-\[
-\alpha=\frac{2}{\left(t/s\right)_{max}}\frac{r-1}{r^{2}}
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{align*}
-\Delta & \leq\alpha rt\\
- & \leq\frac{2}{\left(t/s\right)_{max}}\frac{r-1}{r}t
-\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{align*}
-\frac{2}{\left(t/s\right)_{max}}\frac{r-1}{r^{2}}h & \leq\ln\left(\sum_{i=1}^{k}\frac{2}{\left(t/s\right)_{max}}\frac{r-1}{r}t_{i}\right)\\
-h & \leq\frac{1}{2}\left(\frac{t}{s}\right)_{max}\frac{r^{2}}{r-1}\ln\left(\left(\frac{2}{\left(t/s\right)_{max}}\frac{r-1}{r}\right)\sum_{i=1}^{k}t_{i}\right)
-\end{align*}
-
-\end_inset
-
-
+asdfsad
 \end_layout
 
 \end_body

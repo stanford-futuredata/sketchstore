@@ -98,7 +98,7 @@ class FreqPlannerTest(unittest.TestCase):
 
         sq = storyboard.eval.StoryboardQueryExecutor(sb)
         rq = storyboard.eval.RawQueryExecutor(df, dim_names=dim_names, val_name="f")
-        res3 = eval.eval_error(sq=sq, rq=rq, max_item=100, n_trials=200)
+        res3 = eval.eval_error(sq=sq, rq=rq, x_to_track=range(1,101), n_trials=200)
         print("evaluated: {}".format(res3))
 
     def test_storyboard(self):
@@ -161,5 +161,5 @@ class FreqPlannerTest(unittest.TestCase):
 
             sq = storyboard.eval.StoryboardQueryExecutor(groups)
             rq = storyboard.eval.RawQueryExecutor(df, dim_names=dim_names, val_name="f")
-            res3 = eval.eval_error(sq=sq, rq=rq, max_item=100, n_trials=200)
+            res3 = eval.eval_error(sq=sq, rq=rq, x_to_track=range(1,101), n_trials=200)
             print("evaluated: {}".format(res3))

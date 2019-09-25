@@ -76,9 +76,11 @@ class FreqProcessor:
             self,
             total_size: int,
             workload_prop: WorkloadProperties,
+            opt_bias=True
     ):
         self.total_size = total_size
         self.workload_prop = workload_prop
+        self.opt_bias = opt_bias
 
     def create_storyboard(
             self,
@@ -96,12 +98,18 @@ class FreqProcessor:
 
         a_weights = get_a_weights_poiss(self.workload_prop, group_item_counts)
         group_sizes = scale_a_weights(a_weights, self.total_size)
-        biases = bopt.opt_sequence(
-            x_counts=[g.vals for g in group_item_counts],
-            sizes=group_sizes,
-            n_iter=50,
-            # n_iter=0
-        )
+        if self.opt_bias:
+            biases = bopt.opt_sequence(
+                x_counts=[g.vals for g in group_item_counts],
+                sizes=group_sizes,
+                n_iter=len(group_item_counts)*10,
+                # n_iter=0
+            )
+        else:
+            biases = [0] * len(group_item_counts)
+
+        print("Biases")
+        print(biases)
 
         group_summaries = []
         for group_idx in range(len(group_item_counts)):

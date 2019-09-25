@@ -4,6 +4,7 @@ import numpy as np
 from pandas import DataFrame
 
 from storyboard.planner import WorkloadProperties, FreqGroup
+from tqdm import tqdm
 
 
 class StoryboardQueryExecutor:
@@ -66,16 +67,17 @@ class StoryboardVarianceEstimator:
         time_range = (0, max_time)
         return dim_values, time_range
 
-    def eval_error(self, sq: StoryboardQueryExecutor, rq: RawQueryExecutor, max_item = 100, n_trials: int = 3):
+    def eval_error(self, sq: StoryboardQueryExecutor, rq: RawQueryExecutor, x_to_track, n_trials: int = 3):
         trial_mses = []
         trial_totals = []
-        for trail_idx in range(n_trials):
+        print("Evaluating")
+        for trail_idx in tqdm(range(n_trials)):
             filter, _ = self.sample_query()
             n_dims = len(filter)
             sb_res = sq.exec_query(filter)
             raw_res = rq.exec_query(filter)
-            sb_counts = np.array([sb_res.get(i,0) for i in range(max_item)])
-            raw_counts = np.array([raw_res.get(i,0) for i in range(max_item)])
+            sb_counts = np.array([sb_res.get(i,0) for i in x_to_track])
+            raw_counts = np.array([raw_res.get(i,0) for i in x_to_track])
             trial_total = sum(raw_res.values())
             trial_errors = (raw_counts - sb_counts)**2
             trial_mses.append(np.mean(trial_errors))
