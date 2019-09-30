@@ -9,7 +9,7 @@ import pandas as pd
 from tqdm import tqdm
 
 import q_linear_bench
-import sketch.dyadic as dyadic
+import sketch.compress_dyadic as dyadic
 
 
 def combine_counts(counts: Sequence[Dict]):

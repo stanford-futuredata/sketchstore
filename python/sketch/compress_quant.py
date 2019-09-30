@@ -1,39 +1,34 @@
 import math
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Iterable
 import numpy as np
 import random
+
 import sketch.quantile_cy
-import tdigest.tdigest
-import sortednp as snp
+from sketch.compressor import SeqDictCompressor
 
 
-class RankTracker:
+class RankTracker(SeqDictCompressor):
     def __init__(self, x_tracked: List):
         self.x_tracked = np.array(x_tracked)
 
-    def compress(
-            self,
-            xs,
-    ) -> Dict[Any, float]:
+    def compress(self, xs: np.ndarray, size: int) -> Dict[Any, float]:
         # negate to make ranges (l,r]
         bin_edges = np.concatenate([[-np.inf], self.x_tracked])
         bin_weights, _ = np.histogram(-xs, -bin_edges[::-1])
         x_counts = {self.x_tracked[i]: bin_weights[::-1][i] for i in range(len(self.x_tracked))}
         return x_counts
 
-class SkipCompressor:
-    def __init__(self, size, seed=0, biased=False):
-        self.size = size
+
+class SkipCompressor(SeqDictCompressor):
+    def __init__(self, seed=0, biased=False):
         self.random = random.Random()
         self.random.seed(seed)
         self.biased = biased
 
-    def compress(
-            self,
-            x_sorted
-    ) -> Dict[Any, float]:
+    def compress(self, xs: np.ndarray, size: int) -> Dict[Any, float]:
+        x_sorted = np.sort(xs)
         n = len(x_sorted)
-        skip = int(math.ceil(n/self.size))
+        skip = int(math.ceil(n/size))
         saved = dict()
 
         start_idx = 0
@@ -60,17 +55,13 @@ class SkipCompressor:
         return saved
 
 
-class QRandomSampleCompressor:
-    def __init__(self, size, seed=0, unbiased=True):
-        self.size = size
+class QRandomSampleCompressor(SeqDictCompressor):
+    def __init__(self, seed=0):
         self.random = np.random.RandomState(seed=seed)
 
-    def compress(
-            self,
-            xs
-    ) -> Dict[Any, float]:
-        new_size = self.size
-        sampled = self.random.choice(xs, size=new_size, replace=False)
+    def compress(self, xs: np.ndarray, size: int) -> Dict[Any, float]:
+        new_size = size
+        sampled = self.random.choice(xs, size=new_size, replace=True)
 
         compressed_items = dict()
         inc_amt = len(xs) / new_size
@@ -109,17 +100,14 @@ def find_next_c(xvals, saved, saved_weight, new_weight, seg_start=None, seg_end=
 
 
 class CoopCompressor:
-    def __init__(self, size):
-        self.size = size
+    def __init__(self):
         self.running_stored = np.array([], dtype=float)
         self.stored_weights = np.array([], dtype=float)
         self.running_actual = np.array([], dtype=float)
 
-    def compress(
-            self,
-            xs
-    ) -> Dict[Any, float]:
-        x_segs = np.array_split(xs, self.size)
+    def compress(self, xs: np.ndarray, size: int) -> Dict[Any, float]:
+        xs = np.sort(xs)
+        x_segs = np.array_split(xs, size)
 
         self.running_actual = np.append(self.running_actual, xs)
         self.running_actual.sort()

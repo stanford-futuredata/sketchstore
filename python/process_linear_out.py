@@ -9,8 +9,8 @@ import pandas as pd
 from tqdm import tqdm
 
 import sketch.compress_freq as cf
-import sketch.frequent as f
-import sketch.dyadic as dyadic
+import sketch.sketch_frequent as f
+import sketch.compress_dyadic as dyadic
 import linear_bench
 
 

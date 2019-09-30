@@ -8,7 +8,7 @@ import pickle
 
 import sketch.compress_quant as cq
 import sketch.quantile as q
-from sketch import dyadic
+from sketch import compress_dyadic
 
 
 class QuantileLinearBenchRunner:
@@ -49,7 +49,7 @@ class QuantileLinearBenchRunner:
         dyadic_height = int(math.log2(len(self.segments)))
         dyadic_size = self.size/(dyadic_height+1)
         print("Dyadic Height: {}, Size:{}".format(dyadic_height, dyadic_size))
-        dyadic_compressor = dyadic.DyadicQuantileCompressor(
+        dyadic_compressor = compress_dyadic.DyadicQuantileCompressor(
             size=dyadic_size,
             max_height=dyadic_height
         )

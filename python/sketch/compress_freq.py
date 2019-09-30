@@ -1,55 +1,34 @@
 import math
-from collections import defaultdict
-from typing import Dict, Any, Mapping
-from sketch.frequent_cy import find_t
-
+from typing import Dict, Any, Mapping, Iterable
 import numpy as np
 import random
 
-#
-# def find_t(counts, s):
-#     sum_rest = np.sum(counts)
-#     cur_t = sum_rest / s
-#     found_tail = False
-#     tail_idx = 0
-#     for tail_idx in range(len(counts)):
-#         if tail_idx > 0:
-#             sum_rest -= counts[tail_idx-1]
-#         cur_t = sum_rest / (s-tail_idx)
-#         if counts[tail_idx] < cur_t:
-#             found_tail = True
-#             break
-#     if not found_tail:
-#         cur_t = 0
-#         tail_idx = len(counts)
-#     return cur_t, tail_idx
+from sketch.frequent_cy import find_t
+from sketch.compressor import ItemDictCompressor
 
 
-def apply_bias(x_count, bias):
-    return np.clip(x_count - bias, a_min=0, a_max=None)
-    # x_new = x_count.copy()
-    # x_new[x_count <= bias] = 0
-    # return x_new
+def apply_bias(item_dict: Dict[Any, float], bias: float) -> Dict[Any, float]:
+    return {
+        k: v-bias for k, v in item_dict.items()
+        if v > bias
+    }
 
 
-class IncrementalRangeCompressor:
-    def __init__(self, size):
-        self.deltas = defaultdict(float)
-        self.size = size
+class IncrementalRangeCompressor(ItemDictCompressor):
+    def __init__(self):
+        self.deltas = dict()
 
     def reset(self):
-        self.deltas = defaultdict(float)
+        self.deltas = dict()
 
-    def compress(
-            self,
-            item_dict: Dict[Any, float],
-    ) -> Dict[Any, float]:
-        seg_counts = np.array(list(item_dict.values()), dtype=float)
-        t,_ = find_t(seg_counts, self.size)
+    def compress(self, item_dict: Dict[Any, float], size: int) -> Dict[Any, float]:
+        item_list = sorted(item_dict.items(), key=lambda x: -x[1])
+        counts = np.array([x[1] for x in item_list], dtype=float)
+        t,_ = find_t(counts, size)
 
         keys_to_store = set()
         for k, v in item_dict.items():
-            self.deltas[k] += v
+            self.deltas[k] = self.deltas.get(k, 0) + v
             if v > t:
                 keys_to_store.add(k)
 
@@ -58,12 +37,12 @@ class IncrementalRangeCompressor:
         #     key=lambda e: -e[1]
         # )
         ordered_deficit = sorted(
-            [e for e in item_dict.items()],
+            [e for e in item_dict.items() if e[0] not in keys_to_store],
             key=lambda e: -self.deltas.get(e[0])
         )
 
         for top_k, top_v in ordered_deficit:
-            if len(keys_to_store) >= self.size:
+            if len(keys_to_store) >= size:
                 break
             if top_k in keys_to_store:
                 continue
@@ -71,7 +50,7 @@ class IncrementalRangeCompressor:
 
         items_to_store = dict()
         for cur_key in keys_to_store:
-            deficit_amt = self.deltas[cur_key]
+            deficit_amt = self.deltas.get(cur_key, 0)
             if item_dict.get(cur_key, 0) >= t:
                 store_val = item_dict[cur_key]
             else:
@@ -84,57 +63,25 @@ class IncrementalRangeCompressor:
         return items_to_store
 
 
-class RandomSampleCompressor:
-    def __init__(self, size, seed=0, unbiased=True):
-        self.size = size
-        self.random = np.random.RandomState(seed=seed)
-        self.unbiased = unbiased
-
-    def compress(
-            self,
-            item_dict: Dict[Any, int],
-    ) -> Dict[Any, float]:
-        new_size = self.size
-        items = []
-        for cur_key, cur_count in item_dict.items():
-            items += ([cur_key] * int(cur_count))
-        items = np.array(items)
-        if len(items) < new_size:
-            new_size = len(items)
-
-        sampled = self.random.choice(items, size=new_size, replace=False)
-
-        compressed_items = dict()
-        inc_amt = 1
-        if self.unbiased:
-            inc_amt = len(items) / new_size
-        for item in sampled:
-            compressed_items[item] = compressed_items.get(item, 0.0) + inc_amt
-
-        return compressed_items
+class NopCompressor(ItemDictCompressor):
+    def compress(self, item_dict: Dict[Any, float], size: int) -> Dict[Any, float]:
+        return item_dict
 
 
-class TopValueCompressor:
+class TopValueCompressor(ItemDictCompressor):
     def __init__(self, x_to_track):
-        self.x_to_track = set(x_to_track)
+        self.x_to_track = list(x_to_track)
 
-    def compress(
-            self,
-            item_dict: Dict[Any, int],
-    ) -> Dict[Any, float]:
-        return {k: v for k, v in item_dict.items() if k in self.x_to_track}
+    def compress(self, item_dict: Dict[Any, float], size: int) -> Dict[Any, float]:
+        return {k: item_dict.get(k, 0) for k in self.x_to_track}
 
 
-class TruncationCompressor:
-    def __init__(self, size):
-        self.size = size
+class TruncationCompressor(ItemDictCompressor):
+    def __init__(self):
         self.threshold = 0
 
-    def compress(
-            self,
-            item_dict: Dict[Any, int],
-    ) -> Dict[Any, float]:
-        new_size = self.size
+    def compress(self, item_dict: Dict[Any, float], size: int) -> Dict[Any, float]:
+        new_size = size
         item_list = sorted(item_dict.items(), key=lambda x: -x[1])
         compressed_items = dict()
         if len(item_list) < new_size:
@@ -149,30 +96,22 @@ class TruncationCompressor:
         return compressed_items
 
 
-class HairCombCompressor:
-    def __init__(self, size, seed=0, unbiased=True, bias=0):
-        self.size = size
+class HairCombCompressor(ItemDictCompressor):
+    def __init__(self, seed=0):
         self.random = random.Random()
         self.random.seed(seed)
         self.threshold = 0
         self.tail_idx = 0
-        # self.unbiased = unbiased
-        self.bias = bias
 
-    def compress(
-            self,
-            item_dict: Dict[Any, float],
-    ) -> Dict[Any, float]:
-        if self.size == 0:
+    def compress(self, item_dict: Dict[Any, float], size: int) -> Dict[Any, float]:
+        if size == 0:
             return dict()
 
         item_list = sorted(item_dict.items(), key=lambda x: -x[1])
         n = len(item_list)
-        counts = np.array([x[1] for x in item_list], dtype=float)
-        b_counts = apply_bias(counts, bias=self.bias)
-        # print(b_counts)
+        b_counts = np.array([x[1] for x in item_list], dtype=float)
 
-        self.threshold, self.tail_idx = find_t(b_counts, self.size)
+        self.threshold, self.tail_idx = find_t(b_counts, size)
         compressed_items = dict()
 
         for i in range(self.tail_idx):
@@ -194,25 +133,17 @@ class HairCombCompressor:
         return compressed_items
 
 
-class PPSCompressor:
-    def __init__(self, size, seed=0, unbiased=True):
-        self.size = size
+class PPSCompressor(ItemDictCompressor):
+    def __init__(self, seed=0):
         self.random = random.Random()
         self.random.seed(seed)
         self.threshold = 0
         self.tail_idx = 0
-        self.unbiased = unbiased
 
-    def set_size(self, size):
-        self.size = size
-
-    def compress(
-            self,
-            item_dict: Mapping[Any, float],
-    ) -> Dict[Any, float]:
+    def compress(self, item_dict: Dict[Any, float], size: int) -> Dict[Any, float]:
         item_list = sorted(item_dict.items(), key=lambda x: -x[1])
         counts = np.array([x[1] for x in item_list], dtype=float)
-        self.threshold, self.tail_idx = find_t(counts, self.size)
+        self.threshold, self.tail_idx = find_t(counts, size)
         self.threshold = int(math.ceil(self.threshold))
         compressed_items = dict()
 
@@ -223,10 +154,43 @@ class PPSCompressor:
                 thresh_ratio = count * 1.0 / self.threshold
                 r = self.random.random()
                 if r < thresh_ratio:
-                    if self.unbiased:
-                        target_val = self.threshold
-                    else:
-                        target_val = count
+                    target_val = self.threshold
                     compressed_items[key] = target_val
 
         return compressed_items
+
+
+class UniformSamplingCompressor(ItemDictCompressor):
+    def __init__(self, seed=0):
+        self.random = np.random.RandomState(seed)
+
+    def compress(self, item_dict: Dict[Any, float], size: int) -> Dict[Any, float]:
+        items = item_dict.keys()
+        weights = np.array(item_dict.values())
+        tot_weight = np.sum(weights)
+        ps = weights / tot_weight
+        x_sampled = self.random.choice(items, size=size, replace=True, p=ps)
+
+        sample_increment = tot_weight / size
+        return_dict = dict()
+        for x in x_sampled:
+            return_dict[x] = return_dict.get(x, 0) + sample_increment
+        return return_dict
+
+#
+# def find_t(counts, s):
+#     sum_rest = np.sum(counts)
+#     cur_t = sum_rest / s
+#     found_tail = False
+#     tail_idx = 0
+#     for tail_idx in range(len(counts)):
+#         if tail_idx > 0:
+#             sum_rest -= counts[tail_idx-1]
+#         cur_t = sum_rest / (s-tail_idx)
+#         if counts[tail_idx] < cur_t:
+#             found_tail = True
+#             break
+#     if not found_tail:
+#         cur_t = 0
+#         tail_idx = len(counts)
+#     return cur_t, tail_idx

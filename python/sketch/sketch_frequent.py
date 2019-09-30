@@ -7,22 +7,6 @@ import probables
 import bounter
 
 
-class ExactCounterSketch:
-    def __init__(self):
-        self.items = dict()
-
-    def add(self, xs):
-        for x in xs:
-            self.items[x] = self.items.get(x, 0.0) + 1
-
-    def get_dict(self):
-        return copy.copy(self.items)
-
-    def update(self, counts: Dict[Any, float]):
-        for k, v in counts.items():
-            self.items[k] = self.items.get(k, 0.0) + v
-
-
 class CountMinSketchFast:
     def __init__(self, size=100, seed=0, unbiased=False, x_to_track=None):
         self.size = size
@@ -36,6 +20,7 @@ class CountMinSketchFast:
 
     def get_dict(self):
         return {i: self.cms[str(i)] for i in self.x_to_track}
+
 
 class CountMinSketchOld:
     def __init__(self, size=100, seed=0, unbiased=False, x_to_track=None):

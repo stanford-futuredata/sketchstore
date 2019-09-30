@@ -1,5 +1,5 @@
 import unittest
-import sketch.dyadic as dyadic
+import sketch.compress_dyadic as dyadic
 import numpy as np
 import pandas as pd
 from collections import defaultdict

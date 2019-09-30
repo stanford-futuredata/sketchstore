@@ -1,8 +1,8 @@
 import unittest
 import numpy as np
 
-from sketch import compress_quant, quantile, quantile_cy
-from sketch.quantile import QuantileResultWrapper
+from sketch import compress_quant, quantile_cy
+from sketch.compressor import QuantileResultWrapper
 import sketch.kll
 
 

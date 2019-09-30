@@ -1,6 +1,6 @@
 import unittest
 
-from sketch.frequent import SpaceSavingSketch, CountMinSketchFast
+from sketch.sketch_frequent import SpaceSavingSketch, CountMinSketchFast
 
 
 class SketchTest(unittest.TestCase):

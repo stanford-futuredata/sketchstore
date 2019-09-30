@@ -1,6 +1,6 @@
 import unittest
 import sketch.compress_freq as c
-import sketch.frequent as f
+import sketch.sketch_frequent as f
 import numpy as np
 from collections import defaultdict
 
