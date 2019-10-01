@@ -35,7 +35,6 @@ class BoardGen:
                 new_row["sketch"] = self.sketch_gen.name()
                 new_row["data"] = bsketch
                 new_row["seg_idx"] = seg_idx
-                new_row["total"] = len(cur_segment)
                 result_rows.append(
                     new_row
                 )
