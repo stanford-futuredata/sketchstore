@@ -1,10 +1,12 @@
+from typing import Mapping, Any, Sequence
+
 import numpy as np
 import heapq
 import math
 from tqdm import tqdm
 
 
-def n_bias(x_count, bias):
+def n_bias(x_count: np.ndarray, bias: float):
     #     return np.sum(x_count[x_count >= bias])
     clipped = np.clip(x_count - bias, a_min=0, a_max=None)
     return np.sum(clipped)
@@ -18,7 +20,11 @@ def n_deriv(x_count, bias):
     return np.sum(x_count >= bias)
 
 
-def opt_sequence(x_counts, sizes, n_iter=10):
+def opt_sequence(
+        x_counts: Sequence[np.ndarray],
+        sizes: Sequence[int],
+        n_iter: int=10
+) -> np.ndarray:
     n = len(x_counts)
     b_pows = np.zeros(n) - 1
     bs = np.floor(2.0 ** b_pows)

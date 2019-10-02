@@ -7,8 +7,9 @@ import pandas as pd
 from tqdm import tqdm
 
 import sketch.compress_freq as cf
-import sketch.sketch_frequent as f
+import sketch.compress_quant as cq
 import sketch.compress_dyadic as cd
+import sketch.sketch_frequent as f
 import sketch.sketch_gen as board_sketch
 import storyboard.board_gen as board_gen
 
@@ -20,7 +21,9 @@ def get_tracked(data_name) -> np.ndarray:
         x_to_track = x_df["x_track"].values
     elif data_name == "caida_10M":
         x_df = pd.read_csv("/Users/edwardgan/Documents/Projects/datasets/caida-pcap/caida10M-ipdst-xtrack.csv")
-        x_to_track = x_df["x_track"].values
+        x_to_track = x_df["x_track"].values[:200]
+    elif data_name == "uniform_1M":
+        x_to_track = np.linspace(0, 1, 101)
     else:
         raise Exception("Invalid Dataset: {}".format(data_name))
     return np.sort(x_to_track)
@@ -35,6 +38,9 @@ def get_dataset(data_name) -> np.ndarray:
     elif data_name == "caida_10M":
         df_in = pd.read_csv("/Users/edwardgan/Documents/Projects/datasets/caida-pcap/caida10M-ipdst.csv")
         x_stream = df_in["ip.dst"].values
+    elif data_name == "uniform_1M":
+        r = np.random.RandomState(0)
+        x_stream = r.uniform(0, 1, size=1_000_000)
     else:
         raise Exception("Invalid Dataset: {}".format(data_name))
     return x_stream
@@ -66,9 +72,55 @@ def get_sketch_gen(sketch_name: str, x_to_track: Sequence = None) -> board_sketc
             name=sketch_name,
             compressor=cf.UniformSamplingCompressor()
         )
-    elif sketch_name == "dyadic_b2":
+    elif sketch_name == "cms_min":
+        sketch_gen = board_sketch.CMSGen()
+    elif sketch_name == "truncation":
+        sketch_gen = board_sketch.ItemDictCompressorGen(
+            name=sketch_name,
+            compressor=cf.TruncationCompressor()
+        )
+    elif sketch_name == "pps":
+        sketch_gen = board_sketch.ItemDictCompressorGen(
+            name=sketch_name,
+            compressor=cf.PPSCompressor()
+        )
+    elif sketch_name.startswith("dyadic"):
+        base = get_dyadic_base(sketch_name)
         sketch_gen = board_sketch.DyadicItemDictGen(
-            h_compressor=cd.DyadicFrequencyCompressor(max_height=20)
+            h_compressor=cd.DyadicFrequencyCompressor(max_height=20, base=base)
+        )
+    ## Quantile Sketches
+    elif sketch_name == "q_top_values":
+        sketch_gen = board_sketch.SeqDictCompressorGen(
+            name=sketch_name,
+            compressor=cq.RankTracker(x_tracked=x_to_track)
+        )
+    elif sketch_name == "q_cooperative":
+        sketch_gen = board_sketch.SeqDictCompressorGen(
+            name=sketch_name,
+            compressor=cq.CoopCompressor()
+        )
+    elif sketch_name == "q_random_sample":
+        sketch_gen = board_sketch.SeqDictCompressorGen(
+            name=sketch_name,
+            compressor=cq.QRandomSampleCompressor()
+        )
+    elif sketch_name == "kll":
+        sketch_gen = board_sketch.KLLGen()
+    elif sketch_name == "q_truncation":
+        sketch_gen = board_sketch.SeqDictCompressorGen(
+            name=sketch_name,
+            compressor=cq.SkipCompressor(biased=True)
+        )
+    elif sketch_name == "q_pps":
+        sketch_gen = board_sketch.SeqDictCompressorGen(
+            name=sketch_name,
+            compressor=cq.SkipCompressor(biased=False)
+        )
+    elif sketch_name.startswith("q_dyadic"):
+        base = get_dyadic_base(sketch_name)
+        sketch_gen = board_sketch.DyadicSeqDictGen(
+            h_compressor=cd.DyadicQuantileCompressor(max_height=20, base=base)
         )
     else:
         raise Exception("Invalid Sketch: {}".format(sketch_name))
@@ -142,12 +194,33 @@ def run_test(data_name, cur_granularity, sketch_size, sketch_name):
 
 
 def main():
-    sketch_names = ["dyadic_b2"]
+    # sketch_names = [
+    #     "q_top_values",
+    #     "q_random_sample",
+    #     "q_truncation",
+    #     "q_pps",
+    #     "q_dyadic_b2",
+    #     "q_cooperative",
+    #     "kll"
+    # ]
+    # data_name = "uniform_1M"
+    sketch_names = [
+        "top_values",
+        "cooperative",
+        "random_sample",
+        "truncation",
+        "cms_min",
+        "pps",
+        "dyadic_b2"
+    ]
+    data_name = "caida_10M"
+    cur_granularity = 2048
+    sketch_size = 64
     for sketch_name in sketch_names:
         run_test(
-            data_name="caida_1M",
-            cur_granularity=2048,
-            sketch_size=64,
+            data_name=data_name,
+            cur_granularity=cur_granularity,
+            sketch_size=sketch_size,
             sketch_name=sketch_name
         )
 

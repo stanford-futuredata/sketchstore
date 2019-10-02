@@ -5,13 +5,13 @@ import math
 
 import sketch.sketch_gen as board_sketch
 import storyboard.board_gen as board_gen
-import storyboard.board_query as board_query
 import sketch.compress_dyadic as cd
+import storyboard.query_cy as board_query
 
 
 class TestBoardQuery(unittest.TestCase):
     def test_dyadic(self):
-        x_stream = np.random.zipf(1.1, size=10_000)
+        x_stream = np.random.zipf(1.1, size=100_000)
         cur_granularity = 128
         sketch_size = 64
         segments = np.array_split(x_stream, cur_granularity)
@@ -30,13 +30,14 @@ class TestBoardQuery(unittest.TestCase):
                 "t": t, "size": sketch_size
             } for t in segment_times],
         )
-        tot_results, tot_sum = board_query.query_linear_dyadic(
+        tot_results = board_query.query_linear_dyadic(
             df,
             seg_start=1,
             seg_end=7,
-            x_to_track=list(range(10)),
+            x_to_track=np.arange(10),
             quantile=False,
             dyadic_base=2,
         )
+        self.assertGreater(tot_results[1], 420)
+        self.assertLess(tot_results[1], 480)
         print(tot_results)
-        print(tot_sum)

@@ -165,8 +165,8 @@ class UniformSamplingCompressor(ItemDictCompressor):
         self.random = np.random.RandomState(seed)
 
     def compress(self, item_dict: Dict[Any, float], size: int) -> Dict[Any, float]:
-        items = item_dict.keys()
-        weights = np.array(item_dict.values())
+        items = list(item_dict.keys())
+        weights = np.array(list(item_dict.values()))
         tot_weight = np.sum(weights)
         ps = weights / tot_weight
         x_sampled = self.random.choice(items, size=size, replace=True, p=ps)

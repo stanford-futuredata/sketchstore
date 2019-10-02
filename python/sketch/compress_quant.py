@@ -1,5 +1,5 @@
 import math
-from typing import Dict, Any, List, Iterable
+from typing import Dict, Any, List, Iterable, Sequence
 import numpy as np
 import random
 
@@ -8,7 +8,7 @@ from sketch.compressor import SeqDictCompressor
 
 
 class RankTracker(SeqDictCompressor):
-    def __init__(self, x_tracked: List):
+    def __init__(self, x_tracked: Sequence):
         self.x_tracked = np.array(x_tracked)
 
     def compress(self, xs: np.ndarray, size: int) -> Dict[Any, float]:
@@ -99,7 +99,7 @@ def find_next_c(xvals, saved, saved_weight, new_weight, seg_start=None, seg_end=
     return xvals[x_left_idx+l_diff_best], np.sum(loss(d/scale_f))
 
 
-class CoopCompressor:
+class CoopCompressor(SeqDictCompressor):
     def __init__(self):
         self.running_stored = np.array([], dtype=float)
         self.stored_weights = np.array([], dtype=float)

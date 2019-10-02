@@ -25,6 +25,11 @@ extensions = [
         include_dirs=[numpy.get_include()],
         libraries=None,
         library_dirs=None),
+    Extension(
+        "storyboard.query_cy", ["storyboard/query_cy.pyx"],
+        include_dirs=[numpy.get_include()],
+        libraries=None,
+        library_dirs=None),
 ]
 setup(
     name="Cython Test App",
