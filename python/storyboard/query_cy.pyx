@@ -77,6 +77,37 @@ cpdef float query_linear_tot(
     return tot_sum
 
 
+cpdef float query_cube_tot(
+        df,
+        dict query_values,
+):
+    mask = np.repeat(True, len(df))
+    for cur_dim, cur_value in query_values.items():
+        mask = mask & (df[cur_dim] == cur_value)
+    tot_sum = df["total"][mask].sum()
+    return tot_sum
+
+
+cpdef list query_cube(
+        df,
+        dict query_values,
+        np.ndarray x_to_track,
+        bint quantile,
+):
+    mask = np.repeat(True, len(df))
+    for cur_dim, cur_value in query_values.items():
+        mask = mask & (df[cur_dim] == cur_value)
+    summaries = df["data"][mask]
+
+    cdef double[:] tot_results = np.zeros(shape=len(x_to_track))
+    cdef BoardSketch cur_summary
+    cdef int i
+    for cur_summary in summaries:
+        for i in range(len(x_to_track)):
+            tot_results[i] += cur_summary.estimate(x_to_track[i], rank=quantile)
+    return list(tot_results)
+
+
 cpdef list query_linear(
         df,
         int seg_start,

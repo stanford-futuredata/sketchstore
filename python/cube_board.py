@@ -72,6 +72,7 @@ def get_workload_properties(df_raw: pd.DataFrame, dim_names, p: float):
     return wp
 
 
+# Dimension values must be consecutive integers
 def get_dataset(data_name) -> Tuple[pd.DataFrame, Sequence[str], str]:
     if data_name == "synthf@2":
         df, dim_names = testdata.bench_gen.gen_data(
@@ -104,6 +105,13 @@ def get_sketch_gen(sketch_name: str, x_to_track: np.ndarray = None) -> sketch_ge
     return linear_board.get_sketch_gen(sketch_name, x_to_track=x_to_track)
 
 
+def get_p_from_split_strat(
+        split_strategy: str
+) -> float:
+    p = int(split_strategy[split_strategy.rfind("@") + 1:]) / 100
+    return p
+
+
 def apply_split_strategy(
         split_strategy: str,
         df_total: pd.DataFrame,
@@ -111,7 +119,7 @@ def apply_split_strategy(
         dim_names: Sequence[str],
 ) -> pd.DataFrame:
     if split_strategy.startswith("weighted"):
-        p = int(split_strategy[split_strategy.rfind("@")+1:]) / 100
+        p = get_p_from_split_strat(split_strategy)
         wp = get_workload_properties(df_raw, dim_names, p)
         df_sizes = storyboard.size_optimizer.get_a_weights_poiss(
             wp=wp,
@@ -221,7 +229,7 @@ def main():
         data_name="synthf@2",
         split_strategy="weighted@10",
         board_size=2048,
-        sketch_name="truncation",
+        sketch_name="top_values",
         bias_opt=False,
     )
 
