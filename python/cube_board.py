@@ -72,8 +72,15 @@ def get_workload_properties(df_raw: pd.DataFrame, dim_names, p: float):
     return wp
 
 
+def get_dim_names(data_name) -> Tuple[Sequence[str], str]:
+    if data_name == "synthf@2":
+        return ["d{}".format(i) for i in range(2)], "f"
+    elif data_name == "synthf@4":
+        return ["d{}".format(i) for i in range(4)], "f"
+
+
 # Dimension values must be consecutive integers
-def get_dataset(data_name) -> Tuple[pd.DataFrame, Sequence[str], str]:
+def get_dataset(data_name) -> pd.DataFrame:
     if data_name == "synthf@2":
         df, dim_names = testdata.bench_gen.gen_data(
             1_000_000,
@@ -83,20 +90,10 @@ def get_dataset(data_name) -> Tuple[pd.DataFrame, Sequence[str], str]:
             f_card=10000,
             seed=0,
         )
-        return df, dim_names, "f"
+        return df
     elif data_name == "synthf@4":
-        df, dim_names = testdata.bench_gen.gen_data(
-            10_000_000,
-            [(10, 1),
-             (5, 1),
-             (2, 1),
-             (2, 1),
-             ],
-            f_skew=1.1,
-            f_card=10000,
-            seed=0,
-        )
-        return df, dim_names, "f"
+        df = pd.read_feather("/Users/edwardgan/Documents/Projects/datasets/sketchstore_synth/cube4_10M.feather")
+        return df
     else:
         raise Exception("Invalid dataset name")
 
@@ -126,6 +123,11 @@ def apply_split_strategy(
             df_total=df_total
         )
         return df_sizes
+    elif split_strategy.startswith("uniform"):
+        df_sizes = storyboard.size_optimizer.get_a_weights_uniform(dim_names, df_total=df_total)
+        return df_sizes
+    elif split_strategy.startswith("prop"):
+        return storyboard.size_optimizer.get_a_weights_prop(dim_names, df_total=df_total)
     else:
         raise Exception("Invalid split strategy")
 
@@ -149,12 +151,15 @@ def run_test(
         sketch_name: str,
         bias_opt: bool=False,
 ):
-    df_raw, dim_names, x_name = get_dataset(data_name)
+    print("Generating Dataset")
+    df_raw = get_dataset(data_name)
+    dim_names, x_name = get_dim_names(data_name)
     df_total = write_totals(df_raw, dims=dim_names, val_name=x_name, data_name=data_name)
     x_to_track = get_tracked(data_name)
     sketch_gen = get_sketch_gen(sketch_name, x_to_track=x_to_track)
     board_constructor = board_gen.BoardGen(sketch_gen)
 
+    print("Applying Split Strategy")
     df_sizes = apply_split_strategy(
         split_strategy=split_strategy,
         df_total=df_total,
@@ -218,20 +223,27 @@ def run_test(
 
 
 def main():
-    sketch_names = [
-        "top_values",
-        "random_sample",
-        "truncation",
-        "cms_min",
-        "pps",
+    sketch_types = [
+        ("top_values", "uniform", False),
+        ("pps", "weighted@20", True),
+        ("random_sample", "uniform", False),
+        ("random_sample", "prop", False),
+        ("truncation", "uniform", False),
+        ("cms_min", "uniform", False),
+
+        ("pps", "uniform", True),
+        ("pps", "weighted@20", False),
+        ("random_sample", "weighted@20", True),
     ]
-    run_test(
-        data_name="synthf@2",
-        split_strategy="weighted@10",
-        board_size=2048,
-        sketch_name="top_values",
-        bias_opt=False,
-    )
+
+    for cur_sketch, split_strategy, bias_opt in sketch_types:
+        run_test(
+            data_name="synthf@4",
+            split_strategy=split_strategy,
+            board_size=2048,
+            sketch_name=cur_sketch,
+            bias_opt=bias_opt,
+        )
 
 
 if __name__ == "__main__":

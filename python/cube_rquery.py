@@ -69,21 +69,33 @@ def run_workload(
         quantile: bool,
 ):
     results = []
+    memoized = dict()
     for cur_query in tqdm(workload):
-        true_counts = board_query.query_cube(
-            true_board, query_values=cur_query, x_to_track=x_to_track,
-            quantile=quantile)
-        est_counts = board_query.query_cube(
-            est_board, query_values=cur_query, x_to_track=x_to_track,
-            quantile=quantile)
-        true_tot = board_query.query_cube_tot(totals_df, cur_query)
-        cur_results = board_query.calc_errors(true_counts, est_counts)
-        cur_results["dim_values"] = str(cur_query)
-        cur_results["query_len"] = len(cur_query)
-        cur_results["sketch"] = sketch_name
-        cur_results["total"] = true_tot
+        qstr = str(cur_query)
+        if qstr in memoized:
+            cur_results = memoized[qstr]
+        else:
+            true_counts = board_query.query_cube(
+                true_board, query_values=cur_query, x_to_track=x_to_track,
+                quantile=quantile)
+            est_counts = board_query.query_cube(
+                est_board, query_values=cur_query, x_to_track=x_to_track,
+                quantile=quantile)
+            true_tot = board_query.query_cube_tot(totals_df, cur_query)
+            cur_results = board_query.calc_errors(true_counts, est_counts)
+            cur_results["dim_values"] = str(cur_query)
+            cur_results["query_len"] = len(cur_query)
+            cur_results["sketch"] = sketch_name
+            cur_results["total"] = true_tot
+
+            memoized[qstr] = cur_results
         results.append(cur_results)
     return results
+
+
+def transform_sketch_to_error_file(sketch_file: str, workload_p: float):
+    out_file = sketch_file[:sketch_file.rfind(".")]+"_errors@p{}.csv".format(int(workload_p*100))
+    return out_file
 
 
 def calc_results(
@@ -94,19 +106,21 @@ def calc_results(
         bias_opt: bool,
         quantile: bool,
         workload_p: float, # workload p to test with, could be different from construction strategy
+        num_queries: int = 200,
 ):
     if quantile:
         true_sketch = "q_top_values"
     else:
         true_sketch = "top_values"
     x_to_track = cube_board.get_tracked(data_name)
-    _,dim_names,x_name = cube_board.get_dataset(data_name=data_name)
+    dim_names,x_name = cube_board.get_dim_names(data_name=data_name)
+    print("Loading Boards")
     true_file = cube_board.get_file_name(
         data_name=data_name,
-        split_strategy=split_strategy,
+        split_strategy="uniform",
         board_size=board_size,
         sketch_name=true_sketch,
-        bias=bias_opt,
+        bias=False,
     )
     sketch_file = cube_board.get_file_name(
         data_name=data_name,
@@ -124,10 +138,11 @@ def calc_results(
     )
     workload = gen_workload(
         true_board, wp=wp,
-        seed=0, num_queries=200)
+        seed=0, num_queries=num_queries)
     print("Estimating: {}".format(sketch_name))
 
     cur_board = pd.read_pickle(sketch_file)
+    print("Running Workload")
     cur_results = run_workload(workload, x_to_track=x_to_track,
                                true_board=true_board, est_board=cur_board, totals_df=totals_df,
                                sketch_name=sketch_name,
@@ -139,8 +154,7 @@ def calc_results(
     results_df["_quantile"] = quantile
     results_df["_bias_opt"] = bias_opt
     results_df["_board_size"] = board_size
-    out_dir, _ = os.path.split(true_file)
-    out_file = sketch_file[:sketch_file.rfind(".")]+"_errors@p{}.csv".format(int(workload_p*100))
+    out_file = transform_sketch_to_error_file(sketch_file, workload_p=workload_p)
     print(out_file)
     results_df.to_csv(out_file, index=False)
     return results_df
@@ -149,30 +163,42 @@ def calc_results(
 experiment_runs = [
     {
         "data_name": "synthf@2",
-        "split_strategy": "weighted@10",
         "board_size": 2048,
         "quantile": False,
         "workload_p": .1,
     }, # 0
+    {
+        "data_name": "synthf@4",
+        "board_size": 2048,
+        "quantile": False,
+        "workload_p": .2,
+    },  # 1
 ]
 
 
 def main():
-    experiment_id = 0
+    experiment_id = 1
     cur_experiment = experiment_runs[experiment_id]
 
     data_name = cur_experiment["data_name"]
-    split_strategy = cur_experiment["split_strategy"]
     board_size = cur_experiment["board_size"]
     quantile = cur_experiment["quantile"]
     workload_p = cur_experiment["workload_p"]
 
-    cur_sketches = [
-        # "q_cooperative", "q_random_sample", "kll", "q_truncation", "q_pps", "q_dyadic_b2",
-        # "cooperative", "random_sample", "cms_min", "truncation", "pps", "dyadic_b2",
-        ("truncation", False), ("pps", True),
+    sketch_types = [
+        # ("top_values", "uniform", False),
+        ("pps", "weighted@20", True),
+        ("random_sample", "uniform", False),
+        ("random_sample", "prop", False),
+        ("truncation", "uniform", False),
+        ("cms_min", "uniform", False),
+
+        ("pps", "uniform", True),
+        ("pps", "weighted@20", False),
+        ("random_sample", "weighted@20", True),
     ]
-    for cur_sketch, bias_opt in cur_sketches:
+
+    for cur_sketch, split_strategy, bias_opt in sketch_types:
         results_df = calc_results(
             data_name=data_name,
             split_strategy=split_strategy,
@@ -181,6 +207,7 @@ def main():
             bias_opt=bias_opt,
             quantile=quantile,
             workload_p=workload_p,
+            num_queries=2000,
         )
 
 

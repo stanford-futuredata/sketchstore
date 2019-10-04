@@ -1,4 +1,5 @@
 import json
+import math
 from typing import Dict, List, Tuple, Mapping
 import pickle
 import sketch.sketch_frequent as frequent
@@ -63,7 +64,7 @@ class SpaceSavingGen(SketchGen):
         return "spacesave"
 
     def generate(self, xs, args: Mapping) -> List[Tuple[BoardSketch, Dict]]:
-        size = args["size"]
+        size = int(args["size"])
         ss = frequent.SpaceSavingSketch(size=size, unbiased=False)
         ss.add(xs)
         return [(DictSketch(ss.get_dict()), dict())]
@@ -74,7 +75,7 @@ class CMSGen(SketchGen):
         return "countmin"
 
     def generate(self, xs, args: Mapping) -> List[Tuple[BoardSketch, Dict]]:
-        size = args["size"]
+        size = 2**math.ceil(math.log2(args["size"]))
         cms = bounter.count_min_sketch.CountMinSketch(width=size, depth=5)
         cms.update([str(x) for x in xs])
         return [(CMSSketch(cms_obj=cms), dict())]

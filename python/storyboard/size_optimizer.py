@@ -35,9 +35,19 @@ def scale_a_weights(as_g: np.ndarray, total_space: int):
     # return np.round(a_scaled)
 
 
+def get_a_weights_uniform(dim_names, df_total: pd.DataFrame):
+    df_a_weights = df_total.copy()
+    df_a_weights["_a"] = 1
+    return df_a_weights.set_index(dim_names)["_a"]
+
+
+def get_a_weights_prop(dim_names, df_total: pd.DataFrame):
+    return df_total.set_index(dim_names)["total"]
+
+
 def get_a_weights_poiss(wp: WorkloadProperties, df_total: pd.DataFrame):
     df_a_weights = df_total.copy()
-    df_a_weights["sum"] = 0
+    df_a_weights["_sum"] = 0
     num_dims = len(wp.pred_cardinalities)
     for num_predicates in range(num_dims + 1):
         dim_sets = list(itertools.combinations(range(num_dims), num_predicates))
@@ -45,13 +55,13 @@ def get_a_weights_poiss(wp: WorkloadProperties, df_total: pd.DataFrame):
             cur_prob = wp.calc_prob(dim_set_idxs)
             if len(dim_set_idxs) == 0:
                 tot_sum = df_total["total"].sum()
-                df_a_weights["sum"] += cur_prob / (tot_sum ** 2)
+                df_a_weights["_sum"] += cur_prob / (tot_sum ** 2)
             else:
                 cur_dim_names = [wp.dim_names[i] for i in dim_set_idxs]
                 dfg = df_total.groupby(cur_dim_names)[["total"]].sum().reset_index(
-                ).rename(columns={"total": "tsum"})
+                ).rename(columns={"total": "_tsum"})
                 df_a_weights = df_a_weights.merge(dfg, on=cur_dim_names)
-                df_a_weights["sum"] += cur_prob / (df_a_weights["tsum"] ** 2)
-                del df_a_weights["tsum"]
-    df_a_weights["a"] = (df_a_weights["sum"] * df_a_weights["total"] ** 2) ** (1 / 3)
-    return df_a_weights.set_index(wp.dim_names)["a"]
+                df_a_weights["_sum"] += cur_prob / (df_a_weights["_tsum"] ** 2)
+                del df_a_weights["_tsum"]
+    df_a_weights["_a"] = (df_a_weights["_sum"] * df_a_weights["total"] ** 2) ** (1 / 3)
+    return df_a_weights.set_index(wp.dim_names)["_a"]
