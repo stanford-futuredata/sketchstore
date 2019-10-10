@@ -138,12 +138,42 @@ experiment_runs = [
             "q_dyadic_b3": 9
         }
     },  # 1
+    {
+        "data_name": "zipf1p1_10M",
+        "quantile": False,
+        "granularity": 2048,
+        "baseline_size": 64,
+        "sketch_sizes": {
+            "cooperative": 64,
+            "random_sample": 64,
+            "cms_min": 64,
+            "truncation": 64,
+            "pps": 64,
+            "dyadic_b2": 5,
+            "dyadic_b3": 9,
+        }
+    },  # 2
+    {
+        "data_name": "power_2M",
+        "quantile": True,
+        "granularity": 2048,
+        "baseline_size": 64,
+        "sketch_sizes": {
+            "q_cooperative": 64,
+            "q_random_sample": 64,
+            "q_truncation": 64,
+            "q_pps": 64,
+            "kll": 64,
+            "q_dyadic_b2": 5,
+            "q_dyadic_b3": 9
+        }
+    },  # 3
 
 ]
 
 
 def main():
-    experiment_id = 0
+    experiment_id = 3
     cur_experiment = experiment_runs[experiment_id]
     data_name = cur_experiment["data_name"]
     granularity = cur_experiment["granularity"]
@@ -151,8 +181,9 @@ def main():
     sketch_sizes = cur_experiment["sketch_sizes"]
     quantile = cur_experiment["quantile"]
     cur_sketches = [
-        # "q_cooperative", "q_random_sample", "kll", "q_truncation", "q_pps", "q_dyadic_b2"
-        "cooperative", "random_sample", "cms_min", "truncation", "pps", "dyadic_b2"
+        # "q_cooperative", "q_random_sample", "kll", "q_truncation", "q_pps", "q_dyadic_b2",
+        "q_pps",
+        # "cooperative", "random_sample", "cms_min", "truncation", "pps", "dyadic_b2"
     ]
     for cur_sketch in cur_sketches:
         results_df = calc_results(

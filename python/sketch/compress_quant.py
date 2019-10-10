@@ -39,7 +39,7 @@ class SkipCompressor(SeqDictCompressor):
             else:
                 seg_offset = self.random.randrange(0, skip)
             to_save = x_sorted[start_idx + seg_offset]
-            saved[to_save] = skip
+            saved[to_save] = saved.get(to_save, 0) + skip
             start_idx = end_idx
             end_idx += skip
 
@@ -50,7 +50,7 @@ class SkipCompressor(SeqDictCompressor):
             else:
                 seg_offset = self.random.randrange(0, seg_size)
             to_save = x_sorted[start_idx + seg_offset]
-            saved[to_save] = seg_size
+            saved[to_save] = saved.get(to_save, 0) + seg_size
 
         return saved
 
@@ -71,13 +71,15 @@ class QRandomSampleCompressor(SeqDictCompressor):
         return compressed_items
 
 
-def loss(f):
-    return f**2
 # def loss(f):
-#     a=1
-#     return np.cosh(a*f)
+#     return f**2
+def loss(f):
+    a = 1/math.sqrt(1024)
+    return np.cosh(a*f)
 
-def find_next_c(xvals, saved, saved_weight, new_weight, seg_start=None, seg_end=None):
+def find_next_c(
+        xvals, saved, saved_weight, new_weight, seg_start=None, seg_end=None
+):
     # print("finding")
     # print("range:{}-{}".format(xvals[0],xvals[-1]))
     # print("saved:{}".format(saved))
@@ -149,3 +151,69 @@ class CoopCompressor(SeqDictCompressor):
             ))
 
         return to_save
+
+
+def find_next_c_2(
+        xvals: np.ndarray,
+        xdeltas: np.ndarray,
+        cur_seg_weight: float,
+        seg_start,
+        seg_end
+):
+    x_left_idx = 0
+    x_right_idx = len(xvals)
+    if seg_start is not None:
+        x_left_idx = np.searchsorted(xvals, seg_start, side="left")
+    if seg_end is not None:
+        x_right_idx = np.searchsorted(xvals, seg_end, side="right")
+    d = xdeltas[x_left_idx:x_right_idx]
+
+    scale_f = cur_seg_weight
+    l_diff = loss((d-cur_seg_weight)/scale_f) - loss(d/scale_f)
+    l_diff_suff = np.cumsum(l_diff[::-1])[::-1]
+    l_diff_best = np.argmax(-l_diff_suff)
+
+    xdeltas[x_left_idx+l_diff_best:] -= cur_seg_weight
+    # print("best:{}".format(xvals[l_diff_best]))
+    return xvals[x_left_idx+l_diff_best]
+
+
+class CoopCompressorFinite(SeqDictCompressor):
+    def __init__(self):
+        self.true_weight = dict()
+        self.stored_weight = dict()
+
+    def compress(self, xs: np.ndarray, size: int) -> Dict[Any, float]:
+        for x in xs:
+            self.true_weight[x] = self.true_weight.get(x, 0) + 1
+
+        xvals, xdeltas = sketch.quantile_cy.get_deltas_2(
+            self.true_weight,
+            self.stored_weight
+        )
+        # print("iter")
+        # print(self.stored_weight)
+        # print(xvals)
+        # print(xdeltas)
+
+        xs = np.sort(xs)
+        x_segs = np.array_split(xs, size)
+
+        to_save = dict()
+        for cur_seg in x_segs:
+            seg_start, seg_end = cur_seg[0], cur_seg[-1]
+            cur_seg_weight = len(cur_seg)
+
+            cur_to_save = find_next_c_2(
+                xvals,
+                xdeltas,
+                cur_seg_weight,
+                seg_start=seg_start,
+                seg_end=seg_end
+            )
+            # print("seg: {}-{}".format(seg_start, seg_end))
+            # print("saved: {}".format(cur_to_save))
+            self.stored_weight[cur_to_save] = self.stored_weight.get(cur_to_save, 0) + cur_seg_weight
+            to_save[cur_to_save] = cur_seg_weight
+        return to_save
+

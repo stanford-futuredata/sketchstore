@@ -24,6 +24,12 @@ def get_tracked(data_name) -> np.ndarray:
         x_to_track = x_df["x_track"].values[:200]
     elif data_name == "uniform_1M":
         x_to_track = np.linspace(0, 1, 101)
+    elif data_name == "power_2M":
+        x_df = pd.read_csv("/Users/edwardgan/Documents/Projects/datasets/household/power_tracked.csv")
+        x_to_track = x_df["x_track"].values
+    elif data_name == "zipf1p1_10M":
+        x_df = pd.read_csv("notebooks/zipf10M-xtrack.csv")
+        x_to_track = x_df["x_track"].values[:200]
     else:
         raise Exception("Invalid Dataset: {}".format(data_name))
     return np.sort(x_to_track)
@@ -38,9 +44,15 @@ def get_dataset(data_name) -> np.ndarray:
     elif data_name == "caida_10M":
         df_in = pd.read_csv("/Users/edwardgan/Documents/Projects/datasets/caida-pcap/caida10M-ipdst.csv")
         x_stream = df_in["ip.dst"].values
+    elif data_name == "zipf1p1_10M":
+        df_in = pd.read_csv("notebooks/zipf10M.csv", nrows=10_000_000)
+        x_stream = df_in["x"].values
     elif data_name == "uniform_1M":
         r = np.random.RandomState(0)
         x_stream = r.uniform(0, 1, size=1_000_000)
+    elif data_name == "power_2M":
+        df_in = pd.read_csv("/Users/edwardgan/Documents/Projects/datasets/household/power.csv")
+        x_stream = df_in["Global_active_power"].values
     else:
         raise Exception("Invalid Dataset: {}".format(data_name))
     return x_stream
@@ -98,7 +110,7 @@ def get_sketch_gen(sketch_name: str, x_to_track: Sequence = None) -> board_sketc
     elif sketch_name == "q_cooperative":
         sketch_gen = board_sketch.SeqDictCompressorGen(
             name=sketch_name,
-            compressor=cq.CoopCompressor()
+            compressor=cq.CoopCompressorFinite()
         )
     elif sketch_name == "q_random_sample":
         sketch_gen = board_sketch.SeqDictCompressorGen(
@@ -194,26 +206,26 @@ def run_test(data_name, cur_granularity, sketch_size, sketch_name):
 
 
 def main():
-    # sketch_names = [
-    #     "q_top_values",
-    #     "q_random_sample",
-    #     "q_truncation",
-    #     "q_pps",
-    #     "q_dyadic_b2",
-    #     "q_cooperative",
-    #     "kll"
-    # ]
-    # data_name = "uniform_1M"
     sketch_names = [
-        "top_values",
-        "cooperative",
-        "random_sample",
-        "truncation",
-        "cms_min",
-        "pps",
-        "dyadic_b2"
+        # "q_top_values",
+        # "q_random_sample",
+        # "q_truncation",
+        "q_pps",
+        # "q_dyadic_b2",
+        # "q_cooperative",
+        # "kll"
     ]
-    data_name = "caida_10M"
+    data_name = "power_2M"
+    # sketch_names = [
+    #     "top_values",
+    #     "cooperative",
+    #     "random_sample",
+    #     "truncation",
+    #     "cms_min",
+    #     "pps",
+    #     "dyadic_b2"
+    # ]
+    # data_name = "zipf1p1_10M"
     cur_granularity = 2048
     sketch_size = 64
     for sketch_name in sketch_names:
