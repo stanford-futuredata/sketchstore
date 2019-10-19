@@ -9,7 +9,7 @@ from sketch.compressor import ItemDictCompressor,SeqDictCompressor
 from sketch.compress_dyadic import DyadicFrequencyCompressor, DyadicQuantileCompressor
 import bounter
 import numpy as np
-from storyboard.query_cy import BoardSketch, DictSketch, CMSSketch
+from storyboard.query_cy import BoardSketch, DictSketch, CMSSketch, CDFSketch
 
 
 # class BoardSketch:
@@ -98,6 +98,9 @@ class ItemDictCompressorGen(SketchGen):
             bias = args["bias"]
             item_dict = compress_freq.apply_bias(item_dict, bias=bias)
         output_map = self.compressor.compress(item_dict, size=size)
+        if "bias" in args:
+            bias = args["bias"]
+            output_map = {k: v+bias for k,v in output_map.items()}
         return [(DictSketch(output_map), dict())]
 
 
@@ -112,7 +115,7 @@ class SeqDictCompressorGen(SketchGen):
     def generate(self, xs, args: Mapping) -> List[Tuple[BoardSketch, Dict]]:
         size = args["size"]
         output_map = self.compressor.compress(xs, size=size)
-        return [(DictSketch(output_map), dict())]
+        return [(CDFSketch(output_map), dict())]
 
 
 class KLLGen(SketchGen):
@@ -125,7 +128,7 @@ class KLLGen(SketchGen):
         for x in xs:
             k_sketch.update(x)
         k_sketch.compress()
-        return [(DictSketch(k_sketch.get_dict()), dict())]
+        return [(CDFSketch(k_sketch.get_dict()), dict())]
 
 
 class DyadicItemDictGen(SketchGen):
@@ -157,6 +160,6 @@ class DyadicSeqDictGen(SketchGen):
         size = args["size"]
         output_maps = self.h_compressor.compress(xs, size=size)
         return [
-            (DictSketch(omap), {"level": i})
+            (CDFSketch(omap), {"level": i})
             for i, omap in enumerate(output_maps)
         ]

@@ -15,11 +15,14 @@ def apply_bias(item_dict: Dict[Any, float], bias: float) -> Dict[Any, float]:
 
 
 class IncrementalRangeCompressor(ItemDictCompressor):
-    def __init__(self):
+    def __init__(self, max_t=None):
         self.deltas = dict()
+        self.max_t = max_t
+        self.cur_t = 0
 
     def reset(self):
         self.deltas = dict()
+        self.cur_t = 0
 
     def compress(self, item_dict: Dict[Any, float], size: int) -> Dict[Any, float]:
         item_list = sorted(item_dict.items(), key=lambda x: -x[1])
@@ -55,11 +58,15 @@ class IncrementalRangeCompressor(ItemDictCompressor):
                 store_val = item_dict[cur_key]
             else:
                 # min_val = max(self.deltas[cur_key] - t, 0)
-                max_val = item_dict.get(cur_key, 0.0) + t
+                # max_val = item_dict.get(cur_key, 0.0) + t
+                max_val = t
                 store_val = np.clip(deficit_amt, 0, max_val)
             items_to_store[cur_key] = store_val
             self.deltas[cur_key] -= store_val
 
+        self.cur_t += 1
+        if self.cur_t == self.max_t:
+            self.reset()
         return items_to_store
 
 

@@ -28,10 +28,15 @@ class WorkloadProperties:
         return cur_prob
 
 
-def scale_a_weights(as_g: np.ndarray, total_space: int):
+def scale_a_weights(as_g: np.ndarray, total_space: int, min_amt:int=0):
+    baseline_sizes = np.zeros(as_g.shape, dtype=np.int_)
+    if min_amt > 0:
+        baseline_sizes = min_amt
+        total_space -= np.sum(baseline_sizes)
     a_scaled = as_g * total_space / np.sum(as_g)
+    total_sizes = (baseline_sizes + np.diff(np.round(np.insert(np.cumsum(a_scaled), 0, 0)))).astype(int)
     # round while preserving sum
-    return np.diff(np.round(np.insert(np.cumsum(a_scaled), 0, 0))).astype(int)
+    return total_sizes
     # return np.round(a_scaled)
 
 
@@ -63,5 +68,5 @@ def get_a_weights_poiss(wp: WorkloadProperties, df_total: pd.DataFrame):
                 df_a_weights = df_a_weights.merge(dfg, on=cur_dim_names)
                 df_a_weights["_sum"] += cur_prob / (df_a_weights["_tsum"] ** 2)
                 del df_a_weights["_tsum"]
-    df_a_weights["_a"] = (df_a_weights["_sum"] * df_a_weights["total"] ** 2) ** (1 / 3)
+    df_a_weights["_a"] = (df_a_weights["_sum"] * df_a_weights["total"] ** 2)
     return df_a_weights.set_index(wp.dim_names)["_a"]

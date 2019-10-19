@@ -13,24 +13,80 @@ import bounter
 from libc.math cimport pow, ceil, floor, log
 
 cdef class BoardSketch:
-    def name(self) -> str:
+    cpdef str name(self):
         raise NotImplemented
 
-    def estimate(self, x, bint rank = False) -> float:
+    cpdef double estimate(self, x, bint rank = False):
         raise NotImplemented
 
+
+cdef int binary_search(list arr, double x, int l, int r):
+    cdef int mid
+    cdef double midval
+    while l <= r:
+        if r <= l + 1:
+            return l
+        mid = l + (r - l)//2
+        midval = arr[mid]
+        if midval == x:
+            return mid
+        elif midval < x:
+            l = mid
+        else:
+            r = mid
+    return -1
+
+
+cdef class CDFSketch(BoardSketch):
+    cpdef list vals
+    cpdef list weights
+    def __init__(self, dict val_dict):
+        cdef int n = len(val_dict)
+        # self.vals = np.array(list(val_dict.keys()))
+        # self.vals.sort()
+        # self.weights = np.zeros(n, dtype=np.float_)
+        self.vals = sorted(list(val_dict.keys()))
+        self.weights = [0.0]*n
+        cdef int i
+        cdef double cur_weight
+        for i in range(n):
+            cur_val = self.vals[i]
+            cur_weight = val_dict.get(cur_val, 0)
+            if i == 0:
+                self.weights[0] = cur_weight
+            else:
+                self.weights[i] = self.weights[i-1] + cur_weight
+    cpdef str name(self):
+        return "cdf"
+
+    cpdef double estimate(self, x, bint rank=False):
+        cdef int n = len(self.vals)
+        cdef int i
+        if n == 0:
+            return 0
+        if x < self.vals[0]:
+            return 0
+        if x >= self.vals[n-1]:
+            return self.weights[n-1]
+        i = binary_search(self.vals, x, 0, n-1)
+        # for i in range(n):
+        #     if self.vals[i] > x:
+        #         break
+        #     if i == n-1:
+        #         i = n
+        return self.weights[i]
 
 cdef class DictSketch(BoardSketch):
     cpdef dict vals
     def __init__(self, dict vals):
         self.vals = vals
 
-    def name(self) -> str:
+    cpdef str name(self):
         return "dict"
 
-    def estimate(self, x, bint rank=False) -> float:
+    cpdef double estimate(self, x, bint rank=False):
+        cdef double x_sum = 0
         if rank:
-            x_sum = 0
             for k,v in self.vals.items():
                 if k <= x:
                     x_sum += v
@@ -44,10 +100,10 @@ cdef class CMSSketch(BoardSketch):
     def __init__(self, cms_obj):
         self.cms_obj = cms_obj
 
-    def name(self) -> str:
+    cpdef str name(self):
         return "countmin"
 
-    def estimate(self, x, bint rank=False) -> float:
+    cpdef double estimate(self, x, bint rank=False):
         return self.cms_obj[str(x)]
 
 

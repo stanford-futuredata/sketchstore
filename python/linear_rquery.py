@@ -16,15 +16,18 @@ import linear_board
 def gen_workload(
         granularity: int,
         seed: int = 0,
-        num_queries: int = 100
+        num_queries: int = 100,
+        query_lens=None,
 ):
+    if query_lens is None:
+        query_lens = [
+            2**i for i in range(int(math.log2(granularity)))
+        ]
     workload = []
-    cur_query_len = 1
     r = np.random.RandomState(seed)
-    while cur_query_len < granularity:
+    for cur_query_len in query_lens:
         start_idxs = r.randint(0, granularity - cur_query_len, size=num_queries)
         workload.extend([(start_idx, start_idx + cur_query_len) for start_idx in start_idxs])
-        cur_query_len *= 2
     return workload
 
 
@@ -60,6 +63,7 @@ def run_workload(
 
 
 def calc_results(
+        workload: List,
         data_name: str,
         granularity: int,
         sketch_name: str,
@@ -88,7 +92,6 @@ def calc_results(
     totals_df = pd.read_csv(
         linear_board.get_totals_name(data_name, granularity=granularity)
     )
-    workload = gen_workload(granularity, seed=0, num_queries=20)
     print("Estimating: {}".format(sketch_name))
 
     cur_board = pd.read_pickle(sketch_file)
@@ -107,93 +110,36 @@ def calc_results(
     return results_df
 
 
-experiment_runs = [
-    {
-        "data_name": "caida_10M",
-        "quantile": False,
-        "granularity": 2048,
-        "baseline_size": 64,
-        "sketch_sizes": {
-            "cooperative": 64,
-            "random_sample": 64,
-            "cms_min": 64,
-            "truncation": 64,
-            "pps": 64,
-            "dyadic_b2": 5,
-            "dyadic_b3": 9
-        }
-    }, # 0
-    {
-        "data_name": "uniform_1M",
-        "quantile": True,
-        "granularity": 2048,
-        "baseline_size": 64,
-        "sketch_sizes": {
-            "q_cooperative": 64,
-            "q_random_sample": 64,
-            "q_truncation": 64,
-            "q_pps": 64,
-            "kll": 64,
-            "q_dyadic_b2": 5,
-            "q_dyadic_b3": 9
-        }
-    },  # 1
-    {
-        "data_name": "zipf1p1_10M",
-        "quantile": False,
-        "granularity": 2048,
-        "baseline_size": 64,
-        "sketch_sizes": {
-            "cooperative": 64,
-            "random_sample": 64,
-            "cms_min": 64,
-            "truncation": 64,
-            "pps": 64,
-            "dyadic_b2": 5,
-            "dyadic_b3": 9,
-        }
-    },  # 2
-    {
-        "data_name": "power_2M",
-        "quantile": True,
-        "granularity": 2048,
-        "baseline_size": 64,
-        "sketch_sizes": {
-            "q_cooperative": 64,
-            "q_random_sample": 64,
-            "q_truncation": 64,
-            "q_pps": 64,
-            "kll": 64,
-            "q_dyadic_b2": 5,
-            "q_dyadic_b3": 9
-        }
-    },  # 3
-
-]
-
+from linear_board import space_experiment
 
 def main():
-    experiment_id = 3
-    cur_experiment = experiment_runs[experiment_id]
+    experiment_id = 7
+    cur_experiment = space_experiment[experiment_id]
     data_name = cur_experiment["data_name"]
     granularity = cur_experiment["granularity"]
-    baseline_size = cur_experiment["baseline_size"]
-    sketch_sizes = cur_experiment["sketch_sizes"]
+    baseline_sizes = cur_experiment["baseline_sizes"]
+    cur_sketches = cur_experiment["sketches"]
     quantile = cur_experiment["quantile"]
-    cur_sketches = [
-        # "q_cooperative", "q_random_sample", "kll", "q_truncation", "q_pps", "q_dyadic_b2",
-        "q_pps",
-        # "cooperative", "random_sample", "cms_min", "truncation", "pps", "dyadic_b2"
-    ]
-    for cur_sketch in cur_sketches:
-        results_df = calc_results(
-            data_name=data_name,
-            granularity=granularity,
-            sketch_name=cur_sketch,
-            sketch_size=sketch_sizes[cur_sketch],
-            baseline_size=baseline_size,
-            quantile=quantile,
-        )
+    query_lens = cur_experiment.get("query_lens", None)
+    num_queries = cur_experiment.get("num_queries", 100)
+    workload = gen_workload(
+        granularity,
+        seed=0,
+        num_queries=num_queries,
+        query_lens=query_lens,
+    )
+    for cur_size in baseline_sizes:
+        print("Cur Size: {}".format(cur_size))
+        for cur_sketch in cur_sketches:
+            results_df = calc_results(
+                workload=workload,
+                data_name=data_name,
+                granularity=granularity,
+                sketch_name=cur_sketch,
+                sketch_size=cur_size,
+                baseline_size=cur_size,
+                quantile=quantile,
+            )
 
 
 if __name__ == "__main__":

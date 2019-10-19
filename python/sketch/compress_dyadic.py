@@ -19,7 +19,7 @@ class DyadicFrequencyCompressor:
         self.truncator = TruncationCompressor()
         self.current_idx = 0
 
-    def compress(self, item_dict: Dict[Any, float], size: int) -> List[Dict[Any, float]]:
+    def compress(self, item_dict: Dict[Any, float], size: float) -> List[Dict[Any, float]]:
         output_counts = []
         for level_idx in range(self.max_height+1):
             cur_level_count = self.count_hierarchy[level_idx]

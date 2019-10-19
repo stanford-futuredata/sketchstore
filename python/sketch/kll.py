@@ -71,7 +71,7 @@ class  KLL:
         result_dict = dict()
         for (h, items) in enumerate(self.compactors):
             for item in items:
-                result_dict[item] = result_dict.get(item, 0) + 2**h
+                result_dict[item] = result_dict.get(item, 0.0) + 2.0**h
         return result_dict
 
     def cdf(self):

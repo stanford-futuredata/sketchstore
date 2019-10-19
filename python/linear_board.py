@@ -30,6 +30,15 @@ def get_tracked(data_name) -> np.ndarray:
     elif data_name == "zipf1p1_10M":
         x_df = pd.read_csv("notebooks/zipf10M-xtrack.csv")
         x_to_track = x_df["x_track"].values[:200]
+    elif data_name == "msft_records_3M":
+        x_df = pd.read_csv("/Users/edwardgan/Documents/Projects/datasets/msft/mb-3M-records-track.csv")
+        x_to_track = x_df["x_track"].values
+    elif data_name == "msft_network_3M":
+        x_df = pd.read_csv("/Users/edwardgan/Documents/Projects/datasets/msft/mb-3M-network-track.csv")
+        x_to_track = x_df["x_track"].values
+    elif data_name == "msft_os_3M":
+        x_df = pd.read_csv("/Users/edwardgan/Documents/Projects/datasets/msft/mb-3M-os-track.csv")
+        x_to_track = x_df["x_track"].values
     else:
         raise Exception("Invalid Dataset: {}".format(data_name))
     return np.sort(x_to_track)
@@ -53,6 +62,21 @@ def get_dataset(data_name) -> np.ndarray:
     elif data_name == "power_2M":
         df_in = pd.read_csv("/Users/edwardgan/Documents/Projects/datasets/household/power.csv")
         x_stream = df_in["Global_active_power"].values
+    elif data_name == "msft_records_3M":
+        df_in = pd.read_csv(
+            "/Users/edwardgan/Documents/Projects/datasets/msft/mb-3M-cube.csv"
+        )
+        x_stream = df_in["records_received_count"].values
+    elif data_name == "msft_network_3M":
+        df_in = pd.read_csv(
+            "/Users/edwardgan/Documents/Projects/datasets/msft/mb-3M-cube.csv"
+        )
+        x_stream = df_in["DeviceInfo_NetworkProvider"].values
+    elif data_name == "msft_os_3M":
+        df_in = pd.read_csv(
+            "/Users/edwardgan/Documents/Projects/datasets/msft/mb-3M-cube.csv"
+        )
+        x_stream = df_in["DeviceInfo_OsBuild"].values
     else:
         raise Exception("Invalid Dataset: {}".format(data_name))
     return x_stream
@@ -78,6 +102,12 @@ def get_sketch_gen(sketch_name: str, x_to_track: Sequence = None) -> board_sketc
         sketch_gen = board_sketch.ItemDictCompressorGen(
             name=sketch_name,
             compressor=cf.IncrementalRangeCompressor()
+        )
+    elif sketch_name.startswith("cooperative"):
+        base = get_dyadic_base(sketch_name)
+        sketch_gen = board_sketch.ItemDictCompressorGen(
+            name=sketch_name,
+            compressor=cf.IncrementalRangeCompressor(max_t=base)
         )
     elif sketch_name == "random_sample":
         sketch_gen = board_sketch.ItemDictCompressorGen(
@@ -105,7 +135,7 @@ def get_sketch_gen(sketch_name: str, x_to_track: Sequence = None) -> board_sketc
     elif sketch_name == "q_top_values":
         sketch_gen = board_sketch.SeqDictCompressorGen(
             name=sketch_name,
-            compressor=cq.RankTracker(x_tracked=x_to_track)
+            compressor=cq.RankTracker(x_tracked=np.unique(x_to_track))
         )
     elif sketch_name == "q_cooperative":
         sketch_gen = board_sketch.SeqDictCompressorGen(
@@ -177,18 +207,19 @@ def run_test(data_name, cur_granularity, sketch_size, sketch_name):
     x_to_track = get_tracked(data_name)
     segments = np.array_split(x_stream, cur_granularity)
     sketch_gen = get_sketch_gen(sketch_name, x_to_track=x_to_track)
+    size_arg = sketch_size
     if "dyadic" in sketch_name:
         base = get_dyadic_base(sketch_name)
-        dyadic_height, sketch_size = get_dyadic_adjusted_size(
+        dyadic_height, size_arg = get_dyadic_adjusted_size(
             size=sketch_size, base=base, max_segments=len(segments))
-        print("Dyadic Base: {}, Height: {}, Size:{}".format(base, dyadic_height, sketch_size))
+        print("Dyadic Base: {}, Height: {}, Size:{}".format(base, dyadic_height, size_arg))
     board_constructor = board_gen.BoardGen(sketch_gen)
 
     segment_times = np.cumsum([len(cur_seg) for cur_seg in segments])
     df = board_constructor.generate(
         segments=segments,
         tags=[{
-            "t": t, "size": sketch_size
+            "t": t, "size": size_arg
         } for t in segment_times],
     )
     df["dataset"] = data_name
@@ -204,37 +235,154 @@ def run_test(data_name, cur_granularity, sketch_size, sketch_name):
     write_totals(data_name, granularity=cur_granularity, segments=segments)
     board_constructor.serialize(df, output_file_name)
 
+space_experiment = [
+    {
+        "data_name": "zipf1p1_10M",
+        "quantile": False,
+        "granularity": 2048,
+        # "baseline_sizes": [4, 8, 16, 32, 64, 128, 256, 512],
+        "baseline_sizes": [64],
+        "sketches": [
+            "top_values",
+            "cooperative",
+            "random_sample",
+            "cms_min",
+            "truncation",
+            "pps",
+            "dyadic_b2",
+            # "dyadic_b4",
+            # "dyadic_b10"
+        ]
+    }, # 0
+    {
+        "data_name": "caida_10M",
+        "quantile": False,
+        "granularity": 2048,
+        "baseline_sizes": [4, 8, 16, 32, 64, 128, 256, 512],
+        # "baseline_sizes": [64],
+        "sketches": [
+            "top_values",
+            "cooperative",
+            "random_sample",
+            "cms_min",
+            "truncation",
+            "pps",
+            # "dyadic_b2",
+            # "dyadic_b4",
+            # "dyadic_b10",
+        ]
+    },  # 1
+    {
+        "data_name": "uniform_1M",
+        "quantile": True,
+        "granularity": 2048,
+        # "baseline_sizes": [4, 8, 16, 32, 64, 128, 256, 512],
+        "baseline_sizes": [64],
+        "sketches": {
+            "q_cooperative",
+            "q_random_sample",
+            "q_truncation",
+            "q_pps",
+            "kll",
+            "q_dyadic_b2",
+            "q_dyadic_b3",
+        }
+    },  # 2
+    {
+        "data_name": "power_2M",
+        "quantile": True,
+        "granularity": 2048,
+        "baseline_sizes": [64],
+        "sketches": {
+            "q_top_values",
+            "q_cooperative",
+            "q_random_sample",
+            "q_truncation",
+            "q_pps",
+            "kll",
+            "q_dyadic_b2",
+        }
+    },  # 3
+    {
+        "data_name": "caida_10M",
+        "quantile": False,
+        "granularity": 2048,
+        "baseline_sizes": [64],
+        "sketches": [
+            "cooperative_b8",
+            "cooperative_b32",
+            "cooperative_b128",
+            "cooperative_b512",
+            "cooperative_b2048"
+        ],
+        "query_lens": [64],
+        "num_queries": 100,
+    },  # 4: varying lookback range
+    {
+        "data_name": "msft_records_3M",
+        "quantile": True,
+        "granularity": 2048,
+        "baseline_sizes": [64],
+        "sketches": {
+            "q_top_values",
+            "q_cooperative",
+            "q_random_sample",
+            "q_truncation",
+            "q_pps",
+            "kll",
+            "q_dyadic_b2",
+        }
+    },  # 5
+    {
+        "data_name": "msft_network_3M",
+        "quantile": False,
+        "granularity": 2048,
+        "baseline_sizes": [64],
+        "sketches": {
+            "top_values",
+            "cooperative",
+            "random_sample",
+            "cms_min",
+            "truncation",
+            "pps",
+            "dyadic_b2",
+        }
+    },  # 6
+    {
+        "data_name": "msft_os_3M",
+        "quantile": False,
+        "granularity": 2048,
+        "baseline_sizes": [64],
+        "sketches": [
+            "top_values",
+            "cooperative",
+            "random_sample",
+            "cms_min",
+            "truncation",
+            "pps",
+            "dyadic_b2",
+        ]
+    },  # 7
+]
 
 def main():
-    sketch_names = [
-        # "q_top_values",
-        # "q_random_sample",
-        # "q_truncation",
-        "q_pps",
-        # "q_dyadic_b2",
-        # "q_cooperative",
-        # "kll"
-    ]
-    data_name = "power_2M"
-    # sketch_names = [
-    #     "top_values",
-    #     "cooperative",
-    #     "random_sample",
-    #     "truncation",
-    #     "cms_min",
-    #     "pps",
-    #     "dyadic_b2"
-    # ]
-    # data_name = "zipf1p1_10M"
-    cur_granularity = 2048
-    sketch_size = 64
-    for sketch_name in sketch_names:
-        run_test(
-            data_name=data_name,
-            cur_granularity=cur_granularity,
-            sketch_size=sketch_size,
-            sketch_name=sketch_name
-        )
+    experiment_id = 7
+    cur_experiment = space_experiment[experiment_id]
+    data_name = cur_experiment["data_name"]
+    cur_granularity = cur_experiment["granularity"]
+    sketch_sizes = cur_experiment["baseline_sizes"]
+    sketch_names = cur_experiment["sketches"]
+    quantile = cur_experiment["quantile"]
+
+    for sketch_size in sketch_sizes:
+        print("Sketch Size: {}".format(sketch_size))
+        for sketch_name in sketch_names:
+            run_test(
+                data_name=data_name,
+                cur_granularity=cur_granularity,
+                sketch_size=sketch_size,
+                sketch_name=sketch_name
+            )
 
 
 if __name__ == "__main__":

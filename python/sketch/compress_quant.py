@@ -214,6 +214,6 @@ class CoopCompressorFinite(SeqDictCompressor):
             # print("seg: {}-{}".format(seg_start, seg_end))
             # print("saved: {}".format(cur_to_save))
             self.stored_weight[cur_to_save] = self.stored_weight.get(cur_to_save, 0) + cur_seg_weight
-            to_save[cur_to_save] = cur_seg_weight
+            to_save[cur_to_save] = to_save.get(cur_to_save, 0) + cur_seg_weight
         return to_save
 

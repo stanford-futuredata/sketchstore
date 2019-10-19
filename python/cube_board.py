@@ -15,7 +15,7 @@ import testdata.bench_gen
 import linear_board
 
 import storyboard.size_optimizer
-import storyboard.bias_optimizer
+import storyboard.bias_solver as bopt
 
 
 def get_file_name(
@@ -58,6 +58,41 @@ def get_tracked(data_name) -> np.ndarray:
             200, [], f_skew=1.1, f_card=10000, seed=17
         )
         return df["f"].values
+    elif data_name == "bsynthf@4":
+        df = pd.read_csv(
+            "/Users/edwardgan/Documents/Projects/datasets/sketchstore_synth/bcube4_10M_f_track.csv"
+        )
+        return df["x_track"].values
+        # df, _ = testdata.bench_gen.gen_data(
+        #     200, [], f_skew=1.1, f_card=50000, seed=17
+        # )
+        # return df["f"].values
+    elif data_name == "bsynthq@4":
+        df = pd.read_csv(
+            "/Users/edwardgan/Documents/Projects/datasets/sketchstore_synth/bcube4_10M_q_track.csv"
+        )
+        return df["x_track"].values
+        #
+        # df, _ = testdata.bench_gen.gen_data(
+        #     200, [], f_skew=1.1, f_card=50000, seed=17
+        # )
+        # return np.sort(df["q"].values)
+    elif data_name == "insta":
+        df = pd.read_csv(
+            "/Users/edwardgan/Documents/Projects/datasets/instacart/tracked.csv"
+        )
+        return df["f"].values
+    elif data_name == "msft_os_3M":
+        df = pd.read_csv(
+            "/Users/edwardgan/Documents/Projects/datasets/msft/mb-3M-os-track.csv"
+        )
+        return df["x_track"].values
+    elif data_name == "msft_network_3M":
+        df = pd.read_csv("/Users/edwardgan/Documents/Projects/datasets/msft/mb-3M-network-track.csv")
+        return df["x_track"].values
+    elif data_name == "msft_records_3M":
+        df = pd.read_csv("/Users/edwardgan/Documents/Projects/datasets/msft/mb-3M-records-track.csv")
+        return np.sort(df["x_track"].values)
     else:
         raise Exception("Invalid dataset name")
 
@@ -77,6 +112,29 @@ def get_dim_names(data_name) -> Tuple[Sequence[str], str]:
         return ["d{}".format(i) for i in range(2)], "f"
     elif data_name == "synthf@4":
         return ["d{}".format(i) for i in range(4)], "f"
+    elif data_name == "bsynthf@4":
+        return ["d{}".format(i) for i in range(4)], "f"
+    elif data_name == "bsynthq@4":
+        return ["d{}".format(i) for i in range(4)], "q"
+    elif data_name == "insta":
+        # 32 million rows
+        # 10080 combinations
+        return ["reordered", "order_dow", "order_hour_of_day", "add_to_cart_order"], "product_id"
+    elif data_name.startswith("msft_os"):
+        # 4000 combinations
+        dims = ["TenantId", "AppInfo_Version", "UserInfo_TimeZone", "DeviceInfo_NetworkType"]
+        metric = "DeviceInfo_OsBuild"
+        return dims, metric
+    elif data_name.startswith("msft_network"):
+        dims = ["TenantId", "AppInfo_Version", "UserInfo_TimeZone", "DeviceInfo_NetworkType"]
+        metric = "DeviceInfo_NetworkProvider"
+        return dims, metric
+    elif data_name.startswith("msft_records"):
+        dims = ["TenantId", "AppInfo_Version", "UserInfo_TimeZone", "DeviceInfo_NetworkType"]
+        metric = "records_received_count"
+        return dims, metric
+    else:
+        raise Exception("Bad Data Name: {}".format(data_name))
 
 
 # Dimension values must be consecutive integers
@@ -94,8 +152,20 @@ def get_dataset(data_name) -> pd.DataFrame:
     elif data_name == "synthf@4":
         df = pd.read_feather("/Users/edwardgan/Documents/Projects/datasets/sketchstore_synth/cube4_10M.feather")
         return df
+    elif data_name == "bsynthf@4":
+        df = pd.read_feather("/Users/edwardgan/Documents/Projects/datasets/sketchstore_synth/bcube4_10M.feather")
+        return df
+    elif data_name == "bsynthq@4":
+        df = pd.read_feather("/Users/edwardgan/Documents/Projects/datasets/sketchstore_synth/bcube4_10M.feather")
+        return df
+    elif data_name == "insta":
+        df = pd.read_feather("/Users/edwardgan/Documents/Projects/datasets/instacart/p_df.feather")
+        return df
+    elif (data_name.startswith("msft") and data_name.endswith("3M")):
+        df = pd.read_csv("/Users/edwardgan/Documents/Projects/datasets/msft/mb-3M-cube.csv")
+        return df
     else:
-        raise Exception("Invalid dataset name")
+        raise Exception("Invalid dataset name: {}".format(data_name))
 
 
 def get_sketch_gen(sketch_name: str, x_to_track: np.ndarray = None) -> sketch_gen.SketchGen:
@@ -122,6 +192,16 @@ def apply_split_strategy(
             wp=wp,
             df_total=df_total
         )
+        df_sizes = df_sizes**(1.0/3)
+        return df_sizes
+    elif split_strategy.startswith("sweighted"):
+        p = get_p_from_split_strat(split_strategy)
+        wp = get_workload_properties(df_raw, dim_names, p)
+        df_sizes = storyboard.size_optimizer.get_a_weights_poiss(
+            wp=wp,
+            df_total=df_total
+        )
+        df_sizes = df_sizes ** (1.0/2)
         return df_sizes
     elif split_strategy.startswith("uniform"):
         df_sizes = storyboard.size_optimizer.get_a_weights_uniform(dim_names, df_total=df_total)
@@ -175,19 +255,24 @@ def run_test(
         segments.append(df_seg[x_name].values)
         sketch_sizes.append(df_sizes.loc[df_key])
     sketch_sizes = np.array(sketch_sizes)
-    sketch_sizes = storyboard.size_optimizer.scale_a_weights(sketch_sizes, board_size)
+    sketch_sizes = storyboard.size_optimizer.scale_a_weights(
+        sketch_sizes,
+        board_size,
+        min_amt=1,
+    )
 
     sketch_biases = np.zeros(shape=len(segments))
     if bias_opt:
         x_counts = [np.unique(seg_values, return_counts=True)[1] for seg_values in segments]
-        sketch_biases = storyboard.bias_optimizer.opt_sequence(
+        sketch_biases = bopt.opt_sequence(
             x_counts=x_counts,
             sizes=sketch_sizes,
-            n_iter=2000,
         )
 
-    print(sketch_sizes)
-    print(sketch_biases)
+    bias_top = np.sort(sketch_biases)[::-1]
+    print(sketch_sizes[:10])
+    print(sketch_biases[:10])
+    print("Top Biases: {}".format(bias_top[:10]))
 
     tags = []
     for i in range(len(segments)):
@@ -221,26 +306,156 @@ def run_test(
     write_totals(df_raw, dim_names, val_name=x_name, data_name=data_name)
     board_constructor.serialize(df_board, output_file_name)
 
+experiment_runs = [
+    {
+        "data_name": "bsynthq@4",
+        "board_size": 50000,
+        "quantile": True,
+        "workload_p": .2,
+        "sketch_types": [
+            # ("q_top_values", "uniform", False),
+            ("q_pps", "weighted@20", False),
+            ("q_random_sample", "uniform", False),
+            ("q_random_sample", "sweighted@20", False),
+            ("q_random_sample", "prop", False),
+            ("q_truncation", "uniform", False),
+            ("kll", "uniform", False),
+
+            ("q_pps", "uniform", False),
+            ("q_random_sample", "weighted@20", False),
+        ]
+    },  # 0
+    {
+        "data_name": "bsynthf@4",
+        "board_size": 50000,
+        "quantile": False,
+        "workload_p": .2,
+        "sketch_types": [
+            ("top_values", "uniform", False),
+            ("pps", "weighted@20", True),
+            ("random_sample", "uniform", False),
+            ("random_sample", "sweighted@20", False),
+            ("random_sample", "prop", False),
+            ("truncation", "uniform", False),
+            ("cms_min", "uniform", False),
+
+            ("pps", "uniform", True),
+            ("pps", "weighted@20", False),
+            ("pps", "weighted@5", True),
+            ("random_sample", "weighted@20", True),
+        ]
+    },  # 1
+    {
+        "data_name": "synthf@4",
+        "board_size": 2048,
+        "quantile": False,
+        "workload_p": .2,
+        "sketch_types": [
+            # ("top_values", "uniform", False),
+            ("pps", "weighted@20", True),
+            # ("random_sample", "uniform", False),
+            # ("random_sample", "prop", False),
+            # ("truncation", "uniform", False),
+            # ("cms_min", "uniform", False),
+
+            ("pps", "uniform", True),
+            # ("pps", "weighted@20", False),
+            # ("random_sample", "weighted@20", True),
+        ]
+    },  # 2
+    {
+        "data_name": "insta",
+        "board_size": 300_000,
+        "quantile": False,
+        "workload_p": .2,
+        "sketch_types": [
+            # ("top_values", "uniform", False),
+            ("pps", "weighted@20", True),
+            # ("random_sample", "uniform", False),
+            # ("random_sample", "sweighted@20", False),
+            # ("random_sample", "prop", False),
+            # ("truncation", "uniform", False),
+            # ("cms_min", "uniform", False),
+
+            ("pps", "uniform", True),
+            ("pps", "weighted@20", False),
+            ("pps", "weighted@5", True),
+            ("random_sample", "weighted@20", True),
+        ]
+    },  # 3
+    {
+        "data_name": "msft_os_3M",
+        "board_size": 100_000,
+        "quantile": False,
+        "workload_p": .2,
+        "sketch_types": [
+            ("top_values", "uniform", False),
+            ("pps", "weighted@20", True),
+            ("random_sample", "uniform", False),
+            ("random_sample", "sweighted@20", False),
+            ("random_sample", "prop", False),
+            ("truncation", "uniform", False),
+            ("cms_min", "uniform", False),
+
+            ("pps", "uniform", True),
+            ("pps", "weighted@20", False),
+            ("pps", "weighted@5", True),
+            ("random_sample", "weighted@20", True),
+        ]
+    },  # 4
+    {
+        "data_name": "msft_records_3M",
+        "board_size": 50000,
+        "quantile": True,
+        "workload_p": .2,
+        "sketch_types": [
+            ("q_top_values", "uniform", False),
+            ("q_pps", "weighted@20", False),
+            ("q_random_sample", "uniform", False),
+            ("q_random_sample", "sweighted@20", False),
+            ("q_random_sample", "prop", False),
+            ("q_truncation", "uniform", False),
+            ("kll", "uniform", False),
+
+            ("q_pps", "uniform", False),
+            ("q_random_sample", "weighted@20", False),
+        ]
+    },  # 5
+    {
+        "data_name": "msft_network_3M",
+        "board_size": 100_000,
+        "quantile": False,
+        "workload_p": .2,
+        "sketch_types": [
+            ("top_values", "uniform", False),
+            ("pps", "weighted@20", True),
+            ("random_sample", "uniform", False),
+            ("random_sample", "sweighted@20", False),
+            ("random_sample", "prop", False),
+            ("truncation", "uniform", False),
+            ("cms_min", "uniform", False),
+
+            # ("pps", "uniform", True),
+            # ("pps", "weighted@20", False),
+            # ("pps", "weighted@5", True),
+            # ("random_sample", "weighted@20", True),
+        ]
+    },  # 6
+
+]
 
 def main():
-    sketch_types = [
-        ("top_values", "uniform", False),
-        ("pps", "weighted@20", True),
-        ("random_sample", "uniform", False),
-        ("random_sample", "prop", False),
-        ("truncation", "uniform", False),
-        ("cms_min", "uniform", False),
-
-        ("pps", "uniform", True),
-        ("pps", "weighted@20", False),
-        ("random_sample", "weighted@20", True),
-    ]
+    experiment_num = 6
+    cur_experiment = experiment_runs[experiment_num]
+    sketch_types = cur_experiment["sketch_types"]
+    board_size = cur_experiment["board_size"]
+    data_name = cur_experiment["data_name"]
 
     for cur_sketch, split_strategy, bias_opt in sketch_types:
         run_test(
-            data_name="synthf@4",
+            data_name=data_name,
             split_strategy=split_strategy,
-            board_size=2048,
+            board_size=board_size,
             sketch_name=cur_sketch,
             bias_opt=bias_opt,
         )

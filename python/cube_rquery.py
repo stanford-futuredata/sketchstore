@@ -160,43 +160,15 @@ def calc_results(
     return results_df
 
 
-experiment_runs = [
-    {
-        "data_name": "synthf@2",
-        "board_size": 2048,
-        "quantile": False,
-        "workload_p": .1,
-    }, # 0
-    {
-        "data_name": "synthf@4",
-        "board_size": 2048,
-        "quantile": False,
-        "workload_p": .2,
-    },  # 1
-]
-
-
 def main():
-    experiment_id = 1
-    cur_experiment = experiment_runs[experiment_id]
+    experiment_id = 6
+    cur_experiment = cube_board.experiment_runs[experiment_id]
 
     data_name = cur_experiment["data_name"]
     board_size = cur_experiment["board_size"]
     quantile = cur_experiment["quantile"]
     workload_p = cur_experiment["workload_p"]
-
-    sketch_types = [
-        # ("top_values", "uniform", False),
-        ("pps", "weighted@20", True),
-        ("random_sample", "uniform", False),
-        ("random_sample", "prop", False),
-        ("truncation", "uniform", False),
-        ("cms_min", "uniform", False),
-
-        ("pps", "uniform", True),
-        ("pps", "weighted@20", False),
-        ("random_sample", "weighted@20", True),
-    ]
+    sketch_types = cur_experiment["sketch_types"]
 
     for cur_sketch, split_strategy, bias_opt in sketch_types:
         results_df = calc_results(
@@ -207,7 +179,7 @@ def main():
             bias_opt=bias_opt,
             quantile=quantile,
             workload_p=workload_p,
-            num_queries=2000,
+            num_queries=10000,
         )
 
 
