@@ -75,14 +75,17 @@ def get_tracked(data_name) -> np.ndarray:
         fname = os.path.join(DATA_DIR, "msft/mb-10M-records-track.csv")
         x_df = pd.read_csv(fname)
         x_to_track = x_df["x_track"].values
+        return x_to_track
     elif data_name == "msft_network_10M":
         fname = os.path.join(DATA_DIR, "msft/mb-10M-network-track.csv")
         x_df = pd.read_csv(fname)
         x_to_track = x_df["x_track"].values
+        return x_to_track
     elif data_name == "msft_os_10M":
         fname = os.path.join(DATA_DIR, "msft/mb-10M-os-track.csv")
         x_df = pd.read_csv(fname)
         x_to_track = x_df["x_track"].values
+        return x_to_track
     else:
         raise Exception("Invalid dataset name")
 
@@ -363,22 +366,22 @@ experiment_runs = [
         "quantile": False,
         "workload_p": .2,
         "sketch_types": [
-            # ("top_values", "uniform", False),
+            ("top_values", "uniform", False),
             ("pps", "weighted@20", True),
-            # ("random_sample", "uniform", False),
-            # ("random_sample", "sweighted@20", False),
-            # ("random_sample", "prop", False),
-            # ("truncation", "uniform", False),
-            # ("cms_min", "uniform", False),
+            ("random_sample", "uniform", False),
+            ("random_sample", "sweighted@20", False),
+            ("random_sample", "prop", False),
+            ("truncation", "uniform", False),
+            ("cms_min", "uniform", False),
 
-            ("pps", "uniform", True),
-            ("pps", "weighted@20", False),
-            ("pps", "weighted@5", True),
-            ("random_sample", "weighted@20", True),
+            # ("pps", "uniform", True),
+            # ("pps", "weighted@20", False),
+            # ("pps", "weighted@5", True),
+            # ("random_sample", "weighted@20", True),
         ]
     },  # 3
     {
-        "data_name": "msft_os_3M",
+        "data_name": "msft_os_10M",
         "board_size": 100_000,
         "quantile": False,
         "workload_p": .2,
@@ -391,14 +394,14 @@ experiment_runs = [
             ("truncation", "uniform", False),
             ("cms_min", "uniform", False),
 
-            ("pps", "uniform", True),
-            ("pps", "weighted@20", False),
-            ("pps", "weighted@5", True),
-            ("random_sample", "weighted@20", True),
+            # ("pps", "uniform", True),
+            # ("pps", "weighted@20", False),
+            # ("pps", "weighted@5", True),
+            # ("random_sample", "weighted@20", True),
         ]
     },  # 4
     {
-        "data_name": "msft_records_3M",
+        "data_name": "msft_records_10M",
         "board_size": 50000,
         "quantile": True,
         "workload_p": .2,
@@ -416,7 +419,7 @@ experiment_runs = [
         ]
     },  # 5
     {
-        "data_name": "msft_network_3M",
+        "data_name": "msft_network_10M",
         "board_size": 100_000,
         "quantile": False,
         "workload_p": .2,
@@ -439,7 +442,7 @@ experiment_runs = [
 ]
 
 def main():
-    experiment_num = 1
+    experiment_num = 6
     cur_experiment = experiment_runs[experiment_num]
     sketch_types = cur_experiment["sketch_types"]
     board_size = cur_experiment["board_size"]
