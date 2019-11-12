@@ -13,6 +13,7 @@ import sketch.sketch_frequent as f
 import sketch.sketch_gen as board_sketch
 import storyboard.board_gen as board_gen
 
+DATA_DIR = "/mnt/disks/data/datasets/"
 
 def get_tracked(data_name) -> np.ndarray:
     x_to_track = []
@@ -20,24 +21,30 @@ def get_tracked(data_name) -> np.ndarray:
         x_df = pd.read_csv("notebooks/caida1M-xtrack.csv")
         x_to_track = x_df["x_track"].values
     elif data_name == "caida_10M":
-        x_df = pd.read_csv("/Users/edwardgan/Documents/Projects/datasets/caida-pcap/caida10M-ipdst-xtrack.csv")
+        fname = os.path.join(DATA_DIR, "caida/caida10M-ipdst-xtrack.csv")
+        x_df = pd.read_csv(fname)
         x_to_track = x_df["x_track"].values[:200]
     elif data_name == "uniform_1M":
         x_to_track = np.linspace(0, 1, 101)
     elif data_name == "power_2M":
-        x_df = pd.read_csv("/Users/edwardgan/Documents/Projects/datasets/household/power_tracked.csv")
+        fname = os.path.join(DATA_DIR, "power/power_tracked.csv")
+        x_df = pd.read_csv(fname)
         x_to_track = x_df["x_track"].values
     elif data_name == "zipf1p1_10M":
-        x_df = pd.read_csv("notebooks/zipf10M-xtrack.csv")
+        fname = os.path.join(DATA_DIR, "zipf/zipf10M-xtrack.csv")
+        x_df = pd.read_csv(fname)
         x_to_track = x_df["x_track"].values[:200]
-    elif data_name == "msft_records_3M":
-        x_df = pd.read_csv("/Users/edwardgan/Documents/Projects/datasets/msft/mb-3M-records-track.csv")
+    elif data_name == "msft_records_10M":
+        fname = os.path.join(DATA_DIR, "msft/mb-10M-records-track.csv")
+        x_df = pd.read_csv(fname)
         x_to_track = x_df["x_track"].values
-    elif data_name == "msft_network_3M":
-        x_df = pd.read_csv("/Users/edwardgan/Documents/Projects/datasets/msft/mb-3M-network-track.csv")
+    elif data_name == "msft_network_10M":
+        fname = os.path.join(DATA_DIR, "msft/mb-10M-network-track.csv")
+        x_df = pd.read_csv(fname)
         x_to_track = x_df["x_track"].values
-    elif data_name == "msft_os_3M":
-        x_df = pd.read_csv("/Users/edwardgan/Documents/Projects/datasets/msft/mb-3M-os-track.csv")
+    elif data_name == "msft_os_10M":
+        fname = os.path.join(DATA_DIR, "msft/mb-10M-os-track.csv")
+        x_df = pd.read_csv(fname)
         x_to_track = x_df["x_track"].values
     else:
         raise Exception("Invalid Dataset: {}".format(data_name))
@@ -51,31 +58,31 @@ def get_dataset(data_name) -> np.ndarray:
         df_in = pd.read_csv("notebooks/caida1M-dest-stream.csv")
         x_stream = df_in["Destination"].values
     elif data_name == "caida_10M":
-        df_in = pd.read_csv("/Users/edwardgan/Documents/Projects/datasets/caida-pcap/caida10M-ipdst.csv")
+        fname = os.path.join(DATA_DIR, "caida/caida10M-ipdst.csv")
+        df_in = pd.read_csv(fname)
         x_stream = df_in["ip.dst"].values
     elif data_name == "zipf1p1_10M":
-        df_in = pd.read_csv("notebooks/zipf10M.csv", nrows=10_000_000)
+        fname = os.path.join(DATA_DIR, "zipf/zipf10M.csv")
+        df_in = pd.read_csv(fname, nrows=10_000_000)
         x_stream = df_in["x"].values
     elif data_name == "uniform_1M":
         r = np.random.RandomState(0)
         x_stream = r.uniform(0, 1, size=1_000_000)
     elif data_name == "power_2M":
-        df_in = pd.read_csv("/Users/edwardgan/Documents/Projects/datasets/household/power.csv")
+        fname = os.path.join(DATA_DIR, "power/power.csv")
+        df_in = pd.read_csv(fname)
         x_stream = df_in["Global_active_power"].values
-    elif data_name == "msft_records_3M":
-        df_in = pd.read_csv(
-            "/Users/edwardgan/Documents/Projects/datasets/msft/mb-3M-cube.csv"
-        )
+    elif data_name == "msft_records_10M":
+        fname = os.path.join(DATA_DIR, "msft/mb-10M.csv")
+        df_in = pd.read_csv(fname)
         x_stream = df_in["records_received_count"].values
-    elif data_name == "msft_network_3M":
-        df_in = pd.read_csv(
-            "/Users/edwardgan/Documents/Projects/datasets/msft/mb-3M-cube.csv"
-        )
+    elif data_name == "msft_network_10M":
+        fname = os.path.join(DATA_DIR, "msft/mb-10M.csv")
+        df_in = pd.read_csv(fname)
         x_stream = df_in["DeviceInfo_NetworkProvider"].values
-    elif data_name == "msft_os_3M":
-        df_in = pd.read_csv(
-            "/Users/edwardgan/Documents/Projects/datasets/msft/mb-3M-cube.csv"
-        )
+    elif data_name == "msft_os_10M":
+        fname = os.path.join(DATA_DIR, "msft/mb-10M.csv")
+        df_in = pd.read_csv(fname)
         x_stream = df_in["DeviceInfo_OsBuild"].values
     else:
         raise Exception("Invalid Dataset: {}".format(data_name))
@@ -258,8 +265,8 @@ space_experiment = [
         "data_name": "caida_10M",
         "quantile": False,
         "granularity": 2048,
-        "baseline_sizes": [4, 8, 16, 32, 64, 128, 256, 512],
-        # "baseline_sizes": [64],
+        # "baseline_sizes": [4, 8, 16, 32, 64, 128, 256, 512],
+        "baseline_sizes": [64],
         "sketches": [
             "top_values",
             "cooperative",
@@ -267,7 +274,7 @@ space_experiment = [
             "cms_min",
             "truncation",
             "pps",
-            # "dyadic_b2",
+            "dyadic_b2",
             # "dyadic_b4",
             # "dyadic_b10",
         ]
@@ -319,7 +326,7 @@ space_experiment = [
         "num_queries": 100,
     },  # 4: varying lookback range
     {
-        "data_name": "msft_records_3M",
+        "data_name": "msft_records_10M",
         "quantile": True,
         "granularity": 2048,
         "baseline_sizes": [64],
@@ -334,7 +341,7 @@ space_experiment = [
         }
     },  # 5
     {
-        "data_name": "msft_network_3M",
+        "data_name": "msft_network_10M",
         "quantile": False,
         "granularity": 2048,
         "baseline_sizes": [64],
@@ -349,7 +356,7 @@ space_experiment = [
         }
     },  # 6
     {
-        "data_name": "msft_os_3M",
+        "data_name": "msft_os_10M",
         "quantile": False,
         "granularity": 2048,
         "baseline_sizes": [64],

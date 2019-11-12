@@ -17,6 +17,7 @@ import linear_board
 import storyboard.size_optimizer
 import storyboard.bias_solver as bopt
 
+DATA_DIR = "/mnt/disks/data/datasets/"
 
 def get_file_name(
         data_name: str, split_strategy: str,
@@ -59,40 +60,29 @@ def get_tracked(data_name) -> np.ndarray:
         )
         return df["f"].values
     elif data_name == "bsynthf@4":
-        df = pd.read_csv(
-            "/Users/edwardgan/Documents/Projects/datasets/sketchstore_synth/bcube4_10M_f_track.csv"
-        )
+        fname = os.path.join(DATA_DIR, "sketchstore_synth/bcube4_10M_f_track.csv")
+        df = pd.read_csv(fname)
         return df["x_track"].values
-        # df, _ = testdata.bench_gen.gen_data(
-        #     200, [], f_skew=1.1, f_card=50000, seed=17
-        # )
-        # return df["f"].values
     elif data_name == "bsynthq@4":
-        df = pd.read_csv(
-            "/Users/edwardgan/Documents/Projects/datasets/sketchstore_synth/bcube4_10M_q_track.csv"
-        )
+        fname = os.path.join(DATA_DIR, "sketchstore_synth/bcube4_10M_q_track.csv")
+        df = pd.read_csv(fname)
         return df["x_track"].values
-        #
-        # df, _ = testdata.bench_gen.gen_data(
-        #     200, [], f_skew=1.1, f_card=50000, seed=17
-        # )
-        # return np.sort(df["q"].values)
     elif data_name == "insta":
-        df = pd.read_csv(
-            "/Users/edwardgan/Documents/Projects/datasets/instacart/tracked.csv"
-        )
+        fname = os.path.join(DATA_DIR, "instacart/tracked.csv")
+        df = pd.read_csv(fname)
         return df["f"].values
-    elif data_name == "msft_os_3M":
-        df = pd.read_csv(
-            "/Users/edwardgan/Documents/Projects/datasets/msft/mb-3M-os-track.csv"
-        )
-        return df["x_track"].values
-    elif data_name == "msft_network_3M":
-        df = pd.read_csv("/Users/edwardgan/Documents/Projects/datasets/msft/mb-3M-network-track.csv")
-        return df["x_track"].values
-    elif data_name == "msft_records_3M":
-        df = pd.read_csv("/Users/edwardgan/Documents/Projects/datasets/msft/mb-3M-records-track.csv")
-        return np.sort(df["x_track"].values)
+    elif data_name == "msft_records_10M":
+        fname = os.path.join(DATA_DIR, "msft/mb-10M-records-track.csv")
+        x_df = pd.read_csv(fname)
+        x_to_track = x_df["x_track"].values
+    elif data_name == "msft_network_10M":
+        fname = os.path.join(DATA_DIR, "msft/mb-10M-network-track.csv")
+        x_df = pd.read_csv(fname)
+        x_to_track = x_df["x_track"].values
+    elif data_name == "msft_os_10M":
+        fname = os.path.join(DATA_DIR, "msft/mb-10M-os-track.csv")
+        x_df = pd.read_csv(fname)
+        x_to_track = x_df["x_track"].values
     else:
         raise Exception("Invalid dataset name")
 
@@ -153,16 +143,20 @@ def get_dataset(data_name) -> pd.DataFrame:
         df = pd.read_feather("/Users/edwardgan/Documents/Projects/datasets/sketchstore_synth/cube4_10M.feather")
         return df
     elif data_name == "bsynthf@4":
-        df = pd.read_feather("/Users/edwardgan/Documents/Projects/datasets/sketchstore_synth/bcube4_10M.feather")
+        fname = os.path.join(DATA_DIR, "sketchstore_synth/bcube4_10M.feather")
+        df = pd.read_feather(fname)
         return df
     elif data_name == "bsynthq@4":
-        df = pd.read_feather("/Users/edwardgan/Documents/Projects/datasets/sketchstore_synth/bcube4_10M.feather")
+        fname = os.path.join(DATA_DIR, "sketchstore_synth/bcube4_10M.feather")
+        df = pd.read_feather(fname)
         return df
     elif data_name == "insta":
-        df = pd.read_feather("/Users/edwardgan/Documents/Projects/datasets/instacart/p_df.feather")
+        fname = os.path.join(DATA_DIR, "instacart/p_df.feather")
+        df = pd.read_feather(fname)
         return df
-    elif (data_name.startswith("msft") and data_name.endswith("3M")):
-        df = pd.read_csv("/Users/edwardgan/Documents/Projects/datasets/msft/mb-3M-cube.csv")
+    elif (data_name.startswith("msft") and data_name.endswith("10M")):
+        fname = os.path.join(DATA_DIR, "msft/mb-10M.csv")
+        df = pd.read_csv(fname)
         return df
     else:
         raise Exception("Invalid dataset name: {}".format(data_name))
@@ -445,7 +439,7 @@ experiment_runs = [
 ]
 
 def main():
-    experiment_num = 6
+    experiment_num = 1
     cur_experiment = experiment_runs[experiment_num]
     sketch_types = cur_experiment["sketch_types"]
     board_size = cur_experiment["board_size"]
