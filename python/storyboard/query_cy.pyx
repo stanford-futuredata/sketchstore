@@ -163,6 +163,28 @@ cpdef list query_cube(
             tot_results[i] += cur_summary.estimate(x_to_track[i], rank=quantile)
     return list(tot_results)
 
+from sketch.misragries import MisraGries
+cpdef list query_linear_mg(
+        df,
+        int seg_start,
+        int seg_end,
+        np.ndarray x_to_track,
+        int acc_size,
+):
+    mask = (df["seg_idx"] >= seg_start) & (df["seg_idx"] < seg_end)
+    summaries = df["data"][mask]
+    acc = MisraGries(acc_size)
+    cdef double[:] tot_results = np.zeros(shape=len(x_to_track))
+    cdef DictSketch cur_summary
+    for cur_summary in summaries:
+        for k,v in cur_summary.vals.items():
+            acc.update(k,v)
+
+    cdef int i
+    cdef dict acc_dict = acc.get_dict()
+    for i in range(len(x_to_track)):
+        tot_results[i] += acc_dict.get(x_to_track[i], 0)
+    return list(tot_results)
 
 cpdef list query_linear(
         df,

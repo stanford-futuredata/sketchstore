@@ -39,6 +39,7 @@ def run_workload(
         totals_df: pd.DataFrame,
         sketch_name: str,
         quantile: bool,
+        accumulator_size: int = 0,
 ):
     results = []
     dyadic_base = -1
@@ -48,9 +49,18 @@ def run_workload(
         true_counts = board_query.query_linear(
             true_board, seg_start=start_idx, seg_end=end_idx, x_to_track=x_to_track,
             quantile=quantile, dyadic_base=-1)
-        est_counts = board_query.query_linear(
-            est_board, seg_start=start_idx, seg_end=end_idx, x_to_track=x_to_track,
-            quantile=quantile, dyadic_base=dyadic_base)
+        if accumulator_size == 0:
+            est_counts = board_query.query_linear(
+                est_board, seg_start=start_idx, seg_end=end_idx, x_to_track=x_to_track,
+                quantile=quantile, dyadic_base=dyadic_base)
+        else:
+            if quantile:
+                raise Exception("Invalid Quantile Accumulator")
+            else:
+                est_counts = board_query.query_linear_mg(
+                    est_board, seg_start=start_idx, seg_end=end_idx, x_to_track=x_to_track,
+                    acc_size=accumulator_size,
+                )
         true_tot = board_query.query_linear_tot(totals_df, start_idx, end_idx)
         cur_results = board_query.calc_errors(true_counts, est_counts)
         cur_results["start_idx"] = start_idx
@@ -70,6 +80,7 @@ def calc_results(
         sketch_size: int,
         baseline_size: int,
         quantile: bool,
+        accumulator_size: int = 0,
 ):
     if quantile:
         true_sketch= "q_top_values"
@@ -98,7 +109,7 @@ def calc_results(
     cur_results = run_workload(workload, x_to_track=x_to_track,
                                true_board=true_board, est_board=cur_board, totals_df=totals_df,
                                sketch_name=sketch_name,
-                               quantile=quantile)
+                               quantile=quantile, accumulator_size=accumulator_size)
 
     results_df = pd.DataFrame(cur_results)
     results_df["dataset"] = data_name
@@ -112,8 +123,8 @@ def calc_results(
 
 from linear_board import space_experiment
 
-def main():
-    experiment_id = 7
+
+def run_query_length_experiments(experiment_id):
     cur_experiment = space_experiment[experiment_id]
     data_name = cur_experiment["data_name"]
     granularity = cur_experiment["granularity"]
@@ -140,6 +151,40 @@ def main():
                 baseline_size=cur_size,
                 quantile=quantile,
             )
+
+
+def run_acc_experiments(experiment_id=0):
+    cur_experiment = space_experiment[experiment_id]
+    data_name = cur_experiment["data_name"]
+    granularity = cur_experiment["granularity"]
+    accumulator_sizes = cur_experiment["accumulator_sizes"]
+    cur_sketches = cur_experiment["sketches"]
+    quantile = cur_experiment["quantile"]
+    query_lens = cur_experiment.get("query_lens", None)
+    num_queries = cur_experiment.get("num_queries", 100)
+    workload = gen_workload(
+        granularity,
+        seed=0,
+        num_queries=num_queries,
+        query_lens=query_lens,
+    )
+    for cur_size in accumulator_sizes:
+        print("Accumulator Size: {}".format(cur_size))
+        for cur_sketch in cur_sketches:
+            results_df = calc_results(
+                workload=workload,
+                data_name=data_name,
+                granularity=granularity,
+                sketch_name=cur_sketch,
+                sketch_size=cur_size,
+                baseline_size=cur_size,
+                quantile=quantile,
+                accumulator_size=cur_size,
+            )
+
+
+def main():
+    run_query_length_experiments(experiment_id=7)
 
 
 if __name__ == "__main__":
