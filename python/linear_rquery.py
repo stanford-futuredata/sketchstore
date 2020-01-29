@@ -68,6 +68,7 @@ def run_workload(
         cur_results["query_len"] = end_idx - start_idx
         cur_results["sketch"] = sketch_name
         cur_results["total"] = true_tot
+        cur_results["acc_size"] = accumulator_size
         results.append(cur_results)
     return results
 
@@ -116,7 +117,12 @@ def calc_results(
     results_df["granularity"] = granularity
     results_df["quantile"] = quantile
     out_dir, _ = os.path.split(true_file)
-    out_file = os.path.join(out_dir, "{}_{}_errors.csv".format(sketch_name, sketch_size))
+    if accumulator_size == 0:
+        out_file = os.path.join(out_dir, "{}_{}_errors.csv".format(sketch_name, sketch_size))
+    else:
+        out_file = os.path.join(out_dir, "{}_{}_acc{}_errors.csv".format(
+            sketch_name, sketch_size, accumulator_size
+            ))
     results_df.to_csv(out_file, index=False)
     return results_df
 
@@ -157,7 +163,8 @@ def run_acc_experiments(experiment_id=0):
     cur_experiment = space_experiment[experiment_id]
     data_name = cur_experiment["data_name"]
     granularity = cur_experiment["granularity"]
-    accumulator_sizes = cur_experiment["accumulator_sizes"]
+    baseline_sizes = cur_experiment["baseline_sizes"]
+    accumulator_sizes = cur_experiment.get("accumulator_sizes",[0])
     cur_sketches = cur_experiment["sketches"]
     quantile = cur_experiment["quantile"]
     query_lens = cur_experiment.get("query_lens", None)
@@ -168,23 +175,26 @@ def run_acc_experiments(experiment_id=0):
         num_queries=num_queries,
         query_lens=query_lens,
     )
-    for cur_size in accumulator_sizes:
-        print("Accumulator Size: {}".format(cur_size))
-        for cur_sketch in cur_sketches:
-            results_df = calc_results(
-                workload=workload,
-                data_name=data_name,
-                granularity=granularity,
-                sketch_name=cur_sketch,
-                sketch_size=cur_size,
-                baseline_size=cur_size,
-                quantile=quantile,
-                accumulator_size=cur_size,
-            )
+    for cur_base_size in baseline_sizes:
+        print("Baseline Size: {}".format(cur_base_size))
+        for acc_size in accumulator_sizes:
+            print("Accumulator Size: {}".format(acc_size))
+            for cur_sketch in cur_sketches:
+                results_df = calc_results(
+                    workload=workload,
+                    data_name=data_name,
+                    granularity=granularity,
+                    sketch_name=cur_sketch,
+                    sketch_size=cur_base_size,
+                    baseline_size=cur_base_size,
+                    quantile=quantile,
+                    accumulator_size=acc_size,
+                )
 
 
 def main():
-    run_query_length_experiments(experiment_id=7)
+    # run_query_length_experiments(experiment_id=7)
+    run_acc_experiments(experiment_id=8)
 
 
 if __name__ == "__main__":

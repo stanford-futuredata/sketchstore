@@ -370,6 +370,25 @@ space_experiment = [
             "dyadic_b2",
         ]
     },  # 7
+    {
+        "data_name": "caida_10M",
+        "quantile": False,
+        "granularity": 2048,
+        "accumulator_sizes": [64, 128, 1000, 10_000, 100_000, 1_000_000],
+        "query_lens": [512],
+        "baseline_sizes": [64],
+        "sketches": [
+            "top_values",
+            "cooperative",
+            "random_sample",
+            # "cms_min",
+            "truncation",
+            "pps",
+            # "dyadic_b2",
+            # "dyadic_b4",
+            # "dyadic_b10",
+        ]
+    },  # 8
 ]
 
 def main():
