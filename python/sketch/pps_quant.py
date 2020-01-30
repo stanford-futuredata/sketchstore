@@ -17,10 +17,11 @@ class PPSQuantSketch:
     def compress(self):
         compressed_values = dict()
 
-        nsegs = self.size//2
+        nsegs = int(self.size*.7)
         skip_offset = self.ncounts / nsegs
         target_offsets = self.random.uniform(0, skip_offset, size=nsegs+1)
         target_offsets += np.arange(nsegs+1)*skip_offset
+        # target_offsets = target_offsets[0] + np.arange(nsegs+1)*skip_offset
 
         seg_idx = 0
         cur_offset = 0

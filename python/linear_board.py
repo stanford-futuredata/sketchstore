@@ -401,9 +401,9 @@ space_experiment = [
         "num_queries": 20,
         "sketches": [
             # "q_top_values",
-            # "q_cooperative",
-            # "q_random_sample",
-            # "q_truncation",
+            "q_cooperative",
+            "q_random_sample",
+            "q_truncation",
             "q_pps",
             # "kll",
             # "q_dyadic_b2",
