@@ -39,7 +39,7 @@ class TestBoardQuery(unittest.TestCase):
             quantile=1,
             dyadic_base=0,
         )
-        tot_results_est = board_query.query_linear_gk(
+        tot_results_est = board_query.query_linear_acc_quant(
             df,
             seg_start=1,
             seg_end=7,

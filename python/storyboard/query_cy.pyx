@@ -7,6 +7,7 @@ import pandas as pd
 
 import storyboard.dyadic_cy as dyadic_cy
 import sketch.sketch_gen as board_sketch
+from tdigest import TDigest
 import bounter
 
 
@@ -188,7 +189,7 @@ cpdef list query_linear_mg(
 
 
 from sketch.greenwaldkhanna import GKArray
-cpdef list query_linear_gk(
+cpdef list query_linear_acc_quant(
         df,
         int seg_start,
         int seg_end,
@@ -197,15 +198,19 @@ cpdef list query_linear_gk(
 ):
     mask = (df["seg_idx"] >= seg_start) & (df["seg_idx"] < seg_end)
     summaries = df["data"][mask]
-    acc = GKArray(1.0/acc_size)
+    # acc = GKArray(1.0/acc_size)
+    acc = TDigest(K=5, delta=5/acc_size)
     cdef double[:] tot_results = np.zeros(shape=len(x_to_track))
     cdef CDFSketch cur_summary
+    cdef int i
     for cur_summary in summaries:
         diff_weights = np.diff([0] + cur_summary.weights)
-        acc.add_weighted(cur_summary.vals, diff_weights)
+        for i in range(len(cur_summary.vals)):
+            acc.update(cur_summary.vals[i], diff_weights[i])
+        # acc.add_weighted(cur_summary.vals, diff_weights)
 
-    cdef CDFSketch acc_result = CDFSketch(acc.get_dict())
-    cdef int i
+    cdef CDFSketch acc_result = CDFSketch({c["m"]: c["c"] for c in acc.centroids_to_list()})
+    # cdef CDFSketch acc_result = CDFSketch(acc.get_dict())
     for i in range(len(x_to_track)):
         tot_results[i] = acc_result.estimate(x_to_track[i])
     return list(tot_results)
