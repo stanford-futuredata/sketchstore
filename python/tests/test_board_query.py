@@ -34,7 +34,7 @@ class TestBoardQuery(unittest.TestCase):
         tot_results_true = board_query.query_linear(
             df,
             seg_start=1,
-            seg_end=7,
+            seg_end=52,
             x_to_track=x_to_track,
             quantile=1,
             dyadic_base=0,
@@ -42,9 +42,9 @@ class TestBoardQuery(unittest.TestCase):
         tot_results_est = board_query.query_linear_acc_quant(
             df,
             seg_start=1,
-            seg_end=7,
+            seg_end=52,
             x_to_track=x_to_track,
-            acc_size=20,
+            acc_size=50,
         )
         print(tot_results_true)
         print(tot_results_est)

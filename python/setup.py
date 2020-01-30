@@ -16,6 +16,11 @@ extensions = [
         libraries=None,
         library_dirs=None),
     Extension(
+        "sketch.greenwaldkhanna", ["sketch/greenwaldkhanna.pyx"],
+        include_dirs=[numpy.get_include()],
+        libraries=None,
+        library_dirs=None),
+    Extension(
         "storyboard.dyadic_cy", ["storyboard/dyadic_cy.pyx"],
         include_dirs=[numpy.get_include()],
         libraries=None,
