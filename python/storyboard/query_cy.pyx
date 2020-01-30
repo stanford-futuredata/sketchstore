@@ -189,6 +189,7 @@ cpdef list query_linear_mg(
 
 
 from sketch.greenwaldkhanna import GKArray
+from sketch.pps_quant import PPSQuantSketch
 cpdef list query_linear_acc_quant(
         df,
         int seg_start,
@@ -198,15 +199,19 @@ cpdef list query_linear_acc_quant(
 ):
     mask = (df["seg_idx"] >= seg_start) & (df["seg_idx"] < seg_end)
     summaries = df["data"][mask]
-    cdef acc = GKArray(1.0/acc_size)
+    # cdef acc = GKArray(1.0/acc_size)
+    cdef acc = PPSQuantSketch(acc_size)
     cdef double[:] tot_results = np.zeros(shape=len(x_to_track))
     cdef CDFSketch cur_summary
     cdef int i
     for cur_summary in summaries:
         diff_weights = np.diff([0] + cur_summary.weights)
-        acc.add_pairs(
+        acc.update(
             [(cur_summary.vals[i], diff_weights[i]) for i in range(len(cur_summary.vals))]
         )
+        # acc.add_pairs(
+        #     [(cur_summary.vals[i], diff_weights[i]) for i in range(len(cur_summary.vals))]
+        # )
         # print("Weight: "+str(sum([v for x,v in acc.get_dict().items()])))
 
     cdef dict acc_dict = acc.get_dict()
