@@ -207,8 +207,12 @@ cpdef list query_linear_acc_quant(
         acc.add_pairs(
             [(cur_summary.vals[i], diff_weights[i]) for i in range(len(cur_summary.vals))]
         )
+        # print("Weight: "+str(sum([v for x,v in acc.get_dict().items()])))
 
-    cdef CDFSketch acc_result = CDFSketch(acc.get_dict())
+    cdef dict acc_dict = acc.get_dict()
+    # print("Weight: "+str(sum([v for x,v in acc_dict.items()])))
+
+    cdef CDFSketch acc_result = CDFSketch(acc_dict)
     for i in range(len(x_to_track)):
         tot_results[i] = acc_result.estimate(x_to_track[i])
     return list(tot_results)

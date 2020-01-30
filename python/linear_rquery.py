@@ -55,7 +55,10 @@ def run_workload(
                 quantile=quantile, dyadic_base=dyadic_base)
         else:
             if quantile:
-                raise Exception("Invalid Quantile Accumulator")
+                est_counts = board_query.query_linear_acc_quant(
+                    est_board, seg_start=start_idx, seg_end=end_idx, x_to_track=x_to_track,
+                    acc_size=accumulator_size,
+                )
             else:
                 est_counts = board_query.query_linear_mg(
                     est_board, seg_start=start_idx, seg_end=end_idx, x_to_track=x_to_track,
@@ -63,6 +66,8 @@ def run_workload(
                 )
         true_tot = board_query.query_linear_tot(totals_df, start_idx, end_idx)
         cur_results = board_query.calc_errors(true_counts, est_counts)
+        # print(true_counts)
+        # print(est_counts)
         cur_results["start_idx"] = start_idx
         cur_results["end_idx"] = end_idx
         cur_results["query_len"] = end_idx - start_idx
@@ -194,7 +199,7 @@ def run_acc_experiments(experiment_id=0):
 
 def main():
     # run_query_length_experiments(experiment_id=7)
-    run_acc_experiments(experiment_id=8)
+    run_acc_experiments(experiment_id=9)
 
 
 if __name__ == "__main__":

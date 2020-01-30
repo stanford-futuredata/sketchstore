@@ -374,7 +374,8 @@ space_experiment = [
         "data_name": "caida_10M",
         "quantile": False,
         "granularity": 2048,
-        "accumulator_sizes": [64, 128, 1000, 10_000, 100_000, 1_000_000],
+        # "accumulator_sizes": [64, 128, 512, 1000, 2000, 10_000, 100_000, 1_000_000],
+        "accumulator_sizes": [512, 2000],
         "query_lens": [512],
         "baseline_sizes": [64],
         "sketches": [
@@ -389,6 +390,25 @@ space_experiment = [
             # "dyadic_b10",
         ]
     },  # 8
+    {
+        "data_name": "power_2M",
+        "quantile": True,
+        "granularity": 2048,
+        # "accumulator_sizes": [512, 1000, 2000, 10_000, 100_000, 1_000_000],
+        "accumulator_sizes": [100_000, 1_000_000],
+        "query_lens": [512],
+        "baseline_sizes": [64],
+        "num_queries": 10,
+        "sketches": [
+            # "q_top_values",
+            "q_cooperative",
+            "q_random_sample",
+            "q_truncation",
+            # "q_pps",
+            # "kll",
+            # "q_dyadic_b2",
+        ]
+    },  # 9
 ]
 
 def main():
