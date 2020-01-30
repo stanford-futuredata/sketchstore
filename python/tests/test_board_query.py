@@ -7,10 +7,49 @@ import sketch.sketch_gen as board_sketch
 import storyboard.board_gen as board_gen
 import sketch.compress_dyadic as cd
 import sketch.compress_freq as cf
+import sketch.compress_quant as cq
 import storyboard.query_cy as board_query
 
 
 class TestBoardQuery(unittest.TestCase):
+    def test_acc_gk(self):
+        np.random.seed(0)
+        x_stream = np.random.uniform(0,1,10000)
+        cur_granularity = 128
+        sketch_size = 64
+        segments = np.array_split(x_stream, cur_granularity)
+        sketch_gen = board_sketch.SeqDictCompressorGen(
+            name="pps",
+            compressor=cq.SkipCompressor()
+        )
+        board_constructor = board_gen.BoardGen(sketch_gen)
+        segment_times = np.cumsum([len(cur_seg) for cur_seg in segments])
+        df = board_constructor.generate(
+            segments=segments,
+            tags=[{
+                "t": t, "size": sketch_size
+            } for t in segment_times],
+        )
+        x_to_track = np.linspace(0,1,10)
+        tot_results_true = board_query.query_linear(
+            df,
+            seg_start=1,
+            seg_end=7,
+            x_to_track=x_to_track,
+            quantile=1,
+            dyadic_base=0,
+        )
+        tot_results_est = board_query.query_linear_gk(
+            df,
+            seg_start=1,
+            seg_end=7,
+            x_to_track=x_to_track,
+            acc_size=20,
+        )
+        print(tot_results_true)
+        print(tot_results_est)
+
+
     def test_acc_mg(self):
         x_stream = np.random.zipf(1.1, size=100_000)
         cur_granularity = 128

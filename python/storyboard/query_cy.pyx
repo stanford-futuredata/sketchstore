@@ -186,6 +186,31 @@ cpdef list query_linear_mg(
         tot_results[i] += acc_dict.get(x_to_track[i], 0)
     return list(tot_results)
 
+
+from sketch.greenwaldkhanna import GKArray
+cpdef list query_linear_gk(
+        df,
+        int seg_start,
+        int seg_end,
+        np.ndarray x_to_track,
+        int acc_size,
+):
+    mask = (df["seg_idx"] >= seg_start) & (df["seg_idx"] < seg_end)
+    summaries = df["data"][mask]
+    acc = GKArray(1.0/acc_size)
+    cdef double[:] tot_results = np.zeros(shape=len(x_to_track))
+    cdef CDFSketch cur_summary
+    for cur_summary in summaries:
+        diff_weights = np.diff([0] + cur_summary.weights)
+        acc.add_weighted(cur_summary.vals, diff_weights)
+
+    cdef CDFSketch acc_result = CDFSketch(acc.get_dict())
+    cdef int i
+    for i in range(len(x_to_track)):
+        tot_results[i] = acc_result.estimate(x_to_track[i])
+    return list(tot_results)
+
+
 cpdef list query_linear(
         df,
         int seg_start,
