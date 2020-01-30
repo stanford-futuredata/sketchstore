@@ -11,7 +11,6 @@ class PPSQuantSketch:
     def update(self, new_item_counts):
         self.ncounts += sum([v[1] for v in new_item_counts])
         self.item_counts += new_item_counts
-        self.item_counts.sort(key=lambda x: x[0])
         if len(self.item_counts) > self.size:
             self.compress()
 
@@ -25,9 +24,10 @@ class PPSQuantSketch:
 
         seg_idx = 0
         cur_offset = 0
+        self.item_counts.sort(key=lambda x: x[0])
         for k,v in self.item_counts:
             cur_offset += v
-            if cur_offset > target_offsets[seg_idx]:
+            while cur_offset > target_offsets[seg_idx]:
                 compressed_values[k] = compressed_values.get(k, 0) + skip_offset
                 seg_idx += 1
 
