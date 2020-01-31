@@ -161,7 +161,7 @@ def calc_results(
 
 
 def main():
-    experiment_id = 1
+    experiment_id = 0
     cur_experiment = cube_board.experiment_runs[experiment_id]
 
     data_name = cur_experiment["data_name"]

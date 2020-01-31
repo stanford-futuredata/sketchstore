@@ -265,8 +265,8 @@ space_experiment = [
         "data_name": "caida_10M",
         "quantile": False,
         "granularity": 2048,
-        # "baseline_sizes": [4, 8, 16, 32, 64, 128, 256, 512],
-        "baseline_sizes": [64],
+        "baseline_sizes": [4, 8, 16, 32, 64, 128, 256, 512],
+        # "baseline_sizes": [64],
         "sketches": [
             "top_values",
             "cooperative",
@@ -275,8 +275,8 @@ space_experiment = [
             "truncation",
             "pps",
             "dyadic_b2",
-            # "dyadic_b4",
-            # "dyadic_b10",
+            "dyadic_b4",
+            "dyadic_b10",
         ]
     },  # 1
     {
@@ -412,7 +412,7 @@ space_experiment = [
 ]
 
 def main():
-    experiment_id = 7
+    experiment_id = 4
     cur_experiment = space_experiment[experiment_id]
     data_name = cur_experiment["data_name"]
     cur_granularity = cur_experiment["granularity"]

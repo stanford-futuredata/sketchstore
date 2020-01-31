@@ -442,7 +442,7 @@ experiment_runs = [
 ]
 
 def main():
-    experiment_num = 6
+    experiment_num = 0
     cur_experiment = experiment_runs[experiment_num]
     sketch_types = cur_experiment["sketch_types"]
     board_size = cur_experiment["board_size"]

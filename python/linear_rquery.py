@@ -198,8 +198,8 @@ def run_acc_experiments(experiment_id=0):
 
 
 def main():
-    # run_query_length_experiments(experiment_id=7)
-    run_acc_experiments(experiment_id=9)
+    run_query_length_experiments(experiment_id=1)
+    # run_acc_experiments(experiment_id=9)
 
 
 if __name__ == "__main__":
