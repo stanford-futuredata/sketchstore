@@ -1,4 +1,4 @@
-# sketchstore
+# Storyboard
 Algorithms for compressing and merging large collections of sketches
 Datasets used for evaluation not included
 
@@ -10,3 +10,5 @@ cube_rquery.py evaluates storyboard accuracy for cubes
 
 linear_board.py constructs storyboards for intervals
 linear_rquery.py evaluates storyboard accuracy for intervals
+
+Code for preparing datasets and generating plots is in the notebooks/ directory
