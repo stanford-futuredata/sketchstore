@@ -5,15 +5,17 @@ import org.eclipse.collections.api.list.primitive.IntList;
 import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import summary.BoardSketch;
-import summary.FSketchGen;
+import summary.SketchGen;
 
-public class FBoardGen {
-    public FSketchGen sketchGen;
-    public FBoardGen(FSketchGen sketchGen) {
+import java.io.Serializable;
+
+public class BoardGen<T extends Serializable,TL> {
+    public SketchGen<T,TL> sketchGen;
+    public BoardGen(SketchGen<T,TL> sketchGen) {
         this.sketchGen = sketchGen;
     }
-    public SketchBoard<Long> generate(
-            FastList<LongList> segments,
+    public SketchBoard<T> generate(
+            FastList<TL> segments,
             FastList<LongList> dims,
             IntList sizes,
             DoubleList biases
@@ -23,9 +25,9 @@ public class FBoardGen {
         }
         int ndims = dims.get(0).size();
         int nrows = segments.size();
-        SketchBoard<Long> board = new SketchBoard<>(ndims);
+        SketchBoard<T> board = new SketchBoard<>(ndims);
         for (int i = 0; i < nrows; i++) {
-            FastList<BoardSketch<Long>> curSketches = sketchGen.generate(
+            FastList<BoardSketch<T>> curSketches = sketchGen.generate(
                     segments.get(i),
                     sizes.get(i),
                     biases.get(i)

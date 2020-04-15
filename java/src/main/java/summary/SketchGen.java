@@ -5,8 +5,8 @@ import org.eclipse.collections.impl.list.mutable.FastList;
 
 import java.io.Serializable;
 
-public interface FSketchGen {
-    public FastList<BoardSketch<Long>> generate(
-            LongList xs, int size, double bias
+public interface SketchGen<T extends Serializable, TL> {
+    public FastList<BoardSketch<T>> generate(
+            TL xs, int size, double bias
     );
 }

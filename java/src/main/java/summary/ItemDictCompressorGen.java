@@ -2,27 +2,25 @@ package summary;
 
 import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.list.mutable.FastList;
-import org.eclipse.collections.impl.map.mutable.primitive.LongDoubleHashMap;
+import summary.accumulator.ExactFreqAccumulator;
 import summary.compressor.ItemDictCompressor;
 
-public class ItemDictCompressorGen implements FSketchGen {
+public class ItemDictCompressorGen implements SketchGen<Long, LongList> {
     public ItemDictCompressor compressor;
 
     public ItemDictCompressorGen(ItemDictCompressor c) {
         compressor = c;
     }
 
-    public static LongDoubleHashMap aggregate(LongList xs) {
-        LongDoubleHashMap xCounts = new LongDoubleHashMap();
-        for (int i = 0; i < xs.size(); i++) {
-            xCounts.addToValue(xs.get(i), 1.0);
-        }
-        return xCounts;
-    }
-
     @Override
     public FastList<BoardSketch<Long>> generate(LongList xs, int size, double bias) {
-
-        return null;
+        ExactFreqAccumulator acc = new ExactFreqAccumulator();
+        acc.add(xs);
+        BoardSketch<Long> sketch = new DictSketch(
+                compressor.compress(acc.values, size)
+        );
+        FastList<BoardSketch<Long>> sketches = new FastList<>(1);
+        sketches.add(sketch);
+        return sketches;
     }
 }
