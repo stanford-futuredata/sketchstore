@@ -2,7 +2,7 @@ package summary;
 
 import org.eclipse.collections.impl.map.mutable.primitive.LongDoubleHashMap;
 
-public class DictSketch implements BoardSketch {
+public class DictSketch implements BoardSketch<Long>{
     public LongDoubleHashMap vals;
     public DictSketch(LongDoubleHashMap vals) {
         this.vals = vals;
@@ -14,12 +14,14 @@ public class DictSketch implements BoardSketch {
     }
 
     @Override
-    public double estimate(int x) {
-        return vals.getIfAbsent(x, 0.0);
+    public BoardSketch merge(BoardSketch otherArg) {
+        DictSketch other = (DictSketch)otherArg;
+        vals.putAll(other.vals);
+        return this;
     }
 
     @Override
-    public double estimate(double x) {
-        return 0;
+    public double estimate(Long x) {
+        return vals.getIfAbsent(x, 0.0);
     }
 }

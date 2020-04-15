@@ -2,8 +2,9 @@ package summary;
 
 import java.io.Serializable;
 
-public interface BoardSketch extends Serializable {
+public interface BoardSketch<T extends Serializable> extends Serializable {
     String name();
-    double estimate(int x);
-    double estimate(double x);
+    BoardSketch<T> merge(BoardSketch<T> other);
+    double estimate(T x);
 }
+
