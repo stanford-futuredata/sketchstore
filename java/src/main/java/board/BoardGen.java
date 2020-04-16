@@ -25,6 +25,7 @@ public class BoardGen<T extends Serializable,TL> {
         }
         int ndims = dims.get(0).size();
         int nrows = segments.size();
+
         SketchBoard<T> board = new SketchBoard<>(ndims);
         for (int i = 0; i < nrows; i++) {
             FastList<BoardSketch<T>> curSketches = sketchGen.generate(

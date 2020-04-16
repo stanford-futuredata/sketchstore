@@ -6,7 +6,8 @@ import org.eclipse.collections.impl.list.mutable.FastList;
 import summary.BoardSketch;
 
 import java.io.Serializable;
+import java.util.List;
 
-public interface QueryProcessor<T extends Serializable> {
-    FastList<Double> query(SketchBoard<T> board, FastList<T> xToTrack);
+public interface QueryProcessor<T> {
+    FastList<Double> query(SketchBoard<T> board, List<T> xToTrack);
 }

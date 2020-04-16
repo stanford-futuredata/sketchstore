@@ -8,7 +8,7 @@ import summary.BoardSketch;
 
 import java.io.Serializable;
 
-public class SketchBoard<T extends Serializable> implements Serializable {
+public class SketchBoard<T> implements Serializable {
     public FastList<LongArrayList> dimensionCols;
     public FastList<BoardSketch<T>> sketchCol;
     public IntArrayList tierCol;

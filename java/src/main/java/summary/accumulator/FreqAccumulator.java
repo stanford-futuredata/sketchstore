@@ -5,6 +5,8 @@ import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.map.mutable.primitive.LongDoubleHashMap;
 import summary.DictSketch;
 
+import java.util.List;
+
 public interface FreqAccumulator {
     void reset();
 
@@ -12,5 +14,5 @@ public interface FreqAccumulator {
 
     void add(LongDoubleHashMap curMap);
 
-    FastList<Double> estimate(FastList<Long> xToTrack);
+    FastList<Double> estimate(List<Long> xToTrack);
 }

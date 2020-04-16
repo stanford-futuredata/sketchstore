@@ -7,10 +7,11 @@ import org.eclipse.collections.impl.list.mutable.FastList;
 import tech.tablesaw.api.Table;
 
 import java.io.Serializable;
+import java.util.List;
 
 public interface Planner<TL> {
     void plan(
-            Table t, String metricCol, FastList<String> dimCols
+            Table t, String metricCol, List<String> dimCols
     );
     public FastList<TL> getSegments();
     public FastList<LongList> getDimensions();

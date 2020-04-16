@@ -6,6 +6,8 @@ import org.eclipse.collections.impl.list.mutable.FastList;
 import summary.DictSketch;
 import summary.accumulator.FreqAccumulator;
 
+import java.util.List;
+
 public class LinearFreqAccProcessor implements
         LinearSelector, QueryProcessor<Long> {
     public int startIdx=0, endIdx=0;
@@ -20,7 +22,7 @@ public class LinearFreqAccProcessor implements
     @Override
     public FastList<Double> query(
             SketchBoard<Long> board,
-            FastList<Long> xToTrack
+            List<Long> xToTrack
     ) {
         LongList tValues = board.dimensionCols.get(0);
         for (int i = 0; i < tValues.size(); i++) {

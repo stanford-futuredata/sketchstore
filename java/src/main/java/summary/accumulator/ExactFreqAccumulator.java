@@ -6,6 +6,8 @@ import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.map.mutable.primitive.LongDoubleHashMap;
 import summary.DictSketch;
 
+import java.util.List;
+
 public class ExactFreqAccumulator implements FreqAccumulator {
     public LongDoubleHashMap values;
     public ExactFreqAccumulator() {
@@ -34,7 +36,7 @@ public class ExactFreqAccumulator implements FreqAccumulator {
     }
 
     @Override
-    public FastList<Double> estimate(FastList<Long> xToTrack) {
+    public FastList<Double> estimate(List<Long> xToTrack) {
         FastList<Double> xCounts = new FastList<>(xToTrack.size());
         int size = xToTrack.size();
         for (int i = 0; i < size; i++) {
