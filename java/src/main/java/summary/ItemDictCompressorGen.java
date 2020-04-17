@@ -13,13 +13,13 @@ public class ItemDictCompressorGen implements SketchGen<Long, LongList> {
     }
 
     @Override
-    public FastList<BoardSketch<Long>> generate(LongList xs, int size, double bias) {
+    public FastList<Sketch<Long>> generate(LongList xs, int size, double bias) {
         ExactFreqAccumulator acc = new ExactFreqAccumulator();
         acc.add(xs);
-        BoardSketch<Long> sketch = new DictSketch(
+        Sketch<Long> sketch = new DictSketch(
                 compressor.compress(acc.values, size)
         );
-        FastList<BoardSketch<Long>> sketches = new FastList<>(1);
+        FastList<Sketch<Long>> sketches = new FastList<>(1);
         sketches.add(sketch);
         return sketches;
     }

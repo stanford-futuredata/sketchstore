@@ -4,7 +4,7 @@ import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.api.list.primitive.IntList;
 import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.list.mutable.FastList;
-import summary.BoardSketch;
+import summary.Sketch;
 import summary.SketchGen;
 
 import java.io.Serializable;
@@ -14,7 +14,7 @@ public class BoardGen<T extends Serializable,TL> {
     public BoardGen(SketchGen<T,TL> sketchGen) {
         this.sketchGen = sketchGen;
     }
-    public SketchBoard<T> generate(
+    public StoryBoard<T> generate(
             FastList<TL> segments,
             FastList<LongList> dims,
             IntList sizes,
@@ -26,9 +26,9 @@ public class BoardGen<T extends Serializable,TL> {
         int ndims = dims.get(0).size();
         int nrows = segments.size();
 
-        SketchBoard<T> board = new SketchBoard<>(ndims);
+        StoryBoard<T> board = new StoryBoard<>(ndims);
         for (int i = 0; i < nrows; i++) {
-            FastList<BoardSketch<T>> curSketches = sketchGen.generate(
+            FastList<Sketch<T>> curSketches = sketchGen.generate(
                     segments.get(i),
                     sizes.get(i),
                     biases.get(i)

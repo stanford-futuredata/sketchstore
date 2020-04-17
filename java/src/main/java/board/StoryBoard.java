@@ -4,16 +4,16 @@ import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.list.mutable.primitive.IntArrayList;
 import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
-import summary.BoardSketch;
+import summary.Sketch;
 
 import java.io.Serializable;
 
-public class SketchBoard<T> implements Serializable {
+public class StoryBoard<T> implements Serializable {
     public FastList<LongArrayList> dimensionCols;
-    public FastList<BoardSketch<T>> sketchCol;
+    public FastList<Sketch<T>> sketchCol;
     public IntArrayList tierCol;
 
-    public SketchBoard(int numDims) {
+    public StoryBoard(int numDims) {
         dimensionCols = new FastList<>(numDims);
         for (int i = 0; i < numDims; i++) {
             dimensionCols.add(new LongArrayList());
@@ -22,7 +22,7 @@ public class SketchBoard<T> implements Serializable {
         tierCol = new IntArrayList();
     }
 
-    public void addSketch(LongList dims, BoardSketch<T> sketch) {
+    public void addSketch(LongList dims, Sketch<T> sketch) {
         int numDims = dimensionCols.size();
         for (int i = 0; i < numDims; i++) {
             dimensionCols.get(i).add(dims.get(i));
@@ -31,7 +31,7 @@ public class SketchBoard<T> implements Serializable {
         sketchCol.add(sketch);
     }
 
-    public void addSketches(LongList dims, FastList<BoardSketch<T>> sketches) {
+    public void addSketches(LongList dims, FastList<Sketch<T>> sketches) {
         int numDims = dimensionCols.size();
         int numSketches = sketches.size();
         for (int j = 0; j < numSketches; j++) {

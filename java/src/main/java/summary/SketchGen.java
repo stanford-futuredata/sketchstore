@@ -1,12 +1,9 @@
 package summary;
 
-import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.list.mutable.FastList;
 
-import java.io.Serializable;
-
 public interface SketchGen<T, TL> {
-    public FastList<BoardSketch<T>> generate(
+    public FastList<Sketch<T>> generate(
             TL xs, int size, double bias
     );
 }

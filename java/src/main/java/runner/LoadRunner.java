@@ -1,75 +1,101 @@
 package runner;
 
 import board.BoardGen;
-import board.SketchBoard;
+import board.StoryBoard;
 import board.planner.LinearFreqPlanner;
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.primitive.LongList;
-import org.eclipse.collections.impl.list.mutable.FastList;
 import summary.ItemDictCompressorGen;
 import summary.SketchGen;
 import summary.compressor.CoopFreqCompressor;
 import tech.tablesaw.api.Table;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
-public class LoadBoard {
+public class LoadRunner {
     RunConfig config;
 
+    String experiment;
     boolean quantile;
     String csvPath;
     List<Integer> colTypes;
     String metricCol;
-    String outputPath;
+    String outputDir;
 
     int granularity;
+    List<String> sketchNames;
     List<Integer> sizes;
 
-    public LoadBoard(RunConfig config) {
+    public LoadRunner(RunConfig config) {
         this.config = config;
 
+        experiment = config.get("experiment");
         quantile = config.get("quantile");
         csvPath = config.get("csv_path");
         colTypes = config.get("col_types");
         metricCol = config.get("metric_col");
-        outputPath = config.get("output_path");
+        outputDir = config.get("out_dir");
 
         granularity = config.get("granularity");
         sizes = config.get("sizes");
+        sketchNames = config.get("sketches");
     }
 
-    public void run() throws Exception {
-        Table t = IOUtil.loadTable(csvPath, colTypes);
-        LinearFreqPlanner planner = new LinearFreqPlanner(
-                granularity,
-                sizes.get(0)
+    public void runForParam(
+            Table t,
+            String curSketchName,
+            int curGranularity,
+            int curSize
+    ) throws IOException {
+        SketchGen<Long, LongList> sGen = new ItemDictCompressorGen(
+                new CoopFreqCompressor(0)
         );
-        List<String> dimCols = Lists.fixedSize.<String>empty();
+
+        LinearFreqPlanner planner = new LinearFreqPlanner(
+                curGranularity,
+                curSize
+        );
+        List<String> dimCols = Lists.fixedSize.empty();
         planner.plan(
                 t, metricCol, dimCols
         );
 
-        SketchGen<Long, LongList> sGen = new ItemDictCompressorGen(
-                new CoopFreqCompressor(0)
-        );
         BoardGen<Long, LongList> bGen = new BoardGen<>(sGen);
-        SketchBoard<Long> board = bGen.generate(
+        StoryBoard<Long> board = bGen.generate(
                 planner.getSegments(),
                 planner.getDimensions(),
                 planner.getSizes(),
                 planner.getBiases()
         );
 
+        Path boardDir = Paths.get(outputDir, experiment, "boards");
+        Files.createDirectories(boardDir);
+        String outputPath = String.format("%s/%s",
+                boardDir.toString(),
+                IOUtil.getBoardName(
+                        curSketchName,
+                        0,
+                        curSize,
+                        curGranularity
+                ));
         File outFile = new File(outputPath);
         IOUtil.writeBoard(board, outFile);
+    }
+
+    public void run() throws Exception {
+        Table t = IOUtil.loadTable(csvPath, colTypes);
     }
 
     public static void main(String[] args) throws Exception {
         System.out.println("Starting Loader");
         String confFile = args[0];
         RunConfig config = RunConfig.fromJsonFile(confFile);
-        LoadBoard loader = new LoadBoard(config);
+        LoadRunner loader = new LoadRunner(config);
         loader.run();
     }
 }

@@ -3,7 +3,6 @@ package board;
 import board.planner.LinearFreqPlanner;
 import board.query.LinearFreqAccProcessor;
 import org.eclipse.collections.api.factory.Lists;
-import org.eclipse.collections.api.list.ImmutableList;
 import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.api.list.primitive.IntList;
 import org.eclipse.collections.api.list.primitive.LongList;
@@ -43,7 +42,7 @@ public class BoardGenTest {
                 new CoopFreqCompressor(0)
         );
         BoardGen<Long, LongList> bGen = new BoardGen<>(sGen);
-        SketchBoard<Long> board = bGen.generate(
+        StoryBoard<Long> board = bGen.generate(
                 planner.getSegments(),
                 planner.getDimensions(),
                 planner.getSizes(),
@@ -78,7 +77,7 @@ public class BoardGenTest {
         );
         IntList sizes = IntArrayList.newListWith(2, 2);
         DoubleList bias = DoubleArrayList.newWithNValues(2, 0.0);
-        SketchBoard<Long> board = bGen.generate(
+        StoryBoard<Long> board = bGen.generate(
                 segments,
                 dims,
                 sizes,

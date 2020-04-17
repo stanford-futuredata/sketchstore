@@ -1,14 +1,11 @@
 package board.planner;
 
 import board.BoardGen;
-import board.SketchBoard;
 import org.eclipse.collections.api.PrimitiveIterable;
 import org.eclipse.collections.api.factory.Lists;
-import org.eclipse.collections.api.list.primitive.IntList;
 import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.junit.Test;
-import summary.BoardSketch;
 import summary.ItemDictCompressorGen;
 import summary.SketchGen;
 import summary.compressor.CoopFreqCompressor;

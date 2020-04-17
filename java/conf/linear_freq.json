@@ -1,0 +1,19 @@
+{
+  "experiment": "l_small_f",
+  "quantile": false,
+  "out_dir": "out/",
+  "csv_path": "src/test/resources/small.csv",
+  "col_types": [0],
+  "metric_col": "x",
+
+  "granularity": 4,
+  "sketches": [
+    "top_values",
+    "truncation",
+    "cooperative"
+  ],
+  "sizes": [2],
+
+  "x_to_track": "src/test/resources/small-xtrack.csv",
+  "num_queries": 10
+}

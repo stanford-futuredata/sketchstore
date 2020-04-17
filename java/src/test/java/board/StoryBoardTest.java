@@ -9,10 +9,10 @@ import java.io.*;
 
 import static org.junit.Assert.*;
 
-public class SketchBoardTest {
+public class StoryBoardTest {
     @Test
     public void testSerialize() throws IOException, ClassNotFoundException {
-        SketchBoard<Long> board = new SketchBoard<>(1);
+        StoryBoard<Long> board = new StoryBoard<>(1);
 
         DictSketch sketch = new DictSketch(
                 LongDoubleHashMap.newWithKeysValues(3, 4.0)
@@ -31,7 +31,7 @@ public class SketchBoardTest {
 //        System.out.println(tempFile.length());
         FileInputStream fIn = new FileInputStream(tempFile);
         ObjectInputStream oIn = new ObjectInputStream(fIn);
-        SketchBoard<Long> boardIn = (SketchBoard<Long>)oIn.readObject();
+        StoryBoard<Long> boardIn = (StoryBoard<Long>)oIn.readObject();
         assertEquals(
                 board.sketchCol.get(0).estimate(3L),
                 boardIn.sketchCol.get(0).estimate(3L),

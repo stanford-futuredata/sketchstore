@@ -1,0 +1,25 @@
+package summary;
+
+import org.eclipse.collections.api.list.primitive.LongList;
+import summary.compressor.CoopFreqCompressor;
+import summary.compressor.TopValuesCompressor;
+import summary.compressor.TruncationCompressor;
+
+import java.util.List;
+
+public class SketchUtil {
+    public static SketchGen<Long, LongList> getFreqSketchGen(
+            String sketch,
+            List<Long> xToTrack
+            ) {
+        if (sketch.equals("top_values")) {
+            return new ItemDictCompressorGen(new TopValuesCompressor(xToTrack));
+        } else if(sketch.equals("truncation")) {
+            return new ItemDictCompressorGen(new TruncationCompressor());
+        } else if(sketch.equals("cooperative")) {
+            return new ItemDictCompressorGen(new CoopFreqCompressor(0));
+        } else {
+            return null;
+        }
+    }
+}

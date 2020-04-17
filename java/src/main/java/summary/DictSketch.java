@@ -2,7 +2,7 @@ package summary;
 
 import org.eclipse.collections.impl.map.mutable.primitive.LongDoubleHashMap;
 
-public class DictSketch implements BoardSketch<Long>{
+public class DictSketch implements Sketch<Long> {
     public LongDoubleHashMap vals;
     public DictSketch(LongDoubleHashMap vals) {
         this.vals = vals;
@@ -14,7 +14,7 @@ public class DictSketch implements BoardSketch<Long>{
     }
 
     @Override
-    public BoardSketch merge(BoardSketch otherArg) {
+    public Sketch merge(Sketch otherArg) {
         DictSketch other = (DictSketch)otherArg;
         vals.putAll(other.vals);
         return this;

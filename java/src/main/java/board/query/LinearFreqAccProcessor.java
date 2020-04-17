@@ -1,6 +1,6 @@
 package board.query;
 
-import board.SketchBoard;
+import board.StoryBoard;
 import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import summary.DictSketch;
@@ -21,7 +21,7 @@ public class LinearFreqAccProcessor implements
 
     @Override
     public FastList<Double> query(
-            SketchBoard<Long> board,
+            StoryBoard<Long> board,
             List<Long> xToTrack
     ) {
         LongList tValues = board.dimensionCols.get(0);
