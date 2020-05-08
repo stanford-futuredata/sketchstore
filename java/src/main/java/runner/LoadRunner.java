@@ -3,6 +3,7 @@ package runner;
 import board.BoardGen;
 import board.StoryBoard;
 import board.planner.LinearFreqPlanner;
+import io.IOUtil;
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.primitive.LongList;
 import summary.ItemDictCompressorGen;
