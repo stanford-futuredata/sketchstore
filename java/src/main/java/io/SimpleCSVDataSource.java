@@ -1,11 +1,13 @@
 package io;
 
+import org.eclipse.collections.impl.list.mutable.FastList;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class SimpleCSVDataSource {
+public abstract class SimpleCSVDataSource<T> {
     public String fileName;
     public int column;
     public int limit = Integer.MAX_VALUE;
@@ -24,12 +26,14 @@ public class SimpleCSVDataSource {
         this.limit = limit;
     }
 
-    public double[] get() throws IOException {
+    public abstract T parseString(String strVal);
+
+    public FastList<T> get() throws IOException {
         BufferedReader bf = new BufferedReader(new FileReader(fileName));
         if (hasHeader) {
             bf.readLine();
         }
-        ArrayList<Double> vals = new ArrayList<>();
+        FastList<T> vals = new FastList<>();
         for (int i = 0; i < limit; i++) {
             String curLine = bf.readLine();
             if (curLine == null) {
@@ -47,13 +51,8 @@ public class SimpleCSVDataSource {
                     break;
                 }
             }
-            vals.add(Double.parseDouble(curLine.substring(startIdx, nextIdx)));
+            vals.add(parseString(curLine.substring(startIdx, nextIdx)));
         }
-
-        double[] uVals = new double[vals.size()];
-        for (int i = 0; i < uVals.length; i++) {
-            uVals[i] = vals.get(i);
-        }
-        return uVals;
+        return vals;
     }
 }

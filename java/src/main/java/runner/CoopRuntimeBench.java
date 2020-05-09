@@ -1,10 +1,10 @@
 package runner;
 
-import board.StoryBoard;
 import com.tdunning.math.stats.TDigest;
 import io.SimpleCSVDataSource;
+import io.SimpleCSVDataSourceDouble;
 import org.apache.datasketches.kll.KllFloatsSketch;
-import org.apache.datasketches.quantiles.DoublesSketch;
+import org.eclipse.collections.impl.list.mutable.FastList;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -15,17 +15,21 @@ import java.util.Random;
 
 public class CoopRuntimeBench {
     public static void prepare() throws Exception {
-        SimpleCSVDataSource in = new SimpleCSVDataSource(
+        SimpleCSVDataSourceDouble in = new SimpleCSVDataSourceDouble(
                 "/Users/edgan/Documents/datasets/storyboard/power/power.csv",
                 0
         );
-        double[] batch = in.get();
+        FastList<Double> batch = in.get();
+        double[] batchArray = new double[batch.size()];
+        for (int i = 0; i < batchArray.length; i++) {
+            batchArray[i] = batch.get(i);
+        }
 
         FileOutputStream fOut = new FileOutputStream(
                 "/Users/edgan/Documents/datasets/storyboard/power/power.jser"
         );
         ObjectOutputStream oOut = new ObjectOutputStream(fOut);
-        oOut.writeObject(batch);
+        oOut.writeObject(batchArray);
         oOut.close();
     }
 

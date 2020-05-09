@@ -7,12 +7,12 @@
   "metric_col": "x",
 
   "granularity": 4,
+  "sizes": [2],
   "sketches": [
     "top_values",
     "truncation",
     "cooperative"
   ],
-  "sizes": [2],
 
   "x_to_track": "src/test/resources/small-xtrack.csv",
   "num_queries": 10

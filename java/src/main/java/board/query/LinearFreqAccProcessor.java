@@ -24,6 +24,7 @@ public class LinearFreqAccProcessor implements
             StoryBoard<Long> board,
             List<Long> xToTrack
     ) {
+        acc.reset();
         LongList tValues = board.dimensionCols.get(0);
         for (int i = 0; i < tValues.size(); i++) {
             long curT = tValues.get(i);

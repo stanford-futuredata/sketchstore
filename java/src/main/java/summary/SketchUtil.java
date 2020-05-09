@@ -6,6 +6,7 @@ import summary.compressor.TopValuesCompressor;
 import summary.compressor.TruncationCompressor;
 
 import java.util.List;
+import java.util.Map;
 
 public class SketchUtil {
     public static SketchGen<Long, LongList> getFreqSketchGen(

@@ -13,14 +13,12 @@ import java.util.Map;
 public class IOUtil {
     public static String getBoardName(
             String sketch,
-            int bias,
             int size,
             int granularity
     ) {
         return String.format(
-                "board-%s-%d-%d-%d.out",
+                "board-%s-%d-%d.out",
                 sketch,
-                bias,
                 size,
                 granularity
         );

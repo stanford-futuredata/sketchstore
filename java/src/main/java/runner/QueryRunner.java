@@ -5,6 +5,8 @@ import board.query.LinearFreqAccProcessor;
 import board.query.LinearSelector;
 import board.query.QueryProcessor;
 import io.IOUtil;
+import io.SimpleCSVDataSource;
+import io.SimpleCSVDataSourceLong;
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import summary.accumulator.ExactFreqAccumulator;
@@ -26,9 +28,8 @@ public class QueryRunner {
     int numQueries;
 
     int granularity;
-    List<String> sketchNames;
+    List<String> sketches;
     List<Integer> sizes;
-
 
     public QueryRunner(RunConfig config) {
         this.config = config;
@@ -39,7 +40,7 @@ public class QueryRunner {
 
         granularity = config.get("granularity");
         sizes = config.get("sizes");
-        sketchNames = config.get("sketches");
+        sketches = config.get("sketches");
 
         xToTrackPath = config.get("x_to_track");
         numQueries = config.get("num_queries");
@@ -47,20 +48,11 @@ public class QueryRunner {
 
     public void run() throws Exception {
         Path boardDir = Paths.get(outputDir, experiment, "boards");
-        String boardPath = String.format("%s/%s",
-                boardDir,
-                IOUtil.getBoardName(
-                    sketchNames.get(0),
-                    0,
-                    sizes.get(0),
-                    granularity
-        ));
-        File fIn = new File(boardPath);
-        StoryBoard<Long> board = IOUtil.loadBoard(fIn);
+        int curSize = sizes.get(0);
 
-        Table t = IOUtil.loadTable(xToTrackPath, Lists.fixedSize.of(0));
-        Column<Long> col = (Column<Long>)t.column("x_to_track");
-        List<Long> xToTrack = col.asList();
+        SimpleCSVDataSource<Long> xTrackSource = new SimpleCSVDataSourceLong(xToTrackPath, 0);
+        xTrackSource.setHasHeader(true);
+        FastList<Long> xToTrack = xTrackSource.get();
 
         LinearSelector selector;
         QueryProcessor<Long> processor;
@@ -70,13 +62,27 @@ public class QueryRunner {
         selector = p_raw;
         processor = p_raw;
 
-        selector.setRange(0,4);
-        FastList<Double> queryResults = processor.query(board, xToTrack);
-        System.out.println(queryResults);
+        for (String curSketch: sketches) {
+            String boardPath = String.format("%s/%s",
+                    boardDir,
+                    IOUtil.getBoardName(
+                            curSketch,
+                            curSize,
+                            granularity
+                    ));
+            File fIn = new File(boardPath);
+            StoryBoard<Long> board = IOUtil.loadBoard(fIn);
+
+            selector.setRange(0, 4);
+
+            FastList<Double> queryResults = processor.query(board, xToTrack);
+            System.out.println(curSketch);
+            System.out.println(queryResults);
+        }
     }
 
     public static void main(String[] args) throws Exception {
-        System.out.println("Starting Loader");
+        System.out.println("Starting Query Runner");
         String confFile = args[0];
         RunConfig config = RunConfig.fromJsonFile(confFile);
         QueryRunner runner = new QueryRunner(config);
