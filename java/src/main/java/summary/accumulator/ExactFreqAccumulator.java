@@ -1,8 +1,10 @@
 package summary.accumulator;
 
+import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.api.tuple.primitive.LongDoublePair;
 import org.eclipse.collections.impl.list.mutable.FastList;
+import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
 import org.eclipse.collections.impl.map.mutable.primitive.LongDoubleHashMap;
 import summary.DictSketch;
 
@@ -36,8 +38,8 @@ public class ExactFreqAccumulator implements FreqAccumulator {
     }
 
     @Override
-    public FastList<Double> estimate(List<Long> xToTrack) {
-        FastList<Double> xCounts = new FastList<>(xToTrack.size());
+    public DoubleList estimate(List<Long> xToTrack) {
+        DoubleArrayList xCounts = new DoubleArrayList(xToTrack.size());
         int size = xToTrack.size();
         for (int i = 0; i < size; i++) {
             long aLong = xToTrack.get(i);

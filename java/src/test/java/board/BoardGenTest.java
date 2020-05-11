@@ -54,10 +54,10 @@ public class BoardGenTest {
         );
         qp.setRange(0, 2);
         FastList<Long> xToTrack = FastList.newListWith(1L, 2L, 3L);
-        FastList<Double> xResults = qp.query(board, xToTrack);
+        DoubleList xResults = qp.query(board, xToTrack);
 
         assertEquals(10.0, xResults.get(2), 1e-10);
-        double sum = xResults.sumOfDouble((x) -> x);
+        double sum = xResults.sum();
         assertEquals(17.0, sum, 1e-10);
     }
 
@@ -89,10 +89,10 @@ public class BoardGenTest {
         );
         qp.setRange(0, 2);
         FastList<Long> xToTrack = FastList.newListWith(5L, 1L, 2L);
-        FastList<Double> xResults = qp.query(board, xToTrack);
+        DoubleList xResults = qp.query(board, xToTrack);
 //        System.out.println(xResults);
         assertEquals(6.0, xResults.get(0), 1e-10);
-        double sum = xResults.sumOfDouble((x) -> x);
+        double sum = xResults.sum();
         assertEquals(9.0, sum, 1e-10);
     }
 }

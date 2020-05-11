@@ -1,7 +1,7 @@
 {
   "experiment": "l_small_f",
   "quantile": false,
-  "out_dir": "out/",
+  "out_dir": "output/",
   "csv_path": "src/test/resources/small.csv",
   "col_types": [0],
   "metric_col": "x",

@@ -1,6 +1,7 @@
 package board.query;
 
 import board.StoryBoard;
+import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import summary.DictSketch;
@@ -20,7 +21,7 @@ public class LinearFreqAccProcessor implements
     }
 
     @Override
-    public FastList<Double> query(
+    public DoubleList query(
             StoryBoard<Long> board,
             List<Long> xToTrack
     ) {
@@ -34,6 +35,19 @@ public class LinearFreqAccProcessor implements
             }
         }
         return acc.estimate(xToTrack);
+    }
+
+    @Override
+    public double total(StoryBoard<Long> board) {
+        double result = 0;
+        LongList tValues = board.dimensionCols.get(0);
+        for (int i = 0; i < tValues.size(); i++) {
+            long curT = tValues.get(i);
+            if (curT >= startIdx && curT < endIdx) {
+                result += board.totalCol.get(i);
+            }
+        }
+        return result;
     }
 
     @Override

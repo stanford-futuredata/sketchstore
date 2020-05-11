@@ -1,5 +1,6 @@
 package board;
 
+import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
 import org.eclipse.collections.impl.map.mutable.primitive.LongDoubleHashMap;
 import org.junit.Test;
@@ -17,7 +18,7 @@ public class StoryBoardTest {
         DictSketch sketch = new DictSketch(
                 LongDoubleHashMap.newWithKeysValues(3, 4.0)
         );
-        board.addSketch(LongArrayList.newListWith(1), sketch);
+        board.addSketches(LongArrayList.newListWith(1), Lists.fixedSize.of(sketch), 4.0);
 
         File tempFile = File.createTempFile("board_serialize", "temp");
 //        System.out.println(tempFile.getAbsolutePath());
@@ -40,6 +41,11 @@ public class StoryBoardTest {
         assertEquals(
                 board.dimensionCols.get(0).get(0),
                 boardIn.dimensionCols.get(0).get(0)
+        );
+        assertEquals(
+                4.0,
+                board.totalCol.get(0),
+                1e-10
         );
     }
 }

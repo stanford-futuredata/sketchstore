@@ -1,5 +1,6 @@
 package summary.accumulator;
 
+import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.map.mutable.primitive.LongDoubleHashMap;
@@ -14,5 +15,5 @@ public interface FreqAccumulator {
 
     void add(LongDoubleHashMap curMap);
 
-    FastList<Double> estimate(List<Long> xToTrack);
+    DoubleList estimate(List<Long> xToTrack);
 }
