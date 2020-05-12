@@ -1,5 +1,6 @@
 package summary.compressor;
 
+import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.api.tuple.primitive.LongDoublePair;
 import org.eclipse.collections.impl.map.mutable.primitive.LongDoubleHashMap;
 
@@ -9,14 +10,11 @@ public class TruncationCompressor implements ItemDictCompressor{
         if (size >= xs.size()) {
             return xs;
         }
-        double[] xWeights = xs.values().toSortedArray();
-        double maxWeight = xWeights[xWeights.length-size];
-
+        MutableList<LongDoublePair> values = xs.keyValuesView().toSortedListBy((LongDoublePair xp) -> -xp.getTwo());
         LongDoubleHashMap newMap = new LongDoubleHashMap(size);
-        for (LongDoublePair xv : xs.keyValuesView()) {
-            double curWeight = xv.getTwo();
-            if (curWeight >= maxWeight && newMap.size() < size) {
-                newMap.put(xv.getOne(), curWeight);
+        for (LongDoublePair xv : values) {
+            if (newMap.size() < size) {
+                newMap.put(xv.getOne(), xv.getTwo());
             }
         }
         return newMap;

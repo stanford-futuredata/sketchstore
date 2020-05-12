@@ -104,6 +104,8 @@ public class QueryRunner {
             fIn = new File(boardPath);
             StoryBoard<Long> board = IOUtil.loadBoard(fIn);
 
+            Timer sketchTotalTimer = new Timer();
+            sketchTotalTimer.start();
             for (IntList curInterval : workloadIntervals) {
                 int startIdx = curInterval.get(0);
                 int endIdx = curInterval.get(1);
@@ -128,6 +130,8 @@ public class QueryRunner {
                 }
                 results.add(curResults);
             }
+            sketchTotalTimer.end();
+            System.out.println("Sketch Ran in Time: "+sketchTotalTimer.getTotalMs());
         }
 
         Path resultsDir = Paths.get(outputDir, experiment, "results");
@@ -141,6 +145,7 @@ public class QueryRunner {
 
     public static void main(String[] args) throws Exception {
         System.out.println("Starting Query Runner");
+        System.in.read();
         String confFile = args[0];
         RunConfig config = RunConfig.fromJsonFile(confFile);
         QueryRunner runner = new QueryRunner(config);

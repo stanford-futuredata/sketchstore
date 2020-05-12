@@ -10,7 +10,7 @@ import summary.SketchGen;
 
 import java.io.Serializable;
 
-public class BoardGen<T extends Serializable,TL extends PrimitiveIterable> {
+public class BoardGen<T extends Serializable, TL extends PrimitiveIterable> {
     public SketchGen<T,TL> sketchGen;
     public BoardGen(SketchGen<T,TL> sketchGen) {
         this.sketchGen = sketchGen;
