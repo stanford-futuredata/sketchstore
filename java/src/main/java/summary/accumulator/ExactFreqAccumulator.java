@@ -32,9 +32,7 @@ public class ExactFreqAccumulator implements FreqAccumulator {
     }
     @Override
     public void add(LongDoubleHashMap curMap) {
-        for (LongDoublePair xv : curMap.keyValuesView()) {
-            values.addToValue(xv.getOne(), xv.getTwo());
-        }
+        curMap.forEachKeyValue(this::addTovalue);
     }
 
     @Override
@@ -46,5 +44,9 @@ public class ExactFreqAccumulator implements FreqAccumulator {
             xCounts.add(values.getIfAbsent(aLong, 0));
         }
         return xCounts;
+    }
+
+    private void addTovalue(long x, double v) {
+        values.addToValue(x, v);
     }
 }

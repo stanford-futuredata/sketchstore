@@ -8,8 +8,8 @@ import summary.compressor.TruncationCompressor;
 import java.util.List;
 import java.util.Map;
 
-public class SketchUtil {
-    public static SketchGen<Long, LongList> getFreqSketchGen(
+public class FreqSketchGenFactory implements SketchGenFactory<Long, LongList> {
+    public SketchGen<Long, LongList> getSketchGen(
             String sketch,
             List<Long> xToTrack
             ) {

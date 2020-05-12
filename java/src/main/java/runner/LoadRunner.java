@@ -3,26 +3,23 @@ package runner;
 import board.BoardGen;
 import board.StoryBoard;
 import board.planner.LinearFreqPlanner;
+import board.planner.Planner;
 import io.IOUtil;
 import io.SimpleCSVDataSource;
-import io.SimpleCSVDataSourceDouble;
 import io.SimpleCSVDataSourceLong;
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.list.mutable.FastList;
-import summary.ItemDictCompressorGen;
 import summary.SketchGen;
-import summary.SketchUtil;
-import summary.compressor.CoopFreqCompressor;
+import summary.FreqSketchGenFactory;
+import summary.SketchGenFactory;
 import tech.tablesaw.api.Table;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Map;
 
 public class LoadRunner {
     RunConfig config;
@@ -70,7 +67,7 @@ public class LoadRunner {
 
         int curGranularity = granularity;
         int curSize = sizes.get(0);
-        LinearFreqPlanner planner = new LinearFreqPlanner(
+        Planner<LongList> planner = new LinearFreqPlanner(
                 curGranularity,
                 curSize
         );
@@ -78,9 +75,10 @@ public class LoadRunner {
         planner.plan(
                 t, metricCol, dimCols
         );
+        SketchGenFactory<Long, LongList> sketchGenFactory = new FreqSketchGenFactory();
 
         for (String curSketch: sketches) {
-            SketchGen<Long, LongList> sGen = SketchUtil.getFreqSketchGen(curSketch, xToTrack);
+            SketchGen<Long, LongList> sGen = sketchGenFactory.getSketchGen(curSketch, xToTrack);
             BoardGen<Long, LongList> bGen = new BoardGen<>(sGen);
             StoryBoard<Long> board = bGen.generate(
                     planner.getSegments(),
