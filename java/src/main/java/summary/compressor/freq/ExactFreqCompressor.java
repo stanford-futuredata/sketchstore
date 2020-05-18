@@ -1,9 +1,8 @@
-package summary.compressor;
+package summary.compressor.freq;
 
-import org.eclipse.collections.api.tuple.primitive.LongDoublePair;
 import org.eclipse.collections.impl.map.mutable.primitive.LongDoubleHashMap;
 
-public class ExactCompressor implements ItemDictCompressor{
+public class ExactFreqCompressor implements ItemDictCompressor{
     @Override
     public LongDoubleHashMap compress(LongDoubleHashMap xs, int size) {
         return new LongDoubleHashMap(xs);

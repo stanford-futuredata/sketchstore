@@ -14,7 +14,7 @@ public class DictSketch implements Sketch<Long> {
     }
 
     @Override
-    public Sketch merge(Sketch otherArg) {
+    public Sketch<Long> merge(Sketch<Long> otherArg) {
         DictSketch other = (DictSketch)otherArg;
         vals.putAll(other.vals);
         return this;

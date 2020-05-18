@@ -1,12 +1,11 @@
-package summary;
+package summary.gen;
 
 import org.eclipse.collections.api.list.primitive.LongList;
-import summary.compressor.CoopFreqCompressor;
-import summary.compressor.TopValuesCompressor;
-import summary.compressor.TruncationCompressor;
+import summary.compressor.freq.CoopFreqCompressor;
+import summary.compressor.freq.TopValuesFreqCompressor;
+import summary.compressor.freq.TruncationFreqCompressor;
 
 import java.util.List;
-import java.util.Map;
 
 public class FreqSketchGenFactory implements SketchGenFactory<Long, LongList> {
     public SketchGen<Long, LongList> getSketchGen(
@@ -14,9 +13,9 @@ public class FreqSketchGenFactory implements SketchGenFactory<Long, LongList> {
             List<Long> xToTrack
             ) {
         if (sketch.equals("top_values")) {
-            return new ItemDictCompressorGen(new TopValuesCompressor(xToTrack));
+            return new ItemDictCompressorGen(new TopValuesFreqCompressor(xToTrack));
         } else if(sketch.equals("truncation")) {
-            return new ItemDictCompressorGen(new TruncationCompressor());
+            return new ItemDictCompressorGen(new TruncationFreqCompressor());
         } else if(sketch.equals("cooperative")) {
             return new ItemDictCompressorGen(new CoopFreqCompressor(0));
         } else {

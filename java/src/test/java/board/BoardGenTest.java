@@ -2,7 +2,6 @@ package board;
 
 import board.planner.LinearFreqPlanner;
 import board.query.LinearFreqAccProcessor;
-import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.api.list.primitive.IntList;
 import org.eclipse.collections.api.list.primitive.LongList;
@@ -11,16 +10,15 @@ import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
 import org.eclipse.collections.impl.list.mutable.primitive.IntArrayList;
 import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
 import org.junit.Test;
-import summary.SketchGen;
-import summary.ItemDictCompressorGen;
+import summary.gen.SketchGen;
+import summary.gen.ItemDictCompressorGen;
 import summary.accumulator.ExactFreqAccumulator;
-import summary.compressor.CoopFreqCompressor;
+import summary.compressor.freq.CoopFreqCompressor;
 import tech.tablesaw.api.ColumnType;
 import tech.tablesaw.api.Table;
 import tech.tablesaw.io.csv.CsvReadOptions;
 
 import java.io.IOException;
-import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -32,10 +30,9 @@ public class BoardGenTest {
                 .builder("src/test/resources/small.csv")
                 .columnTypes(types));
 
-        LinearFreqPlanner planner = new LinearFreqPlanner(4, 2);
-        List<String> dimCols = Lists.fixedSize.<String>empty();
+        LinearFreqPlanner planner = new LinearFreqPlanner();
         planner.plan(
-                t, "x", dimCols
+                t, "x", 4, 2
         );
 
         SketchGen<Long, LongList> sGen = new ItemDictCompressorGen(

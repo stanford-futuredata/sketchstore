@@ -6,11 +6,9 @@ import org.eclipse.collections.api.list.primitive.IntList;
 import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import summary.Sketch;
-import summary.SketchGen;
+import summary.gen.SketchGen;
 
-import java.io.Serializable;
-
-public class BoardGen<T extends Serializable, TL extends PrimitiveIterable> {
+public class BoardGen<T, TL extends PrimitiveIterable> {
     public SketchGen<T,TL> sketchGen;
     public BoardGen(SketchGen<T,TL> sketchGen) {
         this.sketchGen = sketchGen;

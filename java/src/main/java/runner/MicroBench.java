@@ -3,7 +3,6 @@ package runner;
 import org.eclipse.collections.api.map.primitive.MutableLongDoubleMap;
 import org.eclipse.collections.impl.list.mutable.primitive.IntArrayList;
 import org.eclipse.collections.impl.map.mutable.primitive.LongDoubleHashMap;
-import summary.compressor.CoopFreqCompressor;
 
 import java.util.ArrayList;
 import java.util.HashMap;

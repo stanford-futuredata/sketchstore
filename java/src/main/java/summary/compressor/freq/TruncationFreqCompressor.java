@@ -1,10 +1,10 @@
-package summary.compressor;
+package summary.compressor.freq;
 
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.api.tuple.primitive.LongDoublePair;
 import org.eclipse.collections.impl.map.mutable.primitive.LongDoubleHashMap;
 
-public class TruncationCompressor implements ItemDictCompressor{
+public class TruncationFreqCompressor implements ItemDictCompressor{
     @Override
     public LongDoubleHashMap compress(LongDoubleHashMap xs, int size) {
         if (size >= xs.size()) {

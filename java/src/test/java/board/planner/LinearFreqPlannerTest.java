@@ -2,19 +2,17 @@ package board.planner;
 
 import board.BoardGen;
 import org.eclipse.collections.api.PrimitiveIterable;
-import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.junit.Test;
-import summary.ItemDictCompressorGen;
-import summary.SketchGen;
-import summary.compressor.CoopFreqCompressor;
+import summary.gen.ItemDictCompressorGen;
+import summary.gen.SketchGen;
+import summary.compressor.freq.CoopFreqCompressor;
 import tech.tablesaw.api.ColumnType;
 import tech.tablesaw.api.Table;
 import tech.tablesaw.io.csv.CsvReadOptions;
 
 import java.io.IOException;
-import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -27,13 +25,9 @@ public class LinearFreqPlannerTest {
                 .columnTypes(types));
 
         int numSegments = 4;
-        LinearFreqPlanner planner = new LinearFreqPlanner(
-                numSegments,
-                2
-        );
-        List<String> dimCols = Lists.fixedSize.<String>empty();
+        LinearFreqPlanner planner = new LinearFreqPlanner();
         planner.plan(
-                t, "x", dimCols
+                t, "x", numSegments, 2
         );
 
         SketchGen<Long, LongList> sGen = new ItemDictCompressorGen(

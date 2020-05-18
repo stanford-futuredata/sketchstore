@@ -1,22 +1,18 @@
 package board.planner;
 
 import org.eclipse.collections.api.list.primitive.DoubleList;
-import org.eclipse.collections.api.list.primitive.ImmutableLongList;
 import org.eclipse.collections.api.list.primitive.IntList;
 import org.eclipse.collections.api.list.primitive.LongList;
-import org.eclipse.collections.impl.factory.primitive.IntLists;
 import org.eclipse.collections.impl.factory.primitive.LongLists;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
 import org.eclipse.collections.impl.list.mutable.primitive.IntArrayList;
 import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
-import org.eclipse.collections.impl.list.mutable.primitive.UnmodifiableLongList;
+import tech.tablesaw.api.DoubleColumn;
 import tech.tablesaw.api.LongColumn;
 import tech.tablesaw.api.Table;
 
-import java.util.List;
-
-public class LinearFreqPlanner implements LinearPlanner<LongList> {
+public class LinearQuantilePlanner implements LinearPlanner<DoubleList> {
     public int numSegments;
     public int size;
 
@@ -34,9 +30,9 @@ public class LinearFreqPlanner implements LinearPlanner<LongList> {
     }
 
     @Override
-    public FastList<LongList> getSegments() {
-        LongColumn col = (LongColumn)data.column(metricCol);
-        FastList<LongList> segments = new FastList<>(numSegments);
+    public FastList<DoubleList> getSegments() {
+        DoubleColumn col = (DoubleColumn)data.column(metricCol);
+        FastList<DoubleList> segments = new FastList<>(numSegments);
         int n = col.size();
         int segLength = n / numSegments;
         for (int i = 0; i < numSegments; i++) {
@@ -45,9 +41,9 @@ public class LinearFreqPlanner implements LinearPlanner<LongList> {
             if (i == numSegments - 1) {
                 endIdx = n;
             }
-            LongArrayList curSegment = new LongArrayList(endIdx-startIdx);
+            DoubleArrayList curSegment = new DoubleArrayList(endIdx-startIdx);
             for (int curIdx = startIdx; curIdx < endIdx; curIdx++) {
-                curSegment.add(col.getLong(curIdx));
+                curSegment.add(col.getDouble(curIdx));
             }
             segments.add(curSegment);
         }

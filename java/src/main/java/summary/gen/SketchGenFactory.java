@@ -1,4 +1,4 @@
-package summary;
+package summary.gen;
 
 import org.eclipse.collections.api.PrimitiveIterable;
 

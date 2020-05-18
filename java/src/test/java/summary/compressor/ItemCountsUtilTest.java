@@ -3,6 +3,7 @@ package summary.compressor;
 import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
 import org.junit.Test;
+import summary.compressor.freq.ItemCountsUtil;
 
 import static org.junit.Assert.*;
 

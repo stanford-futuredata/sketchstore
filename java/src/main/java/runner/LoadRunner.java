@@ -3,16 +3,20 @@ package runner;
 import board.BoardGen;
 import board.StoryBoard;
 import board.planner.LinearFreqPlanner;
-import board.planner.Planner;
+import board.planner.LinearPlanner;
+import board.planner.LinearQuantilePlanner;
 import io.IOUtil;
 import io.SimpleCSVDataSource;
+import io.SimpleCSVDataSourceDouble;
 import io.SimpleCSVDataSourceLong;
-import org.eclipse.collections.api.factory.Lists;
+import org.eclipse.collections.api.PrimitiveIterable;
+import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.list.mutable.FastList;
-import summary.SketchGen;
-import summary.FreqSketchGenFactory;
-import summary.SketchGenFactory;
+import summary.gen.QuantileSketchGenFactory;
+import summary.gen.SketchGen;
+import summary.gen.FreqSketchGenFactory;
+import summary.gen.SketchGenFactory;
 import tech.tablesaw.api.Table;
 
 import java.io.File;
@@ -21,7 +25,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-public class LoadRunner {
+public class LoadRunner<T, TL extends PrimitiveIterable> {
     RunConfig config;
 
     String experiment;
@@ -52,35 +56,30 @@ public class LoadRunner {
         sketches = config.get("sketches");
     }
 
-    public void runQuantile() throws Exception {
-        throw new Exception("Not Implemented");
-    }
-
-    public void runFreq() throws Exception {
+    public void runLinearLoad(
+            SimpleCSVDataSource<T> xTrackSource,
+            LinearPlanner<TL> planner,
+            SketchGenFactory<T, TL> sketchGenFactory
+    ) throws Exception {
         Table t = IOUtil.loadTable(csvPath, colTypes);
         Path boardDir = Paths.get(outputDir, experiment, "boards");
         Files.createDirectories(boardDir);
 
-        SimpleCSVDataSource<Long> xTrackSource = new SimpleCSVDataSourceLong(xToTrackPath, 0);
         xTrackSource.setHasHeader(true);
-        FastList<Long> xToTrack = xTrackSource.get();
+        FastList<T> xToTrack = xTrackSource.get(
+                xToTrackPath, 0
+        );
 
         int curGranularity = granularity;
         int curSize = sizes.get(0);
-        Planner<LongList> planner = new LinearFreqPlanner(
-                curGranularity,
-                curSize
-        );
-        List<String> dimCols = Lists.fixedSize.empty();
         planner.plan(
-                t, metricCol, dimCols
+                t, metricCol, curGranularity, curSize
         );
-        SketchGenFactory<Long, LongList> sketchGenFactory = new FreqSketchGenFactory();
 
         for (String curSketch: sketches) {
-            SketchGen<Long, LongList> sGen = sketchGenFactory.getSketchGen(curSketch, xToTrack);
-            BoardGen<Long, LongList> bGen = new BoardGen<>(sGen);
-            StoryBoard<Long> board = bGen.generate(
+            SketchGen<T, TL> sGen = sketchGenFactory.getSketchGen(curSketch, xToTrack);
+            BoardGen<T, TL> bGen = new BoardGen<>(sGen);
+            StoryBoard<T> board = bGen.generate(
                     planner.getSegments(),
                     planner.getDimensions(),
                     planner.getSizes(),
@@ -100,15 +99,32 @@ public class LoadRunner {
     }
 
     public static void main(String[] args) throws Exception {
-        System.out.println("Starting Loader");
         String confFile = args[0];
         RunConfig config = RunConfig.fromJsonFile(confFile);
         boolean quantile = config.get("quantile");
-        LoadRunner loader = new LoadRunner(config);
         if (quantile) {
-            loader.runQuantile();
+            System.out.println("Starting Loader for Quantiles");
+            LoadRunner<Double, DoubleList> loader = new LoadRunner<>(config);
+            SimpleCSVDataSource<Double> xTrackSource = new SimpleCSVDataSourceDouble();
+            LinearPlanner<DoubleList> planner = new LinearQuantilePlanner();
+            SketchGenFactory<Double, DoubleList> sketchGenFactory = new QuantileSketchGenFactory();
+            loader.runLinearLoad(
+                    xTrackSource,
+                    planner,
+                    sketchGenFactory
+            );
         } else {
-            loader.runFreq();
+            System.out.println("Starting Loader for Frequencies");
+            LoadRunner<Long, LongList> loader = new LoadRunner<>(config);
+            SimpleCSVDataSource<Long> xTrackSource = new SimpleCSVDataSourceLong();
+            LinearPlanner<LongList> planner = new LinearFreqPlanner();
+            SketchGenFactory<Long, LongList> sketchGenFactory = new FreqSketchGenFactory();
+            loader.runLinearLoad(
+                    xTrackSource,
+                    planner,
+                    sketchGenFactory
+            );
         }
+
     }
 }

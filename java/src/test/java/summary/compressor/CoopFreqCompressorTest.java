@@ -2,6 +2,7 @@ package summary.compressor;
 
 import org.eclipse.collections.impl.map.mutable.primitive.LongDoubleHashMap;
 import org.junit.Test;
+import summary.compressor.freq.CoopFreqCompressor;
 
 import static org.junit.Assert.*;
 

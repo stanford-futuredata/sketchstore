@@ -1,4 +1,4 @@
-package summary.compressor;
+package summary.compressor.freq;
 
 import org.eclipse.collections.api.list.primitive.DoubleList;
 

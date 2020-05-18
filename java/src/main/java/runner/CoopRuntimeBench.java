@@ -15,11 +15,11 @@ import java.util.Random;
 
 public class CoopRuntimeBench {
     public static void prepare() throws Exception {
-        SimpleCSVDataSourceDouble in = new SimpleCSVDataSourceDouble(
+        SimpleCSVDataSourceDouble in = new SimpleCSVDataSourceDouble();
+        FastList<Double> batch = in.get(
                 "/Users/edgan/Documents/datasets/storyboard/power/power.csv",
                 0
         );
-        FastList<Double> batch = in.get();
         double[] batchArray = new double[batch.size()];
         for (int i = 0; i < batchArray.length; i++) {
             batchArray[i] = batch.get(i);

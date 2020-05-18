@@ -8,15 +8,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public abstract class SimpleCSVDataSource<T> {
-    public String fileName;
-    public int column;
     public int limit = Integer.MAX_VALUE;
     public boolean hasHeader = true;
-
-    public SimpleCSVDataSource(String fileName, int column) {
-        this.fileName = fileName;
-        this.column = column;
-    }
 
     public void setHasHeader(boolean flag) {
         this.hasHeader = flag;
@@ -28,7 +21,7 @@ public abstract class SimpleCSVDataSource<T> {
 
     public abstract T parseString(String strVal);
 
-    public FastList<T> get() throws IOException {
+    public FastList<T> get(String fileName, int column) throws IOException {
         BufferedReader bf = new BufferedReader(new FileReader(fileName));
         if (hasHeader) {
             bf.readLine();

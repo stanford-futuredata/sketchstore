@@ -1,11 +1,8 @@
-package summary.compressor;
+package summary.compressor.freq;
 
-import org.eclipse.collections.api.DoubleIterable;
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.api.list.primitive.DoubleList;
-import org.eclipse.collections.api.ordered.primitive.OrderedDoubleIterable;
 import org.eclipse.collections.api.tuple.primitive.LongDoublePair;
-import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
 import org.eclipse.collections.impl.map.mutable.primitive.LongDoubleHashMap;
 import org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples;
 

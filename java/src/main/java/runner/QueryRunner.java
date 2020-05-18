@@ -61,9 +61,11 @@ public class QueryRunner {
         Path boardDir = Paths.get(outputDir, experiment, "boards");
         int curSize = sizes.get(0);
 
-        SimpleCSVDataSource<Long> xTrackSource = new SimpleCSVDataSourceLong(xToTrackPath, 0);
+        SimpleCSVDataSource<Long> xTrackSource = new SimpleCSVDataSourceLong();
         xTrackSource.setHasHeader(true);
-        FastList<Long> xToTrack = xTrackSource.get();
+        FastList<Long> xToTrack = xTrackSource.get(
+                xToTrackPath, 0
+        );
 
         LinearSelector selector;
         QueryProcessor<Long> processor;
@@ -145,7 +147,7 @@ public class QueryRunner {
 
     public static void main(String[] args) throws Exception {
         System.out.println("Starting Query Runner");
-        System.in.read();
+//        System.in.read();
         String confFile = args[0];
         RunConfig config = RunConfig.fromJsonFile(confFile);
         QueryRunner runner = new QueryRunner(config);

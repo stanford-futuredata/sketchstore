@@ -7,12 +7,10 @@ import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import tech.tablesaw.api.Table;
 
-import java.io.Serializable;
 import java.util.List;
 
-public interface Planner<TL extends PrimitiveIterable> {
-    public FastList<TL> getSegments();
-    public FastList<LongList> getDimensions();
-    public IntList getSizes();
-    public DoubleList getBiases();
+public interface LinearPlanner<TL extends PrimitiveIterable> extends Planner<TL> {
+    void plan(
+            Table t, String metricCol, int numSegments, int size
+    );
 }
