@@ -17,13 +17,14 @@ public class CoopQuantileCompressor implements SeqCDFCompressor {
 
     @Override
     public CDFSketch compress(DoubleList xs, int size) {
-        trueCDF.add(xs);
+        trueCDF.addRaw(xs);
         CDFSketch xDeltas = trueCDF.calcDelta(storedCDF);
 
         DoubleArrayList savedItems = new DoubleArrayList(size);
         DoubleArrayList savedWeights = new DoubleArrayList(size);
 
         int n = xs.size();
+        int nDelta = xDeltas.values.size();
         int skip = (int)Math.ceil(n*1.0/size);
         int startIdx = 0;
         while (startIdx < n) {
@@ -44,7 +45,7 @@ public class CoopQuantileCompressor implements SeqCDFCompressor {
                     deltaEndIdx
             );
             double toSave = xDeltas.values.get(storedIdx);
-            for (int i = storedIdx; i < n; i++) {
+            for (int i = storedIdx; i < nDelta; i++) {
                 xDeltas.cumTotal.set(i, xDeltas.cumTotal.get(i) - segmentSize);
             }
 

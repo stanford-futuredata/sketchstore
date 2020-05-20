@@ -4,7 +4,7 @@ import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import summary.DictSketch;
 import summary.Sketch;
-import summary.accumulator.ExactFreqAccumulator;
+import summary.accumulator.MapFreqAccumulator;
 import summary.compressor.freq.ItemDictCompressor;
 
 public class ItemDictCompressorGen implements SketchGen<Long, LongList> {
@@ -16,8 +16,8 @@ public class ItemDictCompressorGen implements SketchGen<Long, LongList> {
 
     @Override
     public FastList<Sketch<Long>> generate(LongList xs, int size, double bias) {
-        ExactFreqAccumulator acc = new ExactFreqAccumulator();
-        acc.add(xs);
+        MapFreqAccumulator acc = new MapFreqAccumulator();
+        acc.addRaw(xs);
         Sketch<Long> sketch = new DictSketch(
                 compressor.compress(acc.values, size)
         );

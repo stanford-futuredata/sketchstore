@@ -2,25 +2,21 @@ package runner;
 
 import board.StoryBoard;
 import board.query.ErrorMetric;
-import board.query.LinearFreqAccProcessor;
+import board.query.LinearAccProcessor;
 import board.query.LinearSelector;
 import board.query.QueryProcessor;
 import board.workload.LinearWorkload;
-import io.CSVOutput;
-import io.IOUtil;
-import io.SimpleCSVDataSource;
-import io.SimpleCSVDataSourceLong;
-import org.eclipse.collections.api.factory.Lists;
+import io.*;
+import org.eclipse.collections.api.PrimitiveIterable;
 import org.eclipse.collections.api.factory.Maps;
 import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.api.list.primitive.IntList;
+import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.api.tuple.Pair;
-import org.eclipse.collections.impl.factory.OrderedMaps;
 import org.eclipse.collections.impl.list.mutable.FastList;
-import summary.accumulator.ExactFreqAccumulator;
-import tech.tablesaw.api.Table;
-import tech.tablesaw.columns.Column;
+import summary.accumulator.MapFreqAccumulator;
+import summary.accumulator.SortedQuantileAccumulator;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -29,7 +25,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
-public class QueryRunner {
+public class QueryRunner<T, TL extends PrimitiveIterable> {
     RunConfig config;
 
     String experiment;
@@ -57,23 +53,19 @@ public class QueryRunner {
         numQueries = config.get("num_queries");
     }
 
-    public FastList<Map<String, String>> run() throws Exception {
+    public FastList<Map<String, String>> run(
+            SimpleCSVDataSource<T> xTrackSource,
+            LinearSelector selector,
+            QueryProcessor<T> processor
+    ) throws Exception {
         Path boardDir = Paths.get(outputDir, experiment, "boards");
         int curSize = sizes.get(0);
 
-        SimpleCSVDataSource<Long> xTrackSource = new SimpleCSVDataSourceLong();
         xTrackSource.setHasHeader(true);
-        FastList<Long> xToTrack = xTrackSource.get(
+        FastList<T> xToTrack = xTrackSource.get(
                 xToTrackPath, 0
         );
 
-        LinearSelector selector;
-        QueryProcessor<Long> processor;
-        LinearFreqAccProcessor p_raw = new LinearFreqAccProcessor(
-                new ExactFreqAccumulator()
-        );
-        selector = p_raw;
-        processor = p_raw;
         LinearWorkload workloadGen = new LinearWorkload(0);
         FastList<IntList> workloadIntervals = workloadGen.generate(granularity, numQueries);
 
@@ -85,7 +77,7 @@ public class QueryRunner {
                         granularity
                 ));
         File fIn = new File(boardPath);
-        StoryBoard<Long> trueBoard = IOUtil.loadBoard(fIn);
+        StoryBoard<T> trueBoard = IOUtil.loadBoard(fIn);
 
         FastList<Map<String, String>> results = new FastList<>();
         MutableMap<String, String> baseResults = Maps.mutable.empty();
@@ -104,7 +96,7 @@ public class QueryRunner {
                             granularity
                     ));
             fIn = new File(boardPath);
-            StoryBoard<Long> board = IOUtil.loadBoard(fIn);
+            StoryBoard<T> board = IOUtil.loadBoard(fIn);
 
             Timer sketchTotalTimer = new Timer();
             sketchTotalTimer.start();
@@ -150,7 +142,29 @@ public class QueryRunner {
 //        System.in.read();
         String confFile = args[0];
         RunConfig config = RunConfig.fromJsonFile(confFile);
-        QueryRunner runner = new QueryRunner(config);
-        runner.run();
+        boolean quantile = config.get("quantile");
+        if (quantile) {
+            QueryRunner<Double, DoubleList> runner = new QueryRunner<>(config);
+            SimpleCSVDataSource<Double> xTrackSource = new SimpleCSVDataSourceDouble();
+            LinearAccProcessor<Double, DoubleList> p_raw = new LinearAccProcessor<>(
+                    new SortedQuantileAccumulator()
+            );
+            runner.run(
+                    xTrackSource,
+                    p_raw,
+                    p_raw
+            );
+        } else {
+            QueryRunner<Long, LongList> runner = new QueryRunner<>(config);
+            SimpleCSVDataSource<Long> xTrackSource = new SimpleCSVDataSourceLong();
+            LinearAccProcessor<Long, LongList> p_raw = new LinearAccProcessor<>(
+                    new MapFreqAccumulator()
+            );
+            runner.run(
+                    xTrackSource,
+                    p_raw,
+                    p_raw
+            );
+        }
     }
 }

@@ -33,8 +33,8 @@ public class CoopQuantileCompressorTest {
         CDFSketch sketch2 = compress.compress(xs, 2);
 
         SortedQuantileAccumulator acc = new SortedQuantileAccumulator();
-        acc.add(sketch1);
-        acc.add(sketch2);
+        acc.addSketch(sketch1);
+        acc.addSketch(sketch2);
         assertEquals(1000.0, acc.getCDF().estimate(500.0), 1e-10);
     }
 }

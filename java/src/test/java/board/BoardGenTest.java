@@ -1,7 +1,7 @@
 package board;
 
 import board.planner.LinearFreqPlanner;
-import board.query.LinearFreqAccProcessor;
+import board.query.LinearAccProcessor;
 import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.api.list.primitive.IntList;
 import org.eclipse.collections.api.list.primitive.LongList;
@@ -12,7 +12,7 @@ import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
 import org.junit.Test;
 import summary.gen.SketchGen;
 import summary.gen.ItemDictCompressorGen;
-import summary.accumulator.ExactFreqAccumulator;
+import summary.accumulator.MapFreqAccumulator;
 import summary.compressor.freq.CoopFreqCompressor;
 import tech.tablesaw.api.ColumnType;
 import tech.tablesaw.api.Table;
@@ -46,8 +46,8 @@ public class BoardGenTest {
                 planner.getBiases()
         );
 
-        LinearFreqAccProcessor qp = new LinearFreqAccProcessor(
-                new ExactFreqAccumulator()
+        LinearAccProcessor qp = new LinearAccProcessor(
+                new MapFreqAccumulator()
         );
         qp.setRange(0, 2);
         FastList<Long> xToTrack = FastList.newListWith(1L, 2L, 3L);
@@ -81,8 +81,8 @@ public class BoardGenTest {
                 bias
         );
 
-        LinearFreqAccProcessor qp = new LinearFreqAccProcessor(
-                new ExactFreqAccumulator()
+        LinearAccProcessor qp = new LinearAccProcessor(
+                new MapFreqAccumulator()
         );
         qp.setRange(0, 2);
         FastList<Long> xToTrack = FastList.newListWith(5L, 1L, 2L);

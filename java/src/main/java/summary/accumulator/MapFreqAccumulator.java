@@ -2,20 +2,18 @@ package summary.accumulator;
 
 import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.api.list.primitive.LongList;
-import org.eclipse.collections.api.tuple.primitive.LongDoublePair;
-import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
 import org.eclipse.collections.impl.map.mutable.primitive.LongDoubleHashMap;
 import summary.DictSketch;
 
 import java.util.List;
 
-public class ExactFreqAccumulator implements FreqAccumulator {
+public class MapFreqAccumulator implements Accumulator<Long, LongList> {
     public LongDoubleHashMap values;
-    public ExactFreqAccumulator() {
+    public MapFreqAccumulator() {
         values = new LongDoubleHashMap();
     }
-    public ExactFreqAccumulator(int size) {
+    public MapFreqAccumulator(int size) {
         values = new LongDoubleHashMap(size);
     }
 
@@ -25,14 +23,22 @@ public class ExactFreqAccumulator implements FreqAccumulator {
     }
 
     @Override
-    public void add(LongList xs) {
+    public int compress(int size) {
+        return 0;
+    }
+
+    @Override
+    public void addRaw(LongList xs) {
         for (int i = 0; i < xs.size(); i++) {
             values.addToValue(xs.get(i), 1.0);
         }
     }
+
     @Override
-    public void add(LongDoubleHashMap curMap) {
-        curMap.forEachKeyValue(this::addTovalue);
+    public void addSketch(Object curObject) {
+        assert(curObject instanceof DictSketch);
+        DictSketch curSketch = (DictSketch)  curObject;
+        curSketch.vals.forEachKeyValue(this::addTovalue);
     }
 
     @Override

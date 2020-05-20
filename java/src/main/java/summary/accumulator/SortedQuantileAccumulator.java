@@ -4,7 +4,9 @@ import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
 import summary.CDFSketch;
 
-public class SortedQuantileAccumulator {
+import java.util.List;
+
+public class SortedQuantileAccumulator implements Accumulator<Double, DoubleList> {
     public DoubleArrayList items;
     public DoubleArrayList weights;
     public SortedQuantileAccumulator() {
@@ -16,17 +18,39 @@ public class SortedQuantileAccumulator {
         this.weights = weights;
     }
 
-    public void add(DoubleList xs) {
+    @Override
+    public void addRaw(DoubleList xs) {
         add(xs, DoubleArrayList.newWithNValues(xs.size(), 1.0));
     }
 
-    public void add(CDFSketch sketch) {
+    @Override
+    public void addSketch(Object curObject) {
+        assert(curObject instanceof CDFSketch);
+        CDFSketch sketch = (CDFSketch) curObject;
         int n = sketch.values.size();
         DoubleArrayList weights = new DoubleArrayList(n);
         for (int i = 0; i < n; i++) {
             weights.add(sketch.getWeight(i));
         }
         add(sketch.values, weights);
+    }
+
+    @Override
+    public DoubleList estimate(List<Double> xToTrack) {
+        int n = xToTrack.size();
+        int nStored = items.size();
+        DoubleArrayList xRanks = new DoubleArrayList(n);
+        double curRank = 0.0;
+
+        int itemIdx = 0;
+        for (double x : xToTrack) {
+            while (itemIdx < nStored && items.get(itemIdx) <= x) {
+                curRank += weights.get(itemIdx);
+                itemIdx++;
+            }
+            xRanks.add(curRank);
+        }
+        return xRanks;
     }
 
     public void add(DoubleList xs, DoubleList segWeights) {
@@ -120,7 +144,13 @@ public class SortedQuantileAccumulator {
         );
     }
 
-    public void compress(int size) {
-        return;
+    @Override
+    public void reset() {
+        items.clear();
+        weights.clear();
+    }
+
+    public int compress(int size) {
+        return 0;
     }
 }

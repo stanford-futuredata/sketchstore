@@ -1,5 +1,7 @@
 package summary.compressor.quantile;
 
+import org.eclipse.collections.api.factory.Lists;
+import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.impl.factory.primitive.DoubleLists;
 import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
@@ -16,7 +18,7 @@ public class TrackedQuantileCompressorTest {
         for (int i = 0; i < n; i++) {
             xs.add(i);
         }
-        DoubleList xTracked = DoubleLists.mutable.of(
+        MutableList<Double> xTracked = Lists.mutable.of(
                 10.0, 75.0
         );
         SeqCDFCompressor comp = new TrackedQuantileCompressor(xTracked);
