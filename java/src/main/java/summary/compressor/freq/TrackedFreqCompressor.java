@@ -5,10 +5,10 @@ import org.eclipse.collections.impl.map.mutable.primitive.LongDoubleHashMap;
 
 import java.util.List;
 
-public class TopValuesFreqCompressor implements ItemDictCompressor{
+public class TrackedFreqCompressor implements ItemDictCompressor{
     public LongArrayList xToTrack;
 
-    public TopValuesFreqCompressor(List<Long> xToTrack) {
+    public TrackedFreqCompressor(List<Long> xToTrack) {
         this.xToTrack = new LongArrayList(xToTrack.size());
         for (long x : xToTrack) {
             this.xToTrack.add(x);

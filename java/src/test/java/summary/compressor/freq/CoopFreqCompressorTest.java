@@ -1,4 +1,4 @@
-package summary.compressor;
+package summary.compressor.freq;
 
 import org.eclipse.collections.impl.map.mutable.primitive.LongDoubleHashMap;
 import org.junit.Test;

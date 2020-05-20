@@ -5,19 +5,42 @@ import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
 
 public class CDFSketch implements Sketch<Double> {
     public DoubleArrayList values;
-    public DoubleArrayList weights;
     public DoubleArrayList cumTotal;
-    public CDFSketch(DoubleList xs, DoubleList weights) {
-        this.values = DoubleArrayList.newList(xs);
-        this.weights = DoubleArrayList.newList(weights);
-        double total = weights.sum();
+    public CDFSketch(DoubleArrayList values, DoubleArrayList cumTotal) {
+        this.values = values;
+        this.cumTotal = cumTotal;
+    }
+    public static CDFSketch fromWeights(DoubleList xs, DoubleList weights) {
+        DoubleArrayList values = new DoubleArrayList(xs.toArray());
         int n = weights.size();
         double runningTotal = 0;
-        cumTotal = new DoubleArrayList(n);
+        DoubleArrayList cumTotal = new DoubleArrayList(n);
         for (int i = 0; i < n; i++) {
             runningTotal += weights.get(i);
-            cumTotal.set(i, runningTotal);
+            cumTotal.add(runningTotal);
         }
+        return new CDFSketch(values, cumTotal);
+    }
+
+    public double getWeight(int index) {
+        double weight = cumTotal.get(index);
+        if (index > 0) {
+            weight -= cumTotal.get(index - 1);
+        }
+        return weight;
+    }
+
+    @Override
+    public String toString() {
+        int n = values.size();
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i < n; i++) {
+            out.append(String.valueOf(values.get(i)));
+            out.append(":");
+            out.append(String.valueOf(cumTotal.get(i)));
+            out.append(" ");
+        }
+        return out.toString();
     }
 
     @Override
