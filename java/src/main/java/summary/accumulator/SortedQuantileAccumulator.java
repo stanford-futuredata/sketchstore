@@ -20,6 +20,15 @@ public class SortedQuantileAccumulator {
         add(xs, DoubleArrayList.newWithNValues(xs.size(), 1.0));
     }
 
+    public void add(CDFSketch sketch) {
+        int n = sketch.values.size();
+        DoubleArrayList weights = new DoubleArrayList(n);
+        for (int i = 0; i < n; i++) {
+            weights.add(sketch.getWeight(i));
+        }
+        add(sketch.values, weights);
+    }
+
     public void add(DoubleList xs, DoubleList segWeights) {
         int n = xs.size();
         int nStored = items.size();

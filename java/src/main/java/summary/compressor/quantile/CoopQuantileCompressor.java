@@ -1,11 +1,12 @@
 package summary.compressor.quantile;
 
 import org.apache.commons.math3.util.FastMath;
+import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
 import summary.CDFSketch;
 import summary.accumulator.SortedQuantileAccumulator;
 
-public class CoopQuantileCompressor implements SeqDictCompressor {
+public class CoopQuantileCompressor implements SeqCDFCompressor {
     public SortedQuantileAccumulator trueCDF;
     public SortedQuantileAccumulator storedCDF;
 
@@ -15,7 +16,7 @@ public class CoopQuantileCompressor implements SeqDictCompressor {
     }
 
     @Override
-    public CDFSketch compress(DoubleArrayList xs, int size) {
+    public CDFSketch compress(DoubleList xs, int size) {
         trueCDF.add(xs);
         CDFSketch xDeltas = trueCDF.calcDelta(storedCDF);
 
@@ -81,7 +82,7 @@ public class CoopQuantileCompressor implements SeqDictCompressor {
             double lossCurrent = FastMath.cosh(
                     (deltaCDF.get(curIdx))*scaleFactor
             );
-            suffixCumLossDelta += (lossCurrent - lossIfStored);
+            suffixCumLossDelta += (lossIfStored - lossCurrent);
             if (suffixCumLossDelta < bestCumLossDelta) {
                 bestIdxToStore = curIdx;
                 bestCumLossDelta = suffixCumLossDelta;
