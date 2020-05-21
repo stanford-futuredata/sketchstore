@@ -16,6 +16,7 @@ import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import summary.accumulator.MapFreqAccumulator;
+import summary.accumulator.MapQuantileAccumulator;
 import summary.accumulator.SortedQuantileAccumulator;
 
 import java.io.File;
@@ -147,8 +148,9 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
             QueryRunner<Double, DoubleList> runner = new QueryRunner<>(config);
             SimpleCSVDataSource<Double> xTrackSource = new SimpleCSVDataSourceDouble();
             LinearAccProcessor<Double, DoubleList> p_raw = new LinearAccProcessor<>(
-                    new SortedQuantileAccumulator()
+                    new MapQuantileAccumulator()
             );
+//            System.in.read();
             runner.run(
                     xTrackSource,
                     p_raw,

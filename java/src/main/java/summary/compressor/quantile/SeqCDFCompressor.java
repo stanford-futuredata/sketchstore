@@ -1,8 +1,7 @@
 package summary.compressor.quantile;
 
 import org.eclipse.collections.api.list.primitive.DoubleList;
-import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
-import summary.CDFSketch;
+import summary.CounterDoubleSketch;
 
 public interface SeqCDFCompressor {
     /**
@@ -10,5 +9,5 @@ public interface SeqCDFCompressor {
      * @param size number of items to store
      * @return sorted item, weight pairs
      */
-    CDFSketch compress(DoubleList xs, int size);
+    CounterDoubleSketch compress(DoubleList xs, int size);
 }

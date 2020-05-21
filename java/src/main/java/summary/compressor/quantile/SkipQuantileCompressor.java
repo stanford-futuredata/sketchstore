@@ -2,7 +2,7 @@ package summary.compressor.quantile;
 
 import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
-import summary.CDFSketch;
+import summary.CounterDoubleSketch;
 
 import java.util.Random;
 
@@ -16,7 +16,7 @@ public class SkipQuantileCompressor implements SeqCDFCompressor {
     }
 
     @Override
-    public CDFSketch compress(DoubleList xs, int size) {
+    public CounterDoubleSketch compress(DoubleList xs, int size) {
         int n = xs.size();
         int skip = (int)Math.ceil(n*1.0/size);
         DoubleArrayList savedItems = new DoubleArrayList(size);
@@ -49,6 +49,9 @@ public class SkipQuantileCompressor implements SeqCDFCompressor {
             startIdx += skip;
         }
 
-        return CDFSketch.fromWeights(savedItems, savedWeights);
+        return new CounterDoubleSketch(
+                savedItems.toArray(),
+                savedWeights.toArray()
+        );
     }
 }

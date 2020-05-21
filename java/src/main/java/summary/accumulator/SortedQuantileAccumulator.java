@@ -2,7 +2,7 @@ package summary.accumulator;
 
 import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
-import summary.CDFSketch;
+import summary.CounterDoubleSketch;
 
 import java.util.List;
 
@@ -25,14 +25,11 @@ public class SortedQuantileAccumulator implements Accumulator<Double, DoubleList
 
     @Override
     public void addSketch(Object curObject) {
-        assert(curObject instanceof CDFSketch);
-        CDFSketch sketch = (CDFSketch) curObject;
-        int n = sketch.values.size();
-        DoubleArrayList weights = new DoubleArrayList(n);
-        for (int i = 0; i < n; i++) {
-            weights.add(sketch.getWeight(i));
-        }
-        add(sketch.values, weights);
+        assert(curObject instanceof CounterDoubleSketch);
+        CounterDoubleSketch sketch = (CounterDoubleSketch) curObject;
+        double[] values = sketch.values;
+        double[] weights = sketch.weights;
+        add(new DoubleArrayList(values), new DoubleArrayList(weights));
     }
 
     @Override
@@ -108,7 +105,7 @@ public class SortedQuantileAccumulator implements Accumulator<Double, DoubleList
         weights = newWeights;
     }
 
-    public CDFSketch calcDelta(SortedQuantileAccumulator other) {
+    public double[] calcDelta(SortedQuantileAccumulator other) {
         int n = items.size();
         double[] newCDF = new double[n];
         double otherCDF = 0.0;
@@ -131,17 +128,11 @@ public class SortedQuantileAccumulator implements Accumulator<Double, DoubleList
             newCDF[i] = curCDF - otherCDF;
         }
 
-        return new CDFSketch(items, new DoubleArrayList(newCDF));
+        return newCDF;
     }
 
     public int searchItemIdx(double x) {
         return items.binarySearch(x);
-    }
-
-    public CDFSketch getCDF() {
-        return CDFSketch.fromWeights(
-                items, weights
-        );
     }
 
     @Override

@@ -2,11 +2,9 @@ package summary.compressor.quantile;
 
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.MutableList;
-import org.eclipse.collections.api.list.primitive.DoubleList;
-import org.eclipse.collections.impl.factory.primitive.DoubleLists;
 import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
 import org.junit.Test;
-import summary.CDFSketch;
+import summary.CounterDoubleSketch;
 
 import static org.junit.Assert.*;
 
@@ -22,8 +20,8 @@ public class TrackedQuantileCompressorTest {
                 10.0, 75.0
         );
         SeqCDFCompressor comp = new TrackedQuantileCompressor(xTracked);
-        CDFSketch sketch = comp.compress(xs, 10);
-        assertEquals(2, sketch.values.size());
+        CounterDoubleSketch sketch = comp.compress(xs, 10);
+        assertEquals(2, sketch.values.length);
         assertEquals(76.0, sketch.estimate(101.0), 1e-10);
     }
 

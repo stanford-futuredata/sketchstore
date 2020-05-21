@@ -5,7 +5,6 @@ import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.impl.factory.primitive.DoubleLists;
 import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
 import org.junit.Test;
-import summary.CDFSketch;
 
 import static org.junit.Assert.*;
 
@@ -29,8 +28,8 @@ public class SortedQuantileAccumulatorTest {
 
         SortedQuantileAccumulator trueCDF = new SortedQuantileAccumulator(xs2, pdf2);
         SortedQuantileAccumulator estCDF = new SortedQuantileAccumulator(xs, pdf);
-        CDFSketch delta = trueCDF.calcDelta(estCDF);
-        assertEquals(delta.values.size(), trueCDF.items.size());
+        double[] delta = trueCDF.calcDelta(estCDF);
+        assertEquals(delta.length, trueCDF.items.size());
     }
 
     @Test
