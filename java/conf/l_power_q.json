@@ -11,7 +11,8 @@
   "sketches": [
     "top_values",
     "truncation",
-    "cooperative"
+    "cooperative",
+    "kll"
   ],
 
   "x_to_track": "../../../datasets/storyboard/power/power_tracked.csv",
