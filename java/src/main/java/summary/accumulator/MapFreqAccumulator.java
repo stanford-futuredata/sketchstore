@@ -6,6 +6,7 @@ import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
 import org.eclipse.collections.impl.map.mutable.primitive.LongDoubleHashMap;
 import summary.CounterLongSketch;
 import summary.DictSketch;
+import summary.Sketch;
 
 import java.util.List;
 
@@ -36,7 +37,7 @@ public class MapFreqAccumulator implements Accumulator<Long, LongList> {
     }
 
     @Override
-    public void addSketch(Object curObject) {
+    public void addSketch(Sketch<Long> curObject) {
         if (curObject instanceof DictSketch) {
             DictSketch curSketch = (DictSketch) curObject;
             curSketch.vals.forEachKeyValue(this::addTovalue);

@@ -28,6 +28,11 @@ public class CounterDoubleSketch implements Sketch<Double> {
     }
 
     @Override
+    public int size() {
+        return values.length;
+    }
+
+    @Override
     public Sketch<Double> merge(Sketch<Double> otherArg) {
         throw new RuntimeException("Not Implemented");
     }

@@ -3,6 +3,7 @@ package summary.accumulator;
 import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
 import summary.CounterDoubleSketch;
+import summary.Sketch;
 
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class SortedQuantileAccumulator implements Accumulator<Double, DoubleList
     }
 
     @Override
-    public void addSketch(Object curObject) {
+    public void addSketch(Sketch<Double> curObject) {
         assert(curObject instanceof CounterDoubleSketch);
         CounterDoubleSketch sketch = (CounterDoubleSketch) curObject;
         double[] values = sketch.values;

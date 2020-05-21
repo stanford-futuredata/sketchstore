@@ -4,6 +4,7 @@ import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
 import org.eclipse.collections.impl.map.mutable.primitive.DoubleDoubleHashMap;
 import summary.CounterDoubleSketch;
+import summary.Sketch;
 
 import java.util.List;
 
@@ -36,7 +37,7 @@ public class MapQuantileAccumulator implements Accumulator<Double, DoubleList>{
     }
 
     @Override
-    public void addSketch(Object newObject) {
+    public void addSketch(Sketch<Double> newObject) {
         assert(newObject instanceof CounterDoubleSketch);
         CounterDoubleSketch newSketch = (CounterDoubleSketch) newObject;
         int nSketch = newSketch.values.length;

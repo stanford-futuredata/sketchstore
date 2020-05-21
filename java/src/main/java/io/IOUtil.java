@@ -24,6 +24,19 @@ public class IOUtil {
         );
     }
 
+    public static Serializable testSerDe(Serializable o) throws IOException, ClassNotFoundException {
+        File tempFile = File.createTempFile("board_serialize", "temp");
+        tempFile.deleteOnExit();
+        FileOutputStream fOut = new FileOutputStream(tempFile);
+        ObjectOutputStream oOut = new ObjectOutputStream(fOut);
+        oOut.writeObject(o);
+        oOut.close();
+        FileInputStream fIn = new FileInputStream(tempFile);
+        ObjectInputStream oIn = new ObjectInputStream(fIn);
+        return (Serializable)oIn.readObject();
+    }
+
+
     public static <T> void writeBoard(StoryBoard<T> board, File f) throws IOException {
         FileOutputStream fOut = new FileOutputStream(f);
         ObjectOutputStream oOut = new ObjectOutputStream(fOut);

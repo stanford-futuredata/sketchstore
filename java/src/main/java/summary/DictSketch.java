@@ -14,6 +14,11 @@ public class DictSketch implements Sketch<Long> {
     }
 
     @Override
+    public int size() {
+        return vals.size();
+    }
+
+    @Override
     public Sketch<Long> merge(Sketch<Long> otherArg) {
         DictSketch other = (DictSketch)otherArg;
         vals.putAll(other.vals);

@@ -14,6 +14,11 @@ public class CounterLongSketch implements Sketch<Long> {
     }
 
     @Override
+    public int size() {
+        return vals.length;
+    }
+
+    @Override
     public Sketch<Long> merge(Sketch<Long> otherArg) {
         throw new RuntimeException("Not Implemented");
     }
