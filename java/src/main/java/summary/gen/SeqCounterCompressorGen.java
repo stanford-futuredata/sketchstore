@@ -4,12 +4,12 @@ import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.api.list.primitive.MutableDoubleList;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import summary.Sketch;
-import summary.compressor.quantile.SeqCDFCompressor;
+import summary.compressor.quantile.SeqCounterCompressor;
 
-public class SeqCDFCompressorGen implements SketchGen<Double, DoubleList> {
-    public SeqCDFCompressor compressor;
+public class SeqCounterCompressorGen implements SketchGen<Double, DoubleList> {
+    public SeqCounterCompressor compressor;
 
-    public SeqCDFCompressorGen(SeqCDFCompressor c) {
+    public SeqCounterCompressorGen(SeqCounterCompressor c) {
         compressor = c;
     }
 

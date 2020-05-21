@@ -4,6 +4,7 @@ import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
 import org.eclipse.collections.impl.map.mutable.primitive.LongDoubleHashMap;
+import summary.CounterLongSketch;
 import summary.DictSketch;
 
 import java.util.List;
@@ -36,9 +37,20 @@ public class MapFreqAccumulator implements Accumulator<Long, LongList> {
 
     @Override
     public void addSketch(Object curObject) {
-        assert(curObject instanceof DictSketch);
-        DictSketch curSketch = (DictSketch)  curObject;
-        curSketch.vals.forEachKeyValue(this::addTovalue);
+        if (curObject instanceof DictSketch) {
+            DictSketch curSketch = (DictSketch) curObject;
+            curSketch.vals.forEachKeyValue(this::addTovalue);
+        } else if (curObject instanceof CounterLongSketch) {
+            CounterLongSketch curSketch = (CounterLongSketch) curObject;
+            int n = curSketch.vals.length;
+            long[] vals = curSketch.vals;
+            double[] weights = curSketch.weights;
+            for (int i = 0; i < n; i++) {
+                values.addToValue(vals[i], weights[i]);
+            }
+        } else {
+            throw new RuntimeException("Invalid sketch type: "+curObject.getClass().getCanonicalName());
+        }
     }
 
     @Override

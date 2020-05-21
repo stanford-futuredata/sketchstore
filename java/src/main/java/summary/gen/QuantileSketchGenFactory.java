@@ -5,7 +5,6 @@ import summary.compressor.quantile.CoopQuantileCompressor;
 import summary.compressor.quantile.SkipQuantileCompressor;
 import summary.compressor.quantile.TrackedQuantileCompressor;
 
-import javax.sound.midi.Track;
 import java.util.List;
 
 public class QuantileSketchGenFactory implements SketchGenFactory<Double, DoubleList> {
@@ -14,11 +13,11 @@ public class QuantileSketchGenFactory implements SketchGenFactory<Double, Double
             List<Double> xToTrack
             ) {
         if (sketch.equals("top_values")) {
-            return new SeqCDFCompressorGen(new TrackedQuantileCompressor(xToTrack));
+            return new SeqCounterCompressorGen(new TrackedQuantileCompressor(xToTrack));
         } else if(sketch.equals("truncation")) {
-            return new SeqCDFCompressorGen(new SkipQuantileCompressor(false, 0));
+            return new SeqCounterCompressorGen(new SkipQuantileCompressor(false, 0));
         } else if(sketch.equals("cooperative")) {
-            return new SeqCDFCompressorGen(new CoopQuantileCompressor());
+            return new SeqCounterCompressorGen(new CoopQuantileCompressor());
         } else {
             return null;
         }

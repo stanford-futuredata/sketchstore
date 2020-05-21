@@ -6,7 +6,7 @@ import summary.CounterDoubleSketch;
 
 import java.util.List;
 
-public class TrackedQuantileCompressor implements SeqCDFCompressor {
+public class TrackedQuantileCompressor implements SeqCounterCompressor {
     public DoubleArrayList xToTrack;
 
     public TrackedQuantileCompressor(List<Double> xTracked) {

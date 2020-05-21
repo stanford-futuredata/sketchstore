@@ -3,7 +3,7 @@ package summary.compressor.quantile;
 import org.eclipse.collections.api.list.primitive.DoubleList;
 import summary.CounterDoubleSketch;
 
-public interface SeqCDFCompressor {
+public interface SeqCounterCompressor {
     /**
      * @param xs sorted list of input values
      * @param size number of items to store

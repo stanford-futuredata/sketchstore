@@ -6,7 +6,7 @@ import summary.CounterDoubleSketch;
 
 import java.util.Random;
 
-public class SkipQuantileCompressor implements SeqCDFCompressor {
+public class SkipQuantileCompressor implements SeqCounterCompressor {
     boolean isRandom;
     Random rng;
 

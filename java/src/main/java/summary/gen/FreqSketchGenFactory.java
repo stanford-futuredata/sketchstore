@@ -13,11 +13,11 @@ public class FreqSketchGenFactory implements SketchGenFactory<Long, LongList> {
             List<Long> xToTrack
             ) {
         if (sketch.equals("top_values")) {
-            return new ItemDictCompressorGen(new TrackedFreqCompressor(xToTrack));
+            return new ItemCounterCompressorGen(new TrackedFreqCompressor(xToTrack));
         } else if(sketch.equals("truncation")) {
-            return new ItemDictCompressorGen(new TruncationFreqCompressor());
+            return new ItemCounterCompressorGen(new TruncationFreqCompressor());
         } else if(sketch.equals("cooperative")) {
-            return new ItemDictCompressorGen(new CoopFreqCompressor(0));
+            return new ItemCounterCompressorGen(new CoopFreqCompressor(0));
         } else {
             return null;
         }

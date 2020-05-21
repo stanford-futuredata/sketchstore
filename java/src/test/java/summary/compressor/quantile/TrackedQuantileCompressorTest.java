@@ -19,7 +19,7 @@ public class TrackedQuantileCompressorTest {
         MutableList<Double> xTracked = Lists.mutable.of(
                 10.0, 75.0
         );
-        SeqCDFCompressor comp = new TrackedQuantileCompressor(xTracked);
+        SeqCounterCompressor comp = new TrackedQuantileCompressor(xTracked);
         CounterDoubleSketch sketch = comp.compress(xs, 10);
         assertEquals(2, sketch.values.length);
         assertEquals(76.0, sketch.estimate(101.0), 1e-10);

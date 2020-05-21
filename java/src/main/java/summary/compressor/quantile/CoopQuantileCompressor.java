@@ -6,7 +6,7 @@ import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
 import summary.CounterDoubleSketch;
 import summary.accumulator.SortedQuantileAccumulator;
 
-public class CoopQuantileCompressor implements SeqCDFCompressor {
+public class CoopQuantileCompressor implements SeqCounterCompressor {
     public SortedQuantileAccumulator trueCDF;
     public SortedQuantileAccumulator storedCDF;
 
