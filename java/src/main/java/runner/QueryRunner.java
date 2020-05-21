@@ -3,8 +3,6 @@ package runner;
 import board.StoryBoard;
 import board.query.ErrorMetric;
 import board.query.LinearAccProcessor;
-import board.query.LinearSelector;
-import board.query.QueryProcessor;
 import board.workload.LinearWorkload;
 import io.*;
 import org.eclipse.collections.api.PrimitiveIterable;
@@ -15,9 +13,9 @@ import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.list.mutable.FastList;
-import summary.accumulator.MapFreqAccumulator;
-import summary.accumulator.MapQuantileAccumulator;
-import summary.accumulator.SortedQuantileAccumulator;
+import summary.factory.FreqSketchGenFactory;
+import summary.factory.QuantileSketchGenFactory;
+import summary.factory.SketchGenFactory;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -56,8 +54,7 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
 
     public FastList<Map<String, String>> run(
             SimpleCSVDataSource<T> xTrackSource,
-            LinearSelector selector,
-            QueryProcessor<T> processor
+            SketchGenFactory<T, TL> genFactory
     ) throws Exception {
         Path boardDir = Paths.get(outputDir, experiment, "boards");
         int curSize = sizes.get(0);
@@ -79,6 +76,9 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
                 ));
         File fIn = new File(boardPath);
         StoryBoard<T> trueBoard = IOUtil.loadBoard(fIn);
+        LinearAccProcessor<T, TL> p_true = new LinearAccProcessor<>(
+                genFactory.getAccumulator("top_values")
+        );
 
         FastList<Map<String, String>> results = new FastList<>();
         MutableMap<String, String> baseResults = Maps.mutable.empty();
@@ -99,15 +99,20 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
             fIn = new File(boardPath);
             StoryBoard<T> board = IOUtil.loadBoard(fIn);
 
+            LinearAccProcessor<T, TL> p_raw = new LinearAccProcessor<>(
+                    genFactory.getAccumulator(curSketch)
+            );
+
             Timer sketchTotalTimer = new Timer();
             sketchTotalTimer.start();
             for (IntList curInterval : workloadIntervals) {
                 int startIdx = curInterval.get(0);
                 int endIdx = curInterval.get(1);
-                selector.setRange(startIdx, endIdx);
-                DoubleList trueResults = processor.query(trueBoard, xToTrack);
-                DoubleList queryResults = processor.query(board, xToTrack);
-                double trueTotal = processor.total(trueBoard);
+                p_true.setRange(startIdx, endIdx);
+                DoubleList trueResults = p_true.query(trueBoard, xToTrack);
+                double trueTotal = p_true.total(trueBoard);
+                p_raw.setRange(startIdx, endIdx);
+                DoubleList queryResults = p_raw.query(board, xToTrack);
                 MutableMap<String, Double> errorQuantities = ErrorMetric.calcErrors(
                         trueResults,
                         queryResults
@@ -147,25 +152,19 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
         if (quantile) {
             QueryRunner<Double, DoubleList> runner = new QueryRunner<>(config);
             SimpleCSVDataSource<Double> xTrackSource = new SimpleCSVDataSourceDouble();
-            LinearAccProcessor<Double, DoubleList> p_raw = new LinearAccProcessor<>(
-                    new MapQuantileAccumulator()
-            );
-//            System.in.read();
+            SketchGenFactory<Double, DoubleList> sketchGenFactory = new QuantileSketchGenFactory();
             runner.run(
                     xTrackSource,
-                    p_raw,
-                    p_raw
+                    sketchGenFactory
             );
         } else {
             QueryRunner<Long, LongList> runner = new QueryRunner<>(config);
             SimpleCSVDataSource<Long> xTrackSource = new SimpleCSVDataSourceLong();
-            LinearAccProcessor<Long, LongList> p_raw = new LinearAccProcessor<>(
-                    new MapFreqAccumulator()
-            );
+            SketchGenFactory<Long, LongList> sketchGenFactory = new FreqSketchGenFactory();
+
             runner.run(
                     xTrackSource,
-                    p_raw,
-                    p_raw
+                    sketchGenFactory
             );
         }
     }

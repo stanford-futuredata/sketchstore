@@ -18,7 +18,7 @@ public class YahooMGGen implements SketchGen<Long, LongList> {
         for (int i = 0; i < n; i++) {
             rawSketch.update(xs.get(i));
         }
-        out.add(new YahooMGSketch(rawSketch, size));
+        out.add(new YahooMGSketch(rawSketch, adjustedSize));
         return out;
     }
 }

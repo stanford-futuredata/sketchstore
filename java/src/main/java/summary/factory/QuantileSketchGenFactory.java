@@ -1,9 +1,13 @@
-package summary.gen;
+package summary.factory;
 
 import org.eclipse.collections.api.list.primitive.DoubleList;
+import summary.accumulator.Accumulator;
+import summary.accumulator.MapQuantileAccumulator;
 import summary.compressor.quantile.CoopQuantileCompressor;
 import summary.compressor.quantile.SkipQuantileCompressor;
 import summary.compressor.quantile.TrackedQuantileCompressor;
+import summary.gen.SeqCounterCompressorGen;
+import summary.gen.SketchGen;
 
 import java.util.List;
 
@@ -21,5 +25,10 @@ public class QuantileSketchGenFactory implements SketchGenFactory<Double, Double
         } else {
             return null;
         }
+    }
+
+    @Override
+    public Accumulator<Double, DoubleList> getAccumulator(String sketch) {
+        return new MapQuantileAccumulator();
     }
 }

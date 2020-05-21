@@ -13,10 +13,10 @@ import org.eclipse.collections.api.PrimitiveIterable;
 import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.list.mutable.FastList;
-import summary.gen.QuantileSketchGenFactory;
+import summary.factory.QuantileSketchGenFactory;
 import summary.gen.SketchGen;
-import summary.gen.FreqSketchGenFactory;
-import summary.gen.SketchGenFactory;
+import summary.factory.FreqSketchGenFactory;
+import summary.factory.SketchGenFactory;
 import tech.tablesaw.api.Table;
 
 import java.io.File;
@@ -77,6 +77,7 @@ public class LoadRunner<T, TL extends PrimitiveIterable> {
         );
 
         for (String curSketch: sketches) {
+            System.out.println("Loading: "+curSketch);
             SketchGen<T, TL> sGen = sketchGenFactory.getSketchGen(curSketch, xToTrack);
             BoardGen<T, TL> bGen = new BoardGen<>(sGen);
             StoryBoard<T> board = bGen.generate(

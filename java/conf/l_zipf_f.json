@@ -11,7 +11,8 @@
   "sketches": [
     "top_values",
     "truncation",
-    "cooperative"
+    "cooperative",
+    "yahoo_mg"
   ],
 
   "x_to_track": "../../../datasets/storyboard/zipf/zipf10M-xtrack.csv",
