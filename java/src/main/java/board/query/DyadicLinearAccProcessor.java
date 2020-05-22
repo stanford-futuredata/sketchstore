@@ -4,18 +4,14 @@ import board.StoryBoard;
 import org.eclipse.collections.api.PrimitiveIterable;
 import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.api.list.primitive.LongList;
-import org.eclipse.collections.api.tuple.primitive.IntIntPair;
-import org.eclipse.collections.api.tuple.primitive.LongIntPair;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
-import org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples;
-import summary.Sketch;
 import summary.accumulator.Accumulator;
 
 import java.util.List;
 
 public class DyadicLinearAccProcessor<T, TL extends PrimitiveIterable> implements
-        LinearSelector, QueryProcessor<T> {
+        LinearQueryProcessor<T> {
     public int startIdx=0, endIdx=0;
     public Accumulator<T, TL> acc;
     public int base = 2;
@@ -33,15 +29,18 @@ public class DyadicLinearAccProcessor<T, TL extends PrimitiveIterable> implement
         for (int i = 0; i < maxHeight; i++){
             tierIndices.add(new LongArrayList());
         }
-        long curTierLength = 1;
         while (startIdx < endIdx) {
-            int tierIdx=0;
-            for (tierIdx = 0; tierIdx < maxHeight; tierIdx++) {
-                if (startIdx % (curTierLength * base) == 0) {
-                    curTierLength *= base;
-                }
+            int tierIdx = 0;
+            long curTierLength = 1;
+            while (
+                    (tierIdx+1 < maxHeight)
+                            && (startIdx % (curTierLength*base) == 0)
+                            && (startIdx + (curTierLength*base) < endIdx)
+            ) {
+                tierIdx++;
+                curTierLength *= base;
             }
-            tierIndices.get(tierIdx).add(startIdx);
+            tierIndices.get(tierIdx).add(startIdx+curTierLength-1);
             startIdx += curTierLength;
         }
         return tierIndices;

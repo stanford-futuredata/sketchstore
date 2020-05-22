@@ -1,5 +1,9 @@
-package summary.factory;
+package runner.factory;
 
+import board.query.DyadicLinearAccProcessor;
+import board.query.LinearAccProcessor;
+import board.query.LinearQueryProcessor;
+import org.apache.commons.math3.util.FastMath;
 import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.impl.factory.primitive.DoubleLists;
 import summary.accumulator.Accumulator;
@@ -17,7 +21,8 @@ import java.util.List;
 public class QuantileSketchGenFactory implements SketchGenFactory<Double, DoubleList> {
     public SketchGen<Double, DoubleList> getSketchGen(
             String sketch,
-            List<Double> xToTrack
+            List<Double> xToTrack,
+            int maxLength
             ) {
         if (sketch.equals("top_values")) {
             return new SeqCounterCompressorGen(new TrackedQuantileCompressor(xToTrack));
@@ -27,8 +32,10 @@ public class QuantileSketchGenFactory implements SketchGenFactory<Double, Double
             return new SeqCounterCompressorGen(new CoopQuantileCompressor());
         } else if(sketch.equals("kll")) {
             return new YahooKLLGen();
+        } else if (sketch.equals("dyadic_truncation")) {
+            throw new RuntimeException("Not Implemented");
         }
-        return null;
+        throw new RuntimeException("Unsupported Sketch: "+sketch);
     }
 
     @Override
@@ -36,11 +43,25 @@ public class QuantileSketchGenFactory implements SketchGenFactory<Double, Double
         if (sketch.equals("top_values")
                 || sketch.equals("truncation")
                 || sketch.equals("cooperative")
+                || sketch.equals("dyadic_truncation")
         ) {
             return new MapQuantileAccumulator();
         } else if (sketch.equals("kll")) {
             return new MergingAccumulator<>(new YahooKLLGen(), DoubleLists.immutable.empty());
         }
-        return null;
+        throw new RuntimeException("Unsupported Sketch: "+sketch);
+    }
+
+    @Override
+    public LinearQueryProcessor<Double> getLinearQueryProcessor(String sketch, int maxLength) {
+        if (sketch.equals("dyadic_truncation")) {
+            int maxHeight = (int) FastMath.log(2.0, maxLength);
+            return new DyadicLinearAccProcessor<>(
+                    this.getAccumulator(sketch),
+                    maxHeight
+            );
+        } else {
+            return new LinearAccProcessor<>(this.getAccumulator(sketch));
+        }
     }
 }

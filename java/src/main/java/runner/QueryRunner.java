@@ -3,6 +3,7 @@ package runner;
 import board.StoryBoard;
 import board.query.ErrorMetric;
 import board.query.LinearAccProcessor;
+import board.query.LinearQueryProcessor;
 import board.workload.LinearWorkload;
 import io.*;
 import org.eclipse.collections.api.PrimitiveIterable;
@@ -13,9 +14,9 @@ import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.list.mutable.FastList;
-import summary.factory.FreqSketchGenFactory;
-import summary.factory.QuantileSketchGenFactory;
-import summary.factory.SketchGenFactory;
+import runner.factory.FreqSketchGenFactory;
+import runner.factory.QuantileSketchGenFactory;
+import runner.factory.SketchGenFactory;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -76,8 +77,9 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
                 ));
         File fIn = new File(boardPath);
         StoryBoard<T> trueBoard = IOUtil.loadBoard(fIn);
-        LinearAccProcessor<T, TL> p_true = new LinearAccProcessor<>(
-                genFactory.getAccumulator("top_values")
+        LinearQueryProcessor<T> p_true = genFactory.getLinearQueryProcessor(
+                "top_values",
+                granularity
         );
 
         FastList<Map<String, String>> results = new FastList<>();
@@ -99,8 +101,9 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
             fIn = new File(boardPath);
             StoryBoard<T> board = IOUtil.loadBoard(fIn);
 
-            LinearAccProcessor<T, TL> p_raw = new LinearAccProcessor<>(
-                    genFactory.getAccumulator(curSketch)
+            LinearQueryProcessor<T> p_raw = genFactory.getLinearQueryProcessor(
+                    curSketch,
+                    granularity
             );
 
             Timer sketchTotalTimer = new Timer();

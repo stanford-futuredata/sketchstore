@@ -10,7 +10,7 @@ import summary.accumulator.Accumulator;
 import java.util.List;
 
 public class LinearAccProcessor<T, TL extends PrimitiveIterable> implements
-        LinearSelector, QueryProcessor<T> {
+        LinearQueryProcessor<T> {
     public int startIdx=0, endIdx=0;
     public Accumulator<T, TL> acc;
 

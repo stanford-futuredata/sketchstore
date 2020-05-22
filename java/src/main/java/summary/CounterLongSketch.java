@@ -5,10 +5,10 @@ import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
 import org.eclipse.collections.impl.map.mutable.primitive.LongDoubleHashMap;
 
 public class CounterLongSketch implements Sketch<Long> {
-    public long[] vals;
+    public long[] values;
     public double[] weights;
-    public CounterLongSketch(long[] vals, double[] weights) {
-        this.vals = vals;
+    public CounterLongSketch(long[] values, double[] weights) {
+        this.values = values;
         this.weights = weights;
     }
 
@@ -33,7 +33,20 @@ public class CounterLongSketch implements Sketch<Long> {
 
     @Override
     public int size() {
-        return vals.length;
+        return values.length;
+    }
+
+    @Override
+    public String toString() {
+        int n = values.length;
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i < n; i++) {
+            out.append(String.valueOf(values[i]));
+            out.append(":");
+            out.append(String.valueOf(weights[i]));
+            out.append(" ");
+        }
+        return out.toString();
     }
 
     @Override
@@ -44,9 +57,9 @@ public class CounterLongSketch implements Sketch<Long> {
     @Override
     public double estimate(Long xQuery) {
         long xQueryVal = xQuery;
-        int n = vals.length;
+        int n = values.length;
         for (int i = 0; i < n; i++) {
-            double x = vals[i];
+            double x = values[i];
             if (x == xQueryVal) {
                 return weights[i];
             }

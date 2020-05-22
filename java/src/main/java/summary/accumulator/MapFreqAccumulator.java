@@ -43,8 +43,8 @@ public class MapFreqAccumulator implements Accumulator<Long, LongList> {
             curSketch.vals.forEachKeyValue(this::addTovalue);
         } else if (curObject instanceof CounterLongSketch) {
             CounterLongSketch curSketch = (CounterLongSketch) curObject;
-            int n = curSketch.vals.length;
-            long[] vals = curSketch.vals;
+            int n = curSketch.values.length;
+            long[] vals = curSketch.values;
             double[] weights = curSketch.weights;
             for (int i = 0; i < n; i++) {
                 values.addToValue(vals[i], weights[i]);
