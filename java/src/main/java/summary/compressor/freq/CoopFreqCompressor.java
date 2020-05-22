@@ -28,15 +28,13 @@ public class CoopFreqCompressor implements ItemDictCompressor{
         double t = ItemCountsUtil.find_t(counts, size);
         LongDoubleHashMap itemsToStore = new LongDoubleHashMap(size);
 
-        for (LongDoublePair xv : xs.keyValuesView()) {
-            long curX = xv.getOne();
-            double curVal = xv.getTwo();
+        xs.forEachKeyValue((long curX, double curVal) -> {
             if (curVal >= t) {
                 itemsToStore.put(curX, curVal);
             } else {
                 deltas.addToValue(curX, curVal);
             }
-        }
+        });
         MutableList<LongDoublePair> orderedDeficit = xs.keysView(
         ).collect(
                 (long x) -> PrimitiveTuples.pair(x, deltas.get(x))

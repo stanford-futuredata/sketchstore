@@ -1,11 +1,29 @@
 package summary;
 
+import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
+import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
+import org.eclipse.collections.impl.map.mutable.primitive.LongDoubleHashMap;
+
 public class CounterLongSketch implements Sketch<Long> {
     public long[] vals;
     public double[] weights;
     public CounterLongSketch(long[] vals, double[] weights) {
         this.vals = vals;
         this.weights = weights;
+    }
+
+    public static CounterLongSketch fromMap(LongDoubleHashMap map) {
+        int n = map.size();
+        LongArrayList values = new LongArrayList(n);
+        DoubleArrayList weights = new DoubleArrayList(n);
+        map.forEachKeyValue((long k, double v) -> {
+            values.add(k);
+            weights.add(v);
+        });
+        return new CounterLongSketch(
+                values.toArray(),
+                weights.toArray()
+        );
     }
 
     @Override

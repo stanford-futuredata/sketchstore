@@ -23,19 +23,7 @@ public class ItemCounterCompressorGen implements SketchGen<Long, LongList> {
         MapFreqAccumulator acc = new MapFreqAccumulator();
         acc.addRaw(xs);
         LongDoubleHashMap out = compressor.compress(acc.values, size);
-
-        int n = out.size();
-        LongArrayList values = new LongArrayList(n);
-        DoubleArrayList weights = new DoubleArrayList(n);
-        out.forEachKeyValue((long k, double v) -> {
-            values.add(k);
-            weights.add(v);
-        });
-
-        Sketch<Long> sketch = new CounterLongSketch(
-                values.toArray(),
-                weights.toArray()
-        );
+        CounterLongSketch sketch = CounterLongSketch.fromMap(out);
         FastList<Sketch<Long>> sketches = new FastList<>(1);
         sketches.add(sketch);
         return sketches;

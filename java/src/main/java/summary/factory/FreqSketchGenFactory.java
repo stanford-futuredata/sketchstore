@@ -6,8 +6,10 @@ import summary.accumulator.Accumulator;
 import summary.accumulator.MapFreqAccumulator;
 import summary.accumulator.MergingAccumulator;
 import summary.compressor.freq.CoopFreqCompressor;
+import summary.compressor.freq.HaircombCompressor;
 import summary.compressor.freq.TrackedFreqCompressor;
 import summary.compressor.freq.TruncationFreqCompressor;
+import summary.custom.CMSSketchGen;
 import summary.custom.YahooMGGen;
 import summary.gen.ItemCounterCompressorGen;
 import summary.gen.SketchGen;
@@ -27,9 +29,12 @@ public class FreqSketchGenFactory implements SketchGenFactory<Long, LongList> {
             return new ItemCounterCompressorGen(new CoopFreqCompressor(0));
         } else if (sketch.equals("yahoo_mg")){
             return new YahooMGGen();
-        } else {
-            return null;
+        } else if (sketch.equals("cms_min")) {
+            return new CMSSketchGen();
+        } else if (sketch.equals("pps")) {
+            return new ItemCounterCompressorGen(new HaircombCompressor(0));
         }
+        return null;
     }
 
     @Override
@@ -37,10 +42,13 @@ public class FreqSketchGenFactory implements SketchGenFactory<Long, LongList> {
         if (sketch.equals("top_values")
                 || sketch.equals("truncation")
                 || sketch.equals("cooperative")
+                || sketch.equals("pps")
         ) {
             return new MapFreqAccumulator();
         } else if (sketch.equals("yahoo_mg")) {
             return new MergingAccumulator<>(new YahooMGGen(), LongLists.immutable.empty());
+        } else if (sketch.equals("cms_min")) {
+            return new MergingAccumulator<>(new CMSSketchGen(), LongLists.immutable.empty());
         }
         return null;
     }
