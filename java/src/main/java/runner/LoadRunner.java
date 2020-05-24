@@ -63,7 +63,7 @@ public class LoadRunner<T, TL extends PrimitiveIterable> {
             SketchGenFactory<T, TL> sketchGenFactory
     ) throws Exception {
         Table t = IOUtil.loadTable(csvPath, colTypes);
-        Path boardDir = Paths.get(outputDir, experiment, "boards");
+        Path boardDir = Paths.get(outputDir, "boards", experiment);
         Files.createDirectories(boardDir);
 
         xTrackSource.setHasHeader(true);
@@ -120,7 +120,7 @@ public class LoadRunner<T, TL extends PrimitiveIterable> {
             results.add(curResults);
         }
 
-        Path resultsDir = Paths.get(outputDir, experiment, "results");
+        Path resultsDir = Paths.get(outputDir, "results", experiment);
         Files.createDirectories(resultsDir);
         Path resultsFile = resultsDir.resolve("load_time.csv");
 

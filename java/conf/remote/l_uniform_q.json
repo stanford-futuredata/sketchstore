@@ -1,0 +1,23 @@
+{
+  "experiment": "l_uniform_q",
+  "quantile": true,
+  "out_dir": "output/",
+  "csv_path": "datasets/uniform/uniform.csv",
+  "col_types": [1],
+  "metric_col": "x",
+
+  "granularity": 2048,
+  "sizes": [64],
+  "sketches": [
+    "top_values",
+    "truncation",
+    "cooperative",
+    "kll",
+    "pps",
+    "random_sample",
+    "dyadic_truncation"
+  ],
+
+  "x_to_track": "datasets/uniform/uniform-xtrack.csv",
+  "num_queries": 500
+}

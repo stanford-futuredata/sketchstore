@@ -1,0 +1,23 @@
+{
+  "experiment": "l_mrecords_q",
+  "quantile": true,
+  "out_dir": "output/",
+  "csv_path": "datasets/msft/mb-10M.csv",
+  "col_types": [0,0,1,0,0,0,0],
+  "metric_col": "records_received_count",
+
+  "granularity": 2048,
+  "sizes": [64],
+  "sketches": [
+    "top_values",
+    "truncation",
+    "cooperative",
+    "kll",
+    "pps",
+    "random_sample",
+    "dyadic_truncation"
+  ],
+
+  "x_to_track": "datasets/msft/mb-10M-records-track.csv",
+  "num_queries": 500
+}

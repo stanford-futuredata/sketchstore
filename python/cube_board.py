@@ -424,16 +424,16 @@ experiment_runs = [
         "quantile": False,
         "workload_p": .2,
         "sketch_types": [
-            ("top_values", "uniform", False),
-            ("pps", "weighted@20", True),
-            ("random_sample", "uniform", False),
-            ("random_sample", "sweighted@20", False),
-            ("random_sample", "prop", False),
-            ("truncation", "uniform", False),
-            ("cms_min", "uniform", False),
+            # ("top_values", "uniform", False),
+            # ("pps", "weighted@20", True),
+            # ("random_sample", "uniform", False),
+            # ("random_sample", "sweighted@20", False),
+            # ("random_sample", "prop", False),
+            # ("truncation", "uniform", False),
+            # ("cms_min", "uniform", False),
 
-            # ("pps", "uniform", True),
-            # ("pps", "weighted@20", False),
+            ("pps", "uniform", True),
+            ("pps", "weighted@20", False),
             # ("pps", "weighted@5", True),
             # ("random_sample", "weighted@20", True),
         ]
@@ -442,7 +442,7 @@ experiment_runs = [
 ]
 
 def main():
-    experiment_num = 1
+    experiment_num = 6
     cur_experiment = experiment_runs[experiment_num]
     sketch_types = cur_experiment["sketch_types"]
     board_size = cur_experiment["board_size"]

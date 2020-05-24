@@ -252,11 +252,11 @@ space_experiment = [
         "sketches": [
             "top_values",
             "cooperative",
-            "random_sample",
-            "cms_min",
+            # "random_sample",
+            # "cms_min",
             "truncation",
-            "pps",
-            "dyadic_b2",
+            # "pps",
+            # "dyadic_b2",
             # "dyadic_b4",
             # "dyadic_b10"
         ]
@@ -303,11 +303,11 @@ space_experiment = [
         "sketches": {
             "q_top_values",
             "q_cooperative",
-            "q_random_sample",
-            "q_truncation",
-            "q_pps",
-            "kll",
-            "q_dyadic_b2",
+            # "q_random_sample",
+            # "q_truncation",
+            # "q_pps",
+            # "kll",
+            # "q_dyadic_b2",
         }
     },  # 3
     {

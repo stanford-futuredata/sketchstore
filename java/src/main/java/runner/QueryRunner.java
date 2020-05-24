@@ -58,7 +58,7 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
             SimpleCSVDataSource<T> xTrackSource,
             SketchGenFactory<T, TL> genFactory
     ) throws Exception {
-        Path boardDir = Paths.get(outputDir, experiment, "boards");
+        Path boardDir = Paths.get(outputDir, "boards", experiment);
         int curSize = sizes.get(0);
 
         xTrackSource.setHasHeader(true);
@@ -155,7 +155,7 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
             System.out.println("Sketch Ran in Time: "+sketchTotalTimer.getTotalMs());
         }
 
-        Path resultsDir = Paths.get(outputDir, experiment, "results");
+        Path resultsDir = Paths.get(outputDir, "results", experiment);
         Files.createDirectories(resultsDir);
         Path resultsFile = resultsDir.resolve("errors.csv");
 
