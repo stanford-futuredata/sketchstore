@@ -131,8 +131,10 @@ public class LoadRunner<T, TL extends PrimitiveIterable> {
         String confFile = args[0];
         RunConfig config = RunConfig.fromJsonFile(confFile);
         boolean quantile = config.get("quantile");
+        System.out.println("Starting Loader");
+//        System.in.read();
         if (quantile) {
-            System.out.println("Starting Loader for Quantiles");
+            System.out.println("Quantiles");
             LoadRunner<Double, DoubleList> loader = new LoadRunner<>(config);
             SimpleCSVDataSource<Double> xTrackSource = new SimpleCSVDataSourceDouble();
             LinearPlanner<DoubleList> planner = new LinearQuantilePlanner();
@@ -143,7 +145,7 @@ public class LoadRunner<T, TL extends PrimitiveIterable> {
                     sketchGenFactory
             );
         } else {
-            System.out.println("Starting Loader for Frequencies");
+            System.out.println("Frequencies");
             LoadRunner<Long, LongList> loader = new LoadRunner<>(config);
             SimpleCSVDataSource<Long> xTrackSource = new SimpleCSVDataSourceLong();
             LinearPlanner<LongList> planner = new LinearFreqPlanner();

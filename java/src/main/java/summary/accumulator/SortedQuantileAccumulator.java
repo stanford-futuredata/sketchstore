@@ -6,17 +6,38 @@ import summary.CounterDoubleSketch;
 import summary.Sketch;
 
 import java.util.List;
+import java.util.Random;
 
 public class SortedQuantileAccumulator implements Accumulator<Double, DoubleList> {
     public DoubleArrayList items;
     public DoubleArrayList weights;
+    public Random rng;
     public SortedQuantileAccumulator() {
         items = new DoubleArrayList();
         weights = new DoubleArrayList();
+        this.rng = new Random(0);
     }
     public SortedQuantileAccumulator(DoubleArrayList items, DoubleArrayList weights) {
         this.items = items;
         this.weights = weights;
+        this.rng = new Random(0);
+    }
+
+    public int size() {
+        return items.size();
+    }
+
+    @Override
+    public String toString() {
+        int n = items.size();
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i < n; i++) {
+            out.append(String.valueOf(items.get(i)));
+            out.append(":");
+            out.append(String.valueOf(weights.get(i)));
+            out.append(" ");
+        }
+        return out.toString();
     }
 
     @Override
@@ -143,6 +164,32 @@ public class SortedQuantileAccumulator implements Accumulator<Double, DoubleList
     }
 
     public int compress(int size) {
-        return 0;
+        double wTotal = weights.sum();
+        double sectionWeight = wTotal / size;
+        double randCutoff = rng.nextDouble()*sectionWeight;
+        int n = items.size();
+
+        DoubleArrayList newItems = new DoubleArrayList(size);
+        DoubleArrayList newWeights = new DoubleArrayList(size);
+
+        double totalWeight = 0;
+        for (int i = 0; i < n; i++) {
+            double curItem = items.get(i);
+            double curWeight = weights.get(i);
+            if (curWeight >= sectionWeight) {
+                newItems.add(curItem);
+                newWeights.add(curWeight);
+            } else {
+                totalWeight += curWeight;
+                if (totalWeight >= randCutoff) {
+                    newItems.add(curItem);
+                    newWeights.add(sectionWeight);
+                    totalWeight -= sectionWeight;
+                }
+            }
+        }
+        items = newItems;
+        weights = newWeights;
+        return items.size();
     }
 }

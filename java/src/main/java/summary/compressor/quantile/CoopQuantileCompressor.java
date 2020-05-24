@@ -9,10 +9,15 @@ import summary.accumulator.SortedQuantileAccumulator;
 public class CoopQuantileCompressor implements SeqCounterCompressor {
     public SortedQuantileAccumulator trueCDF;
     public SortedQuantileAccumulator storedCDF;
+    public int maxAccSize = -1;
 
     public CoopQuantileCompressor() {
         trueCDF = new SortedQuantileAccumulator();
         storedCDF = new SortedQuantileAccumulator();
+    }
+
+    public void setMaxAccSize(int maxAccSize) {
+        this.maxAccSize = maxAccSize;
     }
 
     @Override
@@ -62,7 +67,24 @@ public class CoopQuantileCompressor implements SeqCounterCompressor {
         }
 
         storedCDF.add(savedItems, savedWeights);
+
+        if (maxAccSize > 0 && trueCDF.size() > maxAccSize) {
+            trueCDF.compress(maxAccSize/2);
+        }
+        if (maxAccSize > 0 && storedCDF.size() > maxAccSize) {
+            storedCDF.compress(maxAccSize/2);
+        }
         return new CounterDoubleSketch(savedItems.toArray(), savedWeights.toArray());
+    }
+
+    /**
+     * Fast Taylor expansion of cosh
+     * @param x argument
+     * @return approximate cosh
+     */
+    public static double fastcosh(double x) {
+        double x2 = x*x;
+        return 1 + x2/2 + x2*x2/24;
     }
 
     public int findOptimalStore(
@@ -78,13 +100,17 @@ public class CoopQuantileCompressor implements SeqCounterCompressor {
         double bestCumLossDelta = Double.MAX_VALUE;
         double suffixCumLossDelta = 0.0;
         for (int curIdx = endIdx-1; curIdx >= startIdx; curIdx--) {
-            double lossIfStored = FastMath.cosh(
-                    (deltaCDF[curIdx] - curSegWeight)*scaleFactor
-            );
-            double lossCurrent = FastMath.cosh(
-                    (deltaCDF[curIdx])*scaleFactor
-            );
-            suffixCumLossDelta += (lossIfStored - lossCurrent);
+            double deltaIfStored = (deltaCDF[curIdx] - curSegWeight)*scaleFactor;
+            double deltaCurrent = (deltaCDF[curIdx])*scaleFactor;
+            double lossDelta = fastcosh(deltaIfStored) - fastcosh(deltaCurrent);
+//            double lossIfStored = Math.cosh(
+//                    (deltaCDF[curIdx] - curSegWeight)*scaleFactor
+//            );
+//            double lossCurrent = Math.cosh(
+//                    (deltaCDF[curIdx])*scaleFactor
+//            );
+//            suffixCumLossDelta += (lossIfStored - lossCurrent);
+            suffixCumLossDelta += lossDelta;
             if (suffixCumLossDelta < bestCumLossDelta) {
                 bestIdxToStore = curIdx;
                 bestCumLossDelta = suffixCumLossDelta;

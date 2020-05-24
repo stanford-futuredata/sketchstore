@@ -19,6 +19,19 @@ public class SortedQuantileAccumulatorTest {
     }
 
     @Test
+    public void testCompress() {
+        SortedQuantileAccumulator acc = new SortedQuantileAccumulator();
+        DoubleArrayList xs = new DoubleArrayList();
+        int n = 100;
+        for (int i = 0; i < n; i++) {
+            xs.add(i);
+        }
+        acc.addRaw(xs);
+        acc.compress(10);
+        assertEquals(10, acc.items.size());
+    }
+
+    @Test
     public void testDelta() {
         DoubleArrayList xs = DoubleArrayList.newListWith(1.0, 2.0, 3.0);
         DoubleArrayList pdf = DoubleArrayList.newListWith(1.0, 2.0, 2.0);
