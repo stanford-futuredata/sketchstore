@@ -14,9 +14,11 @@
     "cooperative",
     "yahoo_mg",
     "cms_min",
-    "pps"
+    "pps",
+    "random_sample",
+    "dyadic_truncation"
   ],
 
   "x_to_track": "../../../datasets/storyboard/zipf/zipf10M-xtrack.csv",
-  "num_queries": 100
+  "num_queries": 500
 }

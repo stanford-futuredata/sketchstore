@@ -12,7 +12,9 @@ import summary.accumulator.MergingAccumulator;
 import summary.compressor.quantile.CoopQuantileCompressor;
 import summary.compressor.quantile.SkipQuantileCompressor;
 import summary.compressor.quantile.TrackedQuantileCompressor;
+import summary.compressor.quantile.USampleQuantCompressor;
 import summary.custom.YahooKLLGen;
+import summary.gen.DyadicSeqCounterCompressorGen;
 import summary.gen.SeqCounterCompressorGen;
 import summary.gen.SketchGen;
 
@@ -33,7 +35,15 @@ public class QuantileSketchGenFactory implements SketchGenFactory<Double, Double
         } else if(sketch.equals("kll")) {
             return new YahooKLLGen();
         } else if (sketch.equals("dyadic_truncation")) {
-            throw new RuntimeException("Not Implemented");
+            int maxHeight = (int) FastMath.log(2.0, maxLength);
+            return new DyadicSeqCounterCompressorGen(
+                    () -> new SkipQuantileCompressor(false, 0),
+                    maxHeight
+            );
+        } else if(sketch.equals("pps")) {
+            return new SeqCounterCompressorGen(new SkipQuantileCompressor(true, 0));
+        } else if (sketch.equals("random_sample")) {
+            return new SeqCounterCompressorGen(new USampleQuantCompressor(0));
         }
         throw new RuntimeException("Unsupported Sketch: "+sketch);
     }
@@ -44,6 +54,8 @@ public class QuantileSketchGenFactory implements SketchGenFactory<Double, Double
                 || sketch.equals("truncation")
                 || sketch.equals("cooperative")
                 || sketch.equals("dyadic_truncation")
+                || sketch.equals("pps")
+                || sketch.equals("random_sample")
         ) {
             return new MapQuantileAccumulator();
         } else if (sketch.equals("kll")) {

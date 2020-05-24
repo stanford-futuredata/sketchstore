@@ -13,6 +13,7 @@ import org.eclipse.collections.api.list.primitive.IntList;
 import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.factory.primitive.IntLists;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import runner.factory.FreqSketchGenFactory;
 import runner.factory.QuantileSketchGenFactory;
@@ -106,8 +107,18 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
                     granularity
             );
 
+            // Warm-Up
+            for (IntList curInterval : workloadIntervals) {
+                int startIdx = curInterval.get(0);
+                int endIdx = curInterval.get(1);
+                p_raw.setRange(startIdx, endIdx);
+                p_raw.query(board, xToTrack);
+            }
+            System.runFinalization();
+            System.gc();
+
             Timer sketchTotalTimer = new Timer();
-            sketchTotalTimer.start();
+            Timer queryTimer = new Timer();
             for (IntList curInterval : workloadIntervals) {
                 int startIdx = curInterval.get(0);
                 int endIdx = curInterval.get(1);
@@ -115,7 +126,14 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
                 DoubleList trueResults = p_true.query(trueBoard, xToTrack);
                 double trueTotal = p_true.total(trueBoard);
                 p_raw.setRange(startIdx, endIdx);
+
+                sketchTotalTimer.start();
+                queryTimer.reset();
+                queryTimer.start();
                 DoubleList queryResults = p_raw.query(board, xToTrack);
+                queryTimer.end();
+                sketchTotalTimer.end();
+
                 MutableMap<String, Double> errorQuantities = ErrorMetric.calcErrors(
                         trueResults,
                         queryResults
@@ -128,12 +146,12 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
                 curResults.put("end_idx", Integer.toString(endIdx));
                 curResults.put("query_len", Integer.toString(endIdx-startIdx));
                 curResults.put("total", Double.toString(trueTotal));
-                for (Pair<String, Double> curError : errorQuantities.keyValuesView()) {
-                    curResults.put(curError.getOne(), Double.toString(curError.getTwo()));
-                }
+                curResults.put("query_time", Double.toString(queryTimer.getTotalMs()));
+                errorQuantities.forEachKeyValue((String errType, Double errValue) -> {
+                    curResults.put(errType, errValue.toString());
+                });
                 results.add(curResults);
             }
-            sketchTotalTimer.end();
             System.out.println("Sketch Ran in Time: "+sketchTotalTimer.getTotalMs());
         }
 
@@ -164,7 +182,6 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
             QueryRunner<Long, LongList> runner = new QueryRunner<>(config);
             SimpleCSVDataSource<Long> xTrackSource = new SimpleCSVDataSourceLong();
             SketchGenFactory<Long, LongList> sketchGenFactory = new FreqSketchGenFactory();
-
             runner.run(
                     xTrackSource,
                     sketchGenFactory

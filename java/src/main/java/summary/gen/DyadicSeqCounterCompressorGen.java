@@ -1,52 +1,57 @@
 package summary.gen;
 
 import org.apache.commons.math3.util.FastMath;
+import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.api.list.primitive.LongList;
+import org.eclipse.collections.api.list.primitive.MutableDoubleList;
 import org.eclipse.collections.impl.list.mutable.FastList;
+import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
 import org.eclipse.collections.impl.map.mutable.primitive.LongDoubleHashMap;
+import summary.CounterDoubleSketch;
 import summary.CounterLongSketch;
-import summary.DictSketch;
 import summary.Sketch;
 import summary.accumulator.MapFreqAccumulator;
 import summary.compressor.freq.ItemDictCompressor;
+import summary.compressor.quantile.SeqCounterCompressor;
 
 import java.util.function.Supplier;
 
-public class DyadicItemDictCompressorGen implements SketchGen<Long, LongList> {
+public class DyadicSeqCounterCompressorGen implements SketchGen<Double, DoubleList> {
     public int maxHeight;
-    public FastList<ItemDictCompressor> compressorStack;
-    public FastList<MapFreqAccumulator> segmentStack;
+    public FastList<SeqCounterCompressor> compressorStack;
+    public FastList<DoubleArrayList> segmentStack;
     public long[] countdowns;
     public double base = 2.0;
 
-    public DyadicItemDictCompressorGen(Supplier<ItemDictCompressor> cGen, int maxHeight) {
+    public DyadicSeqCounterCompressorGen(Supplier<SeqCounterCompressor> cGen, int maxHeight) {
         this.maxHeight = maxHeight;
         compressorStack = new FastList<>(maxHeight);
         segmentStack = new FastList<>(maxHeight);
         countdowns = new long[maxHeight];
         for (int i=0; i < maxHeight; i++) {
             compressorStack.add(cGen.get());
-            segmentStack.add(new MapFreqAccumulator());
+            segmentStack.add(new DoubleArrayList());
             countdowns[i] = (long) FastMath.pow(base, i);
         }
     }
 
     @Override
-    public FastList<Sketch<Long>> generate(LongList xs, int size, double bias) {
+    public FastList<Sketch<Double>> generate(DoubleList xs, int size, double bias) {
         double scaledSize = size*1.0/maxHeight;
-        FastList<Sketch<Long>> sketches = new FastList<>(maxHeight);
+        FastList<Sketch<Double>> sketches = new FastList<>(maxHeight);
         for (int levelIdx = 0; levelIdx < maxHeight; levelIdx++) {
-            MapFreqAccumulator curSegment = segmentStack.get(levelIdx);
-            curSegment.addRaw(xs);
+            DoubleArrayList curSegment = segmentStack.get(levelIdx);
+            curSegment.addAll(xs);
             countdowns[levelIdx]--;
             if (countdowns[levelIdx] == 0) {
                 int currentSize = (int)Math.round((scaledSize * FastMath.pow(base, levelIdx)));
-                LongDoubleHashMap compressedMap = compressorStack.get(levelIdx).compress(
-                        curSegment.values, currentSize
+                curSegment.sortThis();
+                CounterDoubleSketch compressedMap = compressorStack.get(levelIdx).compress(
+                        curSegment, currentSize
                 );
-                sketches.add(CounterLongSketch.fromMap(compressedMap));
+                sketches.add(compressedMap);
                 countdowns[levelIdx] = (long) FastMath.pow(base, levelIdx);
-                curSegment.reset();
+                curSegment.clear();
             }
         }
         return sketches;

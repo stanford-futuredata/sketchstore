@@ -5,13 +5,12 @@ import board.StoryBoard;
 import board.planner.LinearFreqPlanner;
 import board.planner.LinearPlanner;
 import board.planner.LinearQuantilePlanner;
-import io.IOUtil;
-import io.SimpleCSVDataSource;
-import io.SimpleCSVDataSourceDouble;
-import io.SimpleCSVDataSourceLong;
+import io.*;
 import org.eclipse.collections.api.PrimitiveIterable;
 import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.api.list.primitive.LongList;
+import org.eclipse.collections.api.map.MutableMap;
+import org.eclipse.collections.impl.factory.primitive.IntLists;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import runner.factory.QuantileSketchGenFactory;
 import summary.gen.SketchGen;
@@ -23,7 +22,9 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class LoadRunner<T, TL extends PrimitiveIterable> {
     RunConfig config;
@@ -72,24 +73,33 @@ public class LoadRunner<T, TL extends PrimitiveIterable> {
 
         int curGranularity = granularity;
         int curSize = sizes.get(0);
+        Timer planTime = new Timer();
+        planTime.start();
         planner.plan(
                 t, metricCol, curGranularity, curSize
         );
+        planTime.end();
+
+        FastList<Map<String, String>> results = new FastList<>();
 
         for (String curSketch: sketches) {
             System.out.println("Loading: "+curSketch);
+
             SketchGen<T, TL> sGen = sketchGenFactory.getSketchGen(
                     curSketch,
                     xToTrack,
                     granularity
             );
             BoardGen<T, TL> bGen = new BoardGen<>(sGen);
+            Timer constructTime = new Timer();
+            constructTime.start();
             StoryBoard<T> board = bGen.generate(
                     planner.getSegments(),
                     planner.getDimensions(),
                     planner.getSizes(),
                     planner.getBiases()
             );
+            constructTime.end();
 
             String outputPath = String.format("%s/%s",
                     boardDir.toString(),
@@ -100,7 +110,21 @@ public class LoadRunner<T, TL extends PrimitiveIterable> {
                     ));
             File outFile = new File(outputPath);
             IOUtil.writeBoard(board, outFile);
+
+            HashMap<String, String> curResults = new HashMap<>();
+            curResults.put("sketch", curSketch);
+            curResults.put("granularity", Integer.toString(granularity));
+            curResults.put("size", Integer.toString(curSize));
+            curResults.put("construct_time", Double.toString(constructTime.getTotalMs()));
+            curResults.put("plan_time", Double.toString(planTime.getTotalMs()));
+            results.add(curResults);
         }
+
+        Path resultsDir = Paths.get(outputDir, experiment, "results");
+        Files.createDirectories(resultsDir);
+        Path resultsFile = resultsDir.resolve("load_time.csv");
+
+        CSVOutput.writeAllResults(results, resultsFile.toString());
     }
 
     public static void main(String[] args) throws Exception {

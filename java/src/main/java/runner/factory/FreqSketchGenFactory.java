@@ -9,10 +9,7 @@ import org.eclipse.collections.impl.factory.primitive.LongLists;
 import summary.accumulator.Accumulator;
 import summary.accumulator.MapFreqAccumulator;
 import summary.accumulator.MergingAccumulator;
-import summary.compressor.freq.CoopFreqCompressor;
-import summary.compressor.freq.HaircombCompressor;
-import summary.compressor.freq.TrackedFreqCompressor;
-import summary.compressor.freq.TruncationFreqCompressor;
+import summary.compressor.freq.*;
 import summary.custom.CMSSketchGen;
 import summary.custom.YahooMGGen;
 import summary.gen.DyadicItemDictCompressorGen;
@@ -45,6 +42,8 @@ public class FreqSketchGenFactory implements SketchGenFactory<Long, LongList> {
                     () -> new TruncationFreqCompressor(),
                     maxHeight
             );
+        } else if (sketch.equals("random_sample")) {
+            return new ItemCounterCompressorGen(new USampleFreqCompressor(0));
         }
         throw new RuntimeException("Invalid sketch name");
     }
@@ -56,6 +55,7 @@ public class FreqSketchGenFactory implements SketchGenFactory<Long, LongList> {
                 || sketch.equals("cooperative")
                 || sketch.equals("pps")
                 || sketch.equals("dyadic_truncation")
+                || sketch.equals("random_sample")
         ) {
             return new MapFreqAccumulator();
         } else if (sketch.equals("yahoo_mg")) {
