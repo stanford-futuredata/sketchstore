@@ -12,7 +12,9 @@ import tech.tablesaw.api.DoubleColumn;
 import tech.tablesaw.api.LongColumn;
 import tech.tablesaw.api.Table;
 
-public class LinearQuantilePlanner implements LinearPlanner<DoubleList> {
+import java.util.Map;
+
+public class LinearQuantilePlanner implements Planner<DoubleList> {
     public int numSegments;
     public int size;
 
@@ -21,11 +23,11 @@ public class LinearQuantilePlanner implements LinearPlanner<DoubleList> {
 
     @Override
     public void plan(
-            Table t, String metricCol, int numSegments, int size
+            Table t, String metricCol, int size, Map<String, Object> params
     ) {
         data = t;
         this.metricCol = metricCol;
-        this.numSegments = numSegments;
+        this.numSegments = (Integer)params.get("num_segments");
         this.size = size;
     }
 

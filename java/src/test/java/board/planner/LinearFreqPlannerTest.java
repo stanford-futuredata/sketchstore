@@ -2,6 +2,7 @@ package board.planner;
 
 import board.BoardGen;
 import org.eclipse.collections.api.PrimitiveIterable;
+import org.eclipse.collections.api.factory.Maps;
 import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.junit.Test;
@@ -27,7 +28,7 @@ public class LinearFreqPlannerTest {
         int numSegments = 4;
         LinearFreqPlanner planner = new LinearFreqPlanner();
         planner.plan(
-                t, "x", numSegments, 2
+                t, "x", 2, Maps.mutable.of("num_segments", numSegments)
         );
 
         SketchGen<Long, LongList> sGen = new ItemDictCompressorGen(

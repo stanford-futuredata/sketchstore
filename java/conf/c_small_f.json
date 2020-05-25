@@ -1,0 +1,19 @@
+{
+  "experiment": "c_small_f",
+  "quantile": false,
+  "out_dir": "output/",
+  "csv_path": "src/test/resources/small_cube.csv",
+  "col_types": [0,0,0],
+  "metric_col": "x",
+
+  "dimension_cols": ["d1", "d2"],
+  "workload_prob": 0.5,
+  "sizes": [6],
+  "sketches": [
+    "top_values",
+    "truncation"
+  ],
+
+  "x_to_track": "src/test/resources/small-xtrack.csv",
+  "num_queries": 10
+}

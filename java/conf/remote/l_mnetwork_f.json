@@ -1,5 +1,5 @@
 {
-  "experiment": "l_network_f",
+  "experiment": "l_mnetwork_f",
   "quantile": false,
   "out_dir": "output/",
   "csv_path": "datasets/msft/mb-10M.csv",

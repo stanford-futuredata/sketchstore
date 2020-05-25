@@ -4,6 +4,7 @@ import board.planner.LinearFreqPlanner;
 import board.query.LinearAccProcessor;
 import board.query.LinearQueryProcessor;
 import org.eclipse.collections.api.factory.Lists;
+import org.eclipse.collections.api.factory.Maps;
 import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.api.list.primitive.IntList;
 import org.eclipse.collections.api.list.primitive.LongList;
@@ -38,7 +39,8 @@ public class BoardGenTest {
         LinearFreqPlanner planner = new LinearFreqPlanner();
         int nSegments = 4;
         planner.plan(
-                t, "x", nSegments, 2
+                t, "x", 2,
+                Maps.mutable.of("num_segments",nSegments)
         );
 
         FreqSketchGenFactory factory = new FreqSketchGenFactory();

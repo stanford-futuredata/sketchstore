@@ -15,8 +15,9 @@ import tech.tablesaw.api.LongColumn;
 import tech.tablesaw.api.Table;
 
 import java.util.List;
+import java.util.Map;
 
-public class LinearFreqPlanner implements LinearPlanner<LongList> {
+public class LinearFreqPlanner implements Planner<LongList> {
     public int numSegments;
     public int size;
 
@@ -25,11 +26,11 @@ public class LinearFreqPlanner implements LinearPlanner<LongList> {
 
     @Override
     public void plan(
-            Table t, String metricCol, int numSegments, int size
+            Table t, String metricCol, int size, Map<String, Object> params
     ) {
         data = t;
         this.metricCol = metricCol;
-        this.numSegments = numSegments;
+        this.numSegments = (Integer)params.get("num_segments");
         this.size = size;
     }
 

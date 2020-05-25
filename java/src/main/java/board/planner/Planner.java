@@ -9,10 +9,14 @@ import tech.tablesaw.api.Table;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 public interface Planner<TL extends PrimitiveIterable> {
-    public FastList<TL> getSegments();
-    public FastList<LongList> getDimensions();
-    public IntList getSizes();
-    public DoubleList getBiases();
+    FastList<TL> getSegments();
+    FastList<LongList> getDimensions();
+    IntList getSizes();
+    DoubleList getBiases();
+    void plan(
+            Table t, String metricCol, int size, Map<String, Object> params
+    );
 }

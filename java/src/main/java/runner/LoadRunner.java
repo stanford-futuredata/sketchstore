@@ -3,14 +3,13 @@ package runner;
 import board.BoardGen;
 import board.StoryBoard;
 import board.planner.LinearFreqPlanner;
-import board.planner.LinearPlanner;
 import board.planner.LinearQuantilePlanner;
+import board.planner.Planner;
 import io.*;
 import org.eclipse.collections.api.PrimitiveIterable;
+import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.api.list.primitive.LongList;
-import org.eclipse.collections.api.map.MutableMap;
-import org.eclipse.collections.impl.factory.primitive.IntLists;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import runner.factory.QuantileSketchGenFactory;
 import summary.gen.SketchGen;
@@ -37,9 +36,14 @@ public class LoadRunner<T, TL extends PrimitiveIterable> {
     String metricCol;
     String outputDir;
 
-    int granularity;
     List<String> sketches;
     List<Integer> sizes;
+
+    int granularity;
+
+    boolean isCube;
+    List<String> dimensionCols;
+    double workloadProb;
 
     public LoadRunner(RunConfig config) {
         this.config = config;
@@ -52,14 +56,31 @@ public class LoadRunner<T, TL extends PrimitiveIterable> {
         metricCol = config.get("metric_col");
         outputDir = config.get("out_dir");
 
-        granularity = config.get("granularity");
         sizes = config.get("sizes");
         sketches = config.get("sketches");
+
+        // Linear
+        granularity = config.get("granularity", 0);
+        // Cube
+        dimensionCols = config.get("dimension_cols", Lists.mutable.empty());
+        workloadProb = config.get("workload_prob", -1);
+        isCube = !dimensionCols.isEmpty();
     }
 
-    public void runLinearLoad(
+    public Map<String, Object> getPlannerParams() {
+        Map<String, Object> params = new HashMap<>();
+        if (isCube) {
+            params.put("dimension_cols", dimensionCols);
+            params.put("workload_prob", workloadProb);
+        } else {
+            params.put("num_segments", granularity);
+        }
+        return params;
+    }
+
+    public void runLoad(
             SimpleCSVDataSource<T> xTrackSource,
-            LinearPlanner<TL> planner,
+            Planner<TL> planner,
             SketchGenFactory<T, TL> sketchGenFactory
     ) throws Exception {
         Table t = IOUtil.loadTable(csvPath, colTypes);
@@ -71,13 +92,11 @@ public class LoadRunner<T, TL extends PrimitiveIterable> {
                 xToTrackPath, 0
         );
 
-        int curGranularity = granularity;
+        Map<String, Object> plannerParams = getPlannerParams();
         int curSize = sizes.get(0);
         Timer planTime = new Timer();
         planTime.start();
-        planner.plan(
-                t, metricCol, curGranularity, curSize
-        );
+        planner.plan(t, metricCol, curSize, plannerParams);
         planTime.end();
 
         FastList<Map<String, String>> results = new FastList<>();
@@ -106,17 +125,21 @@ public class LoadRunner<T, TL extends PrimitiveIterable> {
                     IOUtil.getBoardName(
                             curSketch,
                             curSize,
-                            curGranularity
+                            granularity
                     ));
             File outFile = new File(outputPath);
             IOUtil.writeBoard(board, outFile);
 
             HashMap<String, String> curResults = new HashMap<>();
             curResults.put("sketch", curSketch);
-            curResults.put("granularity", Integer.toString(granularity));
             curResults.put("size", Integer.toString(curSize));
             curResults.put("construct_time", Double.toString(constructTime.getTotalMs()));
             curResults.put("plan_time", Double.toString(planTime.getTotalMs()));
+            plannerParams.forEach((String k, Object v) -> {
+                if (v instanceof Number) {
+                    curResults.put(k, v.toString());
+                }
+            });
             results.add(curResults);
         }
 
@@ -137,9 +160,9 @@ public class LoadRunner<T, TL extends PrimitiveIterable> {
             System.out.println("Quantiles");
             LoadRunner<Double, DoubleList> loader = new LoadRunner<>(config);
             SimpleCSVDataSource<Double> xTrackSource = new SimpleCSVDataSourceDouble();
-            LinearPlanner<DoubleList> planner = new LinearQuantilePlanner();
+            Planner<DoubleList> planner = new LinearQuantilePlanner();
             SketchGenFactory<Double, DoubleList> sketchGenFactory = new QuantileSketchGenFactory();
-            loader.runLinearLoad(
+            loader.runLoad(
                     xTrackSource,
                     planner,
                     sketchGenFactory
@@ -148,9 +171,9 @@ public class LoadRunner<T, TL extends PrimitiveIterable> {
             System.out.println("Frequencies");
             LoadRunner<Long, LongList> loader = new LoadRunner<>(config);
             SimpleCSVDataSource<Long> xTrackSource = new SimpleCSVDataSourceLong();
-            LinearPlanner<LongList> planner = new LinearFreqPlanner();
+            Planner<LongList> planner = new LinearFreqPlanner();
             SketchGenFactory<Long, LongList> sketchGenFactory = new FreqSketchGenFactory();
-            loader.runLinearLoad(
+            loader.runLoad(
                     xTrackSource,
                     planner,
                     sketchGenFactory
