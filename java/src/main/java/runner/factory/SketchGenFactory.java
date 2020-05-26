@@ -1,5 +1,6 @@
 package runner.factory;
 
+import board.query.CubeQueryProcessor;
 import board.query.LinearQueryProcessor;
 import org.eclipse.collections.api.PrimitiveIterable;
 import summary.accumulator.Accumulator;
@@ -19,5 +20,8 @@ public interface SketchGenFactory<T, TL extends PrimitiveIterable> {
     LinearQueryProcessor<T> getLinearQueryProcessor(
             String sketch,
             int maxLength
+    );
+    CubeQueryProcessor<T> getCubeQueryProcessor(
+            String sketch
     );
 }

@@ -39,4 +39,14 @@ public class StoryBoard<T> implements Serializable {
             totalCol.add(total * FastMath.pow(2, j));
         }
     }
+
+    public LongArrayList getDimCardinalities() {
+        int nDims = dimensionCols.size();
+        LongArrayList dimCardinalities = new LongArrayList(nDims);
+        for (int i = 0; i < nDims; i++) {
+            LongArrayList curDimValues = dimensionCols.get(i);
+            dimCardinalities.add(curDimValues.max()+1);
+        }
+        return dimCardinalities;
+    }
 }

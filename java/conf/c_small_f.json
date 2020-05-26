@@ -8,6 +8,7 @@
 
   "dimension_cols": ["d1", "d2"],
   "workload_prob": 0.5,
+  "query_workload_probs": [0.5],
   "sizes": [6],
   "sketches": [
     "top_values",

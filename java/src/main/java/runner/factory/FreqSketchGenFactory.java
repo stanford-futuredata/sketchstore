@@ -1,8 +1,6 @@
 package runner.factory;
 
-import board.query.DyadicLinearAccProcessor;
-import board.query.LinearAccProcessor;
-import board.query.LinearQueryProcessor;
+import board.query.*;
 import org.apache.commons.math3.util.FastMath;
 import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.factory.primitive.LongLists;
@@ -80,5 +78,10 @@ public class FreqSketchGenFactory implements SketchGenFactory<Long, LongList> {
         } else {
             return new LinearAccProcessor<>(this.getAccumulator(sketch));
         }
+    }
+
+    @Override
+    public CubeQueryProcessor<Long> getCubeQueryProcessor(String sketch) {
+        return new CubeAccProcessor<>(getAccumulator(sketch));
     }
 }

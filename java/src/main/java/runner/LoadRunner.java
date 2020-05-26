@@ -2,6 +2,7 @@ package runner;
 
 import board.BoardGen;
 import board.StoryBoard;
+import board.planner.CubeFreqPlanner;
 import board.planner.LinearFreqPlanner;
 import board.planner.LinearQuantilePlanner;
 import board.planner.Planner;
@@ -63,7 +64,7 @@ public class LoadRunner<T, TL extends PrimitiveIterable> {
         granularity = config.get("granularity", 0);
         // Cube
         dimensionCols = config.get("dimension_cols", Lists.mutable.empty());
-        workloadProb = config.get("workload_prob", -1);
+        workloadProb = config.get("workload_prob", -1.0);
         isCube = !dimensionCols.isEmpty();
     }
 
@@ -160,7 +161,12 @@ public class LoadRunner<T, TL extends PrimitiveIterable> {
             System.out.println("Quantiles");
             LoadRunner<Double, DoubleList> loader = new LoadRunner<>(config);
             SimpleCSVDataSource<Double> xTrackSource = new SimpleCSVDataSourceDouble();
-            Planner<DoubleList> planner = new LinearQuantilePlanner();
+            Planner<DoubleList> planner;
+            if (loader.isCube) {
+                throw new RuntimeException("Planner not implemented");
+            } else {
+                planner = new LinearQuantilePlanner();
+            }
             SketchGenFactory<Double, DoubleList> sketchGenFactory = new QuantileSketchGenFactory();
             loader.runLoad(
                     xTrackSource,
@@ -171,7 +177,12 @@ public class LoadRunner<T, TL extends PrimitiveIterable> {
             System.out.println("Frequencies");
             LoadRunner<Long, LongList> loader = new LoadRunner<>(config);
             SimpleCSVDataSource<Long> xTrackSource = new SimpleCSVDataSourceLong();
-            Planner<LongList> planner = new LinearFreqPlanner();
+            Planner<LongList> planner;
+            if (loader.isCube) {
+                planner = new CubeFreqPlanner();
+            } else {
+                planner = new LinearFreqPlanner();
+            }
             SketchGenFactory<Long, LongList> sketchGenFactory = new FreqSketchGenFactory();
             loader.runLoad(
                     xTrackSource,
