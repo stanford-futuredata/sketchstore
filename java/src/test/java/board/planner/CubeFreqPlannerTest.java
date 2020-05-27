@@ -35,7 +35,7 @@ public void simpleTest() throws IOException {
 
     FastList<LongList> segments = planner.getSegments();
     FastList<LongList> dims = planner.getDimensions();
-    IntList sizes = planner.getSizes();
+    IntList sizes = planner.getSpaces();
     assertEquals(3, segments.size());
     assertEquals(3, dims.size());
     assertEquals(8, segments.get(0).size());

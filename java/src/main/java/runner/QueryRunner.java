@@ -15,6 +15,7 @@ import org.eclipse.collections.api.list.primitive.IntList;
 import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.impl.list.mutable.FastList;
+import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 import runner.factory.FreqSketchGenFactory;
 import runner.factory.QuantileSketchGenFactory;
 import runner.factory.SketchGenFactory;
@@ -23,6 +24,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -240,7 +242,14 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
                 System.runFinalization();
                 System.gc();
 
-                for (LongList  curFilterDimensions: workloadDimensions) {
+                MutableMap<LongList, Map<String, String>> memoized = new UnifiedMap<>();
+
+                int queryNum = 0;
+                for (LongList curFilterDimensions: workloadDimensions) {
+                    if (memoized.containsKey(curFilterDimensions)) {
+                        results.add(memoized.get(curFilterDimensions));
+                        continue;
+                    }
                     p_true.setDimensions(curFilterDimensions);
                     DoubleList trueResults = p_true.query(trueBoard, xToTrack);
                     double trueTotal = p_true.total(trueBoard);
@@ -270,7 +279,10 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
                         curResults.put(errType, errValue.toString());
                     });
                     results.add(curResults);
+                    queryNum++;
+                    memoized.put(curFilterDimensions, curResults);
                 }
+                System.out.println("Query Runner #: "+queryNum);
             }
             System.out.println("Sketch Ran in Time: " + sketchTotalTimer.getTotalMs());
         }

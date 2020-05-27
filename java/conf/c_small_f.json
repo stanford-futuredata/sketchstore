@@ -12,7 +12,8 @@
   "sizes": [6],
   "sketches": [
     "top_values",
-    "truncation"
+    "truncation",
+    "pps"
   ],
 
   "x_to_track": "src/test/resources/small-xtrack.csv",

@@ -25,8 +25,11 @@ public class CubeFreqPlanner implements Planner<LongList> {
 
     public FastList<LongList> segmentValues;
     public FastList<LongList> segmentDimensions;
-    public IntList segmentSizes;
-    public IntList segmentBiases;
+    public IntArrayList segmentSpaces;
+    public DoubleArrayList segmentBiases;
+
+    boolean optimizeSpace = true;
+    boolean optimizeBias = false;
 
     @Override
     public void plan(
@@ -72,6 +75,40 @@ public class CubeFreqPlanner implements Planner<LongList> {
         segmentValues.add(curSegment);
         segmentDimensions.add(new LongArrayList(curSegmentDimensions));
         curSegment = null;
+
+        int numSegments = segmentValues.size();
+        LongArrayList segmentSizes = new LongArrayList(numSegments);
+        for (LongList curValues : segmentValues) {
+            segmentSizes.add(curValues.size());
+        }
+
+        double[] scaledSizes;
+        if (optimizeSpace) {
+            SizePlanner sizeOpt = new SizePlanner(
+                    segmentSizes,
+                    segmentDimensions,
+                    workloadProb
+            );
+            scaledSizes = sizeOpt.calcScaling();
+        } else {
+            scaledSizes = new double[numSegments];
+            Arrays.fill(scaledSizes, 1.0/numSegments);
+        }
+        for (int i = 0; i < scaledSizes.length; i++) {
+            scaledSizes[i] *= size;
+        }
+        int[] roundedSegmentSizes = SizeUtils.safeRound(scaledSizes);
+        segmentSpaces = new IntArrayList(roundedSegmentSizes);
+        System.out.println(segmentSpaces);
+
+        segmentBiases = DoubleArrayList.newWithNValues(numSegments, 0.0);
+    }
+
+    public void setOptimizeSpace(boolean flag) {
+        this.optimizeSpace = flag;
+    }
+    public void setOptimizeBias(boolean flag) {
+        this.optimizeBias = flag;
     }
 
     @Override
@@ -85,15 +122,12 @@ public class CubeFreqPlanner implements Planner<LongList> {
     }
 
     @Override
-    public IntList getSizes() {
-        int numSegments = segmentValues.size();
-        int sizePerSegment = size / numSegments;
-        return IntArrayList.newWithNValues(numSegments, sizePerSegment);
+    public IntList getSpaces() {
+        return segmentSpaces;
     }
 
     @Override
     public DoubleList getBiases() {
-        int numSegments = segmentValues.size();
-        return DoubleArrayList.newWithNValues(numSegments, 0.0);
+        return segmentBiases;
     }
 }

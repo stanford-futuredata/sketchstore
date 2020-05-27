@@ -14,8 +14,6 @@ import org.eclipse.collections.impl.list.mutable.primitive.IntArrayList;
 import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
 import org.junit.Test;
 import runner.factory.FreqSketchGenFactory;
-import summary.compressor.freq.TruncationFreqCompressor;
-import summary.gen.DyadicItemDictCompressorGen;
 import summary.gen.SketchGen;
 import summary.gen.ItemDictCompressorGen;
 import summary.accumulator.MapFreqAccumulator;
@@ -58,7 +56,7 @@ public class BoardGenTest {
             StoryBoard<Long> board = bGen.generate(
                     planner.getSegments(),
                     planner.getDimensions(),
-                    planner.getSizes(),
+                    planner.getSpaces(),
                     planner.getBiases()
             );
             LinearQueryProcessor<Long> qp = factory.getLinearQueryProcessor(

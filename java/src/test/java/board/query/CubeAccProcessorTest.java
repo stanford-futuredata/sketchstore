@@ -47,7 +47,7 @@ public class CubeAccProcessorTest {
         StoryBoard<Long> board = bGen.generate(
                 planner.getSegments(),
                 planner.getDimensions(),
-                planner.getSizes(),
+                planner.getSpaces(),
                 planner.getBiases()
         );
 

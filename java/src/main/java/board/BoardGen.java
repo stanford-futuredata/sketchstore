@@ -27,7 +27,7 @@ public class BoardGen<T, TL extends PrimitiveIterable> {
 
         StoryBoard<T> board = new StoryBoard<>(ndims);
         for (int i = 0; i < nSegments; i++) {
-            System.out.println("[BoardGen] Segment: "+i);
+//            System.out.println("[BoardGen] Segment: "+i);
             TL curSegment = segments.get(i);
             FastList<Sketch<T>> curSketches = sketchGen.generate(
                     curSegment,

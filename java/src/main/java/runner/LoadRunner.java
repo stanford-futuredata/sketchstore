@@ -116,7 +116,7 @@ public class LoadRunner<T, TL extends PrimitiveIterable> {
             StoryBoard<T> board = bGen.generate(
                     planner.getSegments(),
                     planner.getDimensions(),
-                    planner.getSizes(),
+                    planner.getSpaces(),
                     planner.getBiases()
             );
             constructTime.end();

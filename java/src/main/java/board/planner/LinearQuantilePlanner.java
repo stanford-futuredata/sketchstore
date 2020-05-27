@@ -63,7 +63,7 @@ public class LinearQuantilePlanner implements Planner<DoubleList> {
     }
 
     @Override
-    public IntList getSizes() {
+    public IntList getSpaces() {
         return IntArrayList.newWithNValues(numSegments, size);
     }
 

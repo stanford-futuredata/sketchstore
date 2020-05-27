@@ -66,7 +66,7 @@ public class LinearFreqPlanner implements Planner<LongList> {
     }
 
     @Override
-    public IntList getSizes() {
+    public IntList getSpaces() {
         return IntArrayList.newWithNValues(numSegments, size);
     }
 

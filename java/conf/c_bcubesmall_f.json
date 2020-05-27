@@ -1,0 +1,21 @@
+{
+  "experiment": "c_bcubesmall_f",
+  "quantile": false,
+  "out_dir": "output/",
+  "csv_path": "src/test/resources/bcube4_5k.csv",
+  "col_types": [0,1,0,0,0,0,0],
+  "metric_col": "f",
+
+  "dimension_cols": ["d0","d1","d2","d3"],
+  "workload_prob": 0.5,
+  "query_workload_probs": [0.5],
+  "sizes": [5000],
+  "sketches": [
+    "top_values",
+    "truncation",
+    "pps"
+  ],
+
+  "x_to_track": "src/test/resources/bcube4_f_track.csv",
+  "num_queries": 10
+}

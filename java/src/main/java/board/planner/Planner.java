@@ -14,7 +14,7 @@ import java.util.Map;
 public interface Planner<TL extends PrimitiveIterable> {
     FastList<TL> getSegments();
     FastList<LongList> getDimensions();
-    IntList getSizes();
+    IntList getSpaces();
     DoubleList getBiases();
     void plan(
             Table t, String metricCol, int size, Map<String, Object> params
