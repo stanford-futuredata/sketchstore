@@ -2,10 +2,7 @@ package runner;
 
 import board.BoardGen;
 import board.StoryBoard;
-import board.planner.CubeFreqPlanner;
-import board.planner.LinearFreqPlanner;
-import board.planner.LinearQuantilePlanner;
-import board.planner.Planner;
+import board.planner.*;
 import io.*;
 import org.eclipse.collections.api.PrimitiveIterable;
 import org.eclipse.collections.api.factory.Lists;
@@ -95,15 +92,30 @@ public class LoadRunner<T, TL extends PrimitiveIterable> {
 
         Map<String, Object> plannerParams = getPlannerParams();
         int curSize = sizes.get(0);
-        Timer planTime = new Timer();
-        planTime.start();
-        planner.plan(t, metricCol, curSize, plannerParams);
-        planTime.end();
+        planner.setParams(plannerParams);
+        planner.plan(t, metricCol);
 
         FastList<Map<String, String>> results = new FastList<>();
 
         for (String curSketch: sketches) {
             System.out.println("Loading: "+curSketch);
+
+            Timer optimizeTimer = new Timer();
+            PlanOptimizer<TL> planOptimizer = sketchGenFactory.getPlanOptimizer(
+                    curSketch,
+                    isCube
+            );
+            planOptimizer.setParams(plannerParams);
+            optimizeTimer.start();
+            planOptimizer.optimizePlan(
+                    planner.getSegments(),
+                    planner.getDimensions(),
+                    curSize
+            );
+            optimizeTimer.end();
+
+            System.out.println("Generating with sizes: ");
+            System.out.println(planOptimizer.getSpaces());
 
             SketchGen<T, TL> sGen = sketchGenFactory.getSketchGen(
                     curSketch,
@@ -116,8 +128,8 @@ public class LoadRunner<T, TL extends PrimitiveIterable> {
             StoryBoard<T> board = bGen.generate(
                     planner.getSegments(),
                     planner.getDimensions(),
-                    planner.getSpaces(),
-                    planner.getBiases()
+                    planOptimizer.getSpaces(),
+                    planOptimizer.getBiases()
             );
             constructTime.end();
 
@@ -135,7 +147,7 @@ public class LoadRunner<T, TL extends PrimitiveIterable> {
             curResults.put("sketch", curSketch);
             curResults.put("size", Integer.toString(curSize));
             curResults.put("construct_time", Double.toString(constructTime.getTotalMs()));
-            curResults.put("plan_time", Double.toString(planTime.getTotalMs()));
+            curResults.put("plan_time", Double.toString(optimizeTimer.getTotalMs()));
             plannerParams.forEach((String k, Object v) -> {
                 if (v instanceof Number) {
                     curResults.put(k, v.toString());

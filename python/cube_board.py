@@ -333,12 +333,12 @@ experiment_runs = [
             # ("random_sample", "uniform", False),
             # ("random_sample", "sweighted@20", False),
             # ("random_sample", "prop", False),
-            # ("truncation", "uniform", False),
+            ("truncation", "uniform", False),
             # ("cms_min", "uniform", False),
 
             # ("pps", "uniform", True),
             # ("pps", "weighted@20", False),
-            ("pps", "weighted@50", True),
+            # ("pps", "weighted@50", True),
             # ("random_sample", "weighted@20", True),
         ]
     },  # 1
@@ -442,7 +442,7 @@ experiment_runs = [
 ]
 
 def main():
-    experiment_num = 6
+    experiment_num = 1
     cur_experiment = experiment_runs[experiment_num]
     sketch_types = cur_experiment["sketch_types"]
     board_size = cur_experiment["board_size"]

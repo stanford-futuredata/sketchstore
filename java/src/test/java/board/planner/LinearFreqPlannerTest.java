@@ -27,14 +27,14 @@ public class LinearFreqPlannerTest {
 
         int numSegments = 4;
         LinearFreqPlanner planner = new LinearFreqPlanner();
+        planner.setParams(Maps.mutable.of("num_segments", numSegments));
         planner.plan(
-                t, "x", 2, Maps.mutable.of("num_segments", numSegments)
+                t, "x"
         );
 
         SketchGen<Long, LongList> sGen = new ItemDictCompressorGen(
                 new CoopFreqCompressor(0)
         );
-        BoardGen<Long, LongList> bGen = new BoardGen<>(sGen);
         FastList<LongList> segments = planner.getSegments();
         FastList<LongList> dims = planner.getDimensions();
 

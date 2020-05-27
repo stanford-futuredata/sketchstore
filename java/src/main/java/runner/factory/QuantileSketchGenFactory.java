@@ -1,8 +1,12 @@
 package runner.factory;
 
+import board.planner.CubeOptimizer;
+import board.planner.LinearOptimizer;
+import board.planner.PlanOptimizer;
 import board.query.*;
 import org.apache.commons.math3.util.FastMath;
 import org.eclipse.collections.api.list.primitive.DoubleList;
+import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.factory.primitive.DoubleLists;
 import summary.accumulator.Accumulator;
 import summary.accumulator.MapQuantileAccumulator;
@@ -80,5 +84,19 @@ public class QuantileSketchGenFactory implements SketchGenFactory<Double, Double
     @Override
     public CubeQueryProcessor<Double> getCubeQueryProcessor(String sketch) {
         return new CubeAccProcessor<>(getAccumulator(sketch));
+    }
+
+    @Override
+    public PlanOptimizer<DoubleList> getPlanOptimizer(String sketch, boolean isCube) {
+        if (isCube) {
+            CubeOptimizer<DoubleList> opt = new CubeOptimizer<>();
+            if (sketch.equals("coop_pps")) {
+                opt.setOptimizeBias(false);
+                opt.setOptimizeSpace(true);
+            }
+            return opt;
+        } else {
+            return new LinearOptimizer<>();
+        }
     }
 }

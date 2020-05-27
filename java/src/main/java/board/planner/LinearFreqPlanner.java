@@ -18,26 +18,22 @@ import java.util.List;
 import java.util.Map;
 
 public class LinearFreqPlanner implements Planner<LongList> {
-    public int numSegments;
+    public int numSegments = 0;
     public int size;
 
-    public String metricCol;
-    public Table data;
+    FastList<LongList> segmentDimensions;
+    FastList<LongList> segmentValues;
 
     @Override
     public void plan(
-            Table t, String metricCol, int size, Map<String, Object> params
+            Table t, String metricCol
     ) {
-        data = t;
-        this.metricCol = metricCol;
-        this.numSegments = (Integer)params.get("num_segments");
-        this.size = size;
-    }
-
-    @Override
-    public FastList<LongList> getSegments() {
+        Table data = t;
         LongColumn col = (LongColumn)data.column(metricCol);
-        FastList<LongList> segments = new FastList<>(numSegments);
+
+        segmentValues = new FastList<>(numSegments);
+        segmentDimensions = new FastList<>(numSegments);
+
         int n = col.size();
         int segLength = n / numSegments;
         for (int i = 0; i < numSegments; i++) {
@@ -50,29 +46,24 @@ public class LinearFreqPlanner implements Planner<LongList> {
             for (int curIdx = startIdx; curIdx < endIdx; curIdx++) {
                 curSegment.add(col.getLong(curIdx));
             }
-            segments.add(curSegment);
+            segmentValues.add(curSegment);
+            segmentDimensions.add(LongLists.immutable.of(i));
         }
-        return segments;
+
+    }
+
+    @Override
+    public FastList<LongList> getSegments() {
+        return segmentValues;
     }
 
     @Override
     public FastList<LongList> getDimensions() {
-        int n = numSegments;
-        FastList<LongList> dims = new FastList<>(n);
-        for (int i = 0; i < n; i++) {
-            dims.add(LongLists.immutable.of(i));
-        }
-        return dims;
+        return segmentDimensions;
     }
 
     @Override
-    public IntList getSpaces() {
-        return IntArrayList.newWithNValues(numSegments, size);
-    }
-
-    @Override
-    public DoubleList getBiases() {
-        int n = data.rowCount();
-        return DoubleArrayList.newWithNValues(numSegments, 0.0);
+    public void setParams(Map<String, Object> params) {
+        this.numSegments = (Integer)params.get("num_segments");
     }
 }

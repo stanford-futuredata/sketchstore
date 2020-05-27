@@ -3,6 +3,7 @@ package board.query;
 import board.BoardGen;
 import board.StoryBoard;
 import board.planner.CubeFreqPlanner;
+import board.planner.PlanOptimizer;
 import org.eclipse.collections.api.factory.Maps;
 import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.api.list.primitive.LongList;
@@ -17,6 +18,7 @@ import tech.tablesaw.io.csv.CsvReadOptions;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -28,27 +30,35 @@ public class CubeAccProcessorTest {
                 .builder("src/test/resources/small_cube.csv")
                 .columnTypes(types));
 
+        Map<String, Object> planParams = Maps.mutable.of(
+                "dimension_cols",
+                Lists.mutable.of("d1", "d2"),
+                "workload_prob",
+                .2
+        );
+        FreqSketchGenFactory factory = new FreqSketchGenFactory();
         CubeFreqPlanner planner = new CubeFreqPlanner();
+        planner.setParams(planParams);
         planner.plan(
-                t, "x", 10,
-                Maps.mutable.of(
-                        "dimension_cols",
-                        Lists.mutable.of("d1", "d2"),
-                        "workload_prob",
-                        .2
-                )
+                t, "x"
+        );
+        PlanOptimizer<LongList> planOptimizer = factory.getPlanOptimizer("top_values", true);
+        planOptimizer.setParams(planParams);
+        planOptimizer.optimizePlan(
+                planner.getSegments(),
+                planner.getDimensions(),
+                10
         );
 
         List<Long> xToTrack = org.eclipse.collections.api.factory.Lists.mutable.of(1L,2L,3L);
         String curSketchName = "top_values";
-        FreqSketchGenFactory factory = new FreqSketchGenFactory();
         SketchGen<Long, LongList> sGen = factory.getSketchGen(curSketchName, xToTrack, 0);
         BoardGen<Long, LongList> bGen = new BoardGen<>(sGen);
         StoryBoard<Long> board = bGen.generate(
                 planner.getSegments(),
                 planner.getDimensions(),
-                planner.getSpaces(),
-                planner.getBiases()
+                planOptimizer.getSpaces(),
+                planOptimizer.getBiases()
         );
 
         CubeQueryProcessor<Long> qp = factory.getCubeQueryProcessor(curSketchName);

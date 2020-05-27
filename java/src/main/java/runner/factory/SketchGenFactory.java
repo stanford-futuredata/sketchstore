@@ -1,5 +1,7 @@
 package runner.factory;
 
+import board.planner.CubeOptimizer;
+import board.planner.PlanOptimizer;
 import board.query.CubeQueryProcessor;
 import board.query.LinearQueryProcessor;
 import org.eclipse.collections.api.PrimitiveIterable;
@@ -23,5 +25,9 @@ public interface SketchGenFactory<T, TL extends PrimitiveIterable> {
     );
     CubeQueryProcessor<T> getCubeQueryProcessor(
             String sketch
+    );
+    PlanOptimizer<TL> getPlanOptimizer(
+            String sketch,
+            boolean isCube
     );
 }

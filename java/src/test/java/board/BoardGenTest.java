@@ -1,6 +1,7 @@
 package board;
 
 import board.planner.LinearFreqPlanner;
+import board.planner.PlanOptimizer;
 import board.query.LinearAccProcessor;
 import board.query.LinearQueryProcessor;
 import org.eclipse.collections.api.factory.Lists;
@@ -24,6 +25,7 @@ import tech.tablesaw.io.csv.CsvReadOptions;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -34,14 +36,24 @@ public class BoardGenTest {
         Table t = Table.read().usingOptions(CsvReadOptions
                 .builder("src/test/resources/small.csv")
                 .columnTypes(types));
-        LinearFreqPlanner planner = new LinearFreqPlanner();
         int nSegments = 4;
+        Map<String, Object> planParams = Maps.mutable.of("num_segments",nSegments);
+        LinearFreqPlanner planner = new LinearFreqPlanner();
+        planner.setParams(planParams);
         planner.plan(
-                t, "x", 2,
-                Maps.mutable.of("num_segments",nSegments)
+                t, "x"
+        );
+        FreqSketchGenFactory factory = new FreqSketchGenFactory();
+        PlanOptimizer<LongList> planOptimizer = factory.getPlanOptimizer(
+                "top_values", false
+        );
+        planOptimizer.setParams(planParams);
+        planOptimizer.optimizePlan(
+                planner.getSegments(),
+                planner.getDimensions(),
+                2
         );
 
-        FreqSketchGenFactory factory = new FreqSketchGenFactory();
         List<String> sketchNames = Lists.mutable.of(
                 "cooperative",
                 "dyadic_truncation"
@@ -56,8 +68,8 @@ public class BoardGenTest {
             StoryBoard<Long> board = bGen.generate(
                     planner.getSegments(),
                     planner.getDimensions(),
-                    planner.getSpaces(),
-                    planner.getBiases()
+                    planOptimizer.getSpaces(),
+                    planOptimizer.getBiases()
             );
             LinearQueryProcessor<Long> qp = factory.getLinearQueryProcessor(
                     curSketchName,

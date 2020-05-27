@@ -13,7 +13,8 @@
   "sketches": [
     "top_values",
     "truncation",
-    "pps"
+    "pps",
+    "pps_coop"
   ],
 
   "x_to_track": "datasets/sketchstore_synth/bcube4_10M_f_track.csv",

@@ -12,6 +12,7 @@ import tech.tablesaw.api.Table;
 import tech.tablesaw.io.csv.CsvReadOptions;
 
 import java.io.IOException;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -23,23 +24,20 @@ public void simpleTest() throws IOException {
             .columnTypes(types));
 
     CubeFreqPlanner planner = new CubeFreqPlanner();
-    planner.plan(
-            t, "x", 10,
-            Maps.mutable.of(
-                    "dimension_cols",
-                    Lists.mutable.of("d1", "d2"),
-                    "workload_prob",
-                    .2
-            )
+    Map<String, Object> params = Maps.mutable.of(
+            "dimension_cols",
+            Lists.mutable.of("d1", "d2"),
+            "workload_prob",
+            .2
     );
+    planner.setParams(params);
+    planner.plan(t, "x");
 
     FastList<LongList> segments = planner.getSegments();
     FastList<LongList> dims = planner.getDimensions();
-    IntList sizes = planner.getSpaces();
     assertEquals(3, segments.size());
     assertEquals(3, dims.size());
     assertEquals(8, segments.get(0).size());
-    assertTrue(sizes.sum() <= 10);
 
     long totalLen = segments.collectInt(PrimitiveIterable::size).sum();
     assertEquals(t.rowCount(), totalLen);

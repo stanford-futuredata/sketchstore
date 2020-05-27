@@ -1,5 +1,8 @@
 package runner.factory;
 
+import board.planner.CubeOptimizer;
+import board.planner.LinearOptimizer;
+import board.planner.PlanOptimizer;
 import board.query.*;
 import org.apache.commons.math3.util.FastMath;
 import org.eclipse.collections.api.list.primitive.LongList;
@@ -32,7 +35,10 @@ public class FreqSketchGenFactory implements SketchGenFactory<Long, LongList> {
             return new YahooMGGen();
         } else if (sketch.equals("cms_min")) {
             return new CMSSketchGen();
-        } else if (sketch.equals("pps")) {
+        } else if (
+                sketch.equals("pps")
+                        || sketch.equals("pps_coop")
+        ) {
             return new ItemCounterCompressorGen(new HaircombCompressor(0));
         } else if (sketch.equals("dyadic_truncation")) {
             int maxHeight = (int) FastMath.log(2.0, maxLength);
@@ -52,6 +58,7 @@ public class FreqSketchGenFactory implements SketchGenFactory<Long, LongList> {
                 || sketch.equals("truncation")
                 || sketch.equals("cooperative")
                 || sketch.equals("pps")
+                || sketch.equals("pps_coop")
                 || sketch.equals("dyadic_truncation")
                 || sketch.equals("random_sample")
         ) {
@@ -83,5 +90,19 @@ public class FreqSketchGenFactory implements SketchGenFactory<Long, LongList> {
     @Override
     public CubeQueryProcessor<Long> getCubeQueryProcessor(String sketch) {
         return new CubeAccProcessor<>(getAccumulator(sketch));
+    }
+
+    @Override
+    public PlanOptimizer<LongList> getPlanOptimizer(String sketch, boolean isCube) {
+        if (isCube) {
+            CubeOptimizer<LongList> opt = new CubeOptimizer<>();
+            if (sketch.equals("pps_coop")) {
+                opt.setOptimizeBias(true);
+                opt.setOptimizeSpace(true);
+            }
+            return opt;
+        } else {
+            return new LinearOptimizer<>();
+        }
     }
 }

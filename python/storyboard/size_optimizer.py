@@ -31,7 +31,7 @@ class WorkloadProperties:
 def scale_a_weights(as_g: np.ndarray, total_space: int, min_amt:int=0):
     baseline_sizes = np.zeros(as_g.shape, dtype=np.int_)
     if min_amt > 0:
-        baseline_sizes = min_amt
+        baseline_sizes = np.repeat(min_amt, as_g.shape)
         total_space -= np.sum(baseline_sizes)
     a_scaled = as_g * total_space / np.sum(as_g)
     total_sizes = (baseline_sizes + np.diff(np.round(np.insert(np.cumsum(a_scaled), 0, 0)))).astype(int)
