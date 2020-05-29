@@ -8,12 +8,13 @@ import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
 import org.eclipse.collections.impl.list.mutable.primitive.IntArrayList;
+import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
 
 import java.util.Map;
 
 public class LinearOptimizer<TL extends PrimitiveIterable> implements PlanOptimizer<TL> {
     IntArrayList spaces;
-    DoubleArrayList biases;
+    LongArrayList biases;
 
     public LinearOptimizer() {
         return;
@@ -25,7 +26,7 @@ public class LinearOptimizer<TL extends PrimitiveIterable> implements PlanOptimi
     }
 
     @Override
-    public DoubleList getBiases() {
+    public LongList getBiases() {
         return biases;
     }
 
@@ -33,7 +34,7 @@ public class LinearOptimizer<TL extends PrimitiveIterable> implements PlanOptimi
     public void optimizePlan(FastList<TL> segments, FastList<LongList> segDimensions, int size) {
         int nSegments = segments.size();
         spaces = new IntArrayList(nSegments);
-        biases = new DoubleArrayList(nSegments);
+        biases = new LongArrayList(nSegments);
 
         for (int i = 0; i < nSegments; i++) {
             spaces.add(size);

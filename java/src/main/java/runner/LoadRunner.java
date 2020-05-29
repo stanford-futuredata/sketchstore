@@ -7,6 +7,7 @@ import io.*;
 import org.eclipse.collections.api.PrimitiveIterable;
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.primitive.DoubleList;
+import org.eclipse.collections.api.list.primitive.IntList;
 import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import runner.factory.QuantileSketchGenFactory;
@@ -114,8 +115,20 @@ public class LoadRunner<T, TL extends PrimitiveIterable> {
             );
             optimizeTimer.end();
 
-            System.out.println("Generating with sizes: ");
-            System.out.println(planOptimizer.getSpaces());
+//            System.out.println("Generating with sizes: ");
+//            System.out.println(planOptimizer.getSpaces());
+            LongList biases = planOptimizer.getBiases();
+            IntList spaces = planOptimizer.getSpaces();
+            System.out.print("space: ");
+            for (int i = 0; i < 10; i++) {
+                System.out.print(spaces.get(i)+" ");
+            }
+            System.out.println();
+            System.out.print("bias: ");
+            for (int i = 0; i < 10; i++) {
+                System.out.print(biases.get(i)+" ");
+            }
+            System.out.println();
 
             SketchGen<T, TL> sGen = sketchGenFactory.getSketchGen(
                     curSketch,

@@ -1,5 +1,6 @@
 package board.planner.bias;
 
+import com.github.lbfgs4j.LbfgsMinimizer;
 import com.github.lbfgs4j.liblbfgs.Function;
 import com.github.lbfgs4j.liblbfgs.Lbfgs;
 import com.github.lbfgs4j.liblbfgs.LbfgsConstant;
@@ -110,7 +111,8 @@ public class BFGSOptimizer {
         double[] x = xArg.clone();
         LbfgsConstant.LBFGS_Param params = Lbfgs.defaultParams();
         params.max_iterations = maxIter;
-        params.epsilon = gradTol;
+        params.delta = gradTol;
+        params.epsilon = 0;
 
         int dim = xArg.length;
         MutableDouble fx  = new MutableDouble();
@@ -122,6 +124,7 @@ public class BFGSOptimizer {
 
         stepCount = ((Progress) progress).getNumSteps();
         converged = (retVal == LBFGS_CONVERGENCE);
+        System.out.println("retval: "+retVal);
         return x;
     }
 }

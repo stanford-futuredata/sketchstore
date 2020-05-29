@@ -10,7 +10,7 @@ import java.util.Map;
 
 public interface PlanOptimizer<TL extends PrimitiveIterable> {
     IntList getSpaces();
-    DoubleList getBiases();
+    LongList getBiases();
     void setParams(Map<String, Object> params);
     void optimizePlan(FastList<TL> segments, FastList<LongList> segDimensions, int size);
 }

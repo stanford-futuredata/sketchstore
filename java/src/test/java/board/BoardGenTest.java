@@ -101,7 +101,7 @@ public class BoardGenTest {
                 LongArrayList.newListWith(1)
         );
         IntList sizes = IntArrayList.newListWith(2, 2);
-        DoubleList bias = DoubleArrayList.newWithNValues(2, 0.0);
+        LongList bias = LongArrayList.newWithNValues(2, 0);
         StoryBoard<Long> board = bGen.generate(
                 segments,
                 dims,

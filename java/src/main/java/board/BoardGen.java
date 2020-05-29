@@ -17,7 +17,7 @@ public class BoardGen<T, TL extends PrimitiveIterable> {
             FastList<TL> segments,
             FastList<LongList> dims,
             IntList sizes,
-            DoubleList biases
+            LongList biases
     ) {
         if (dims.size() == 0) {
             return null;

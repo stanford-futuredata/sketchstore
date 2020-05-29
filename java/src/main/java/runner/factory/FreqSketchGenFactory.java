@@ -3,6 +3,8 @@ package runner.factory;
 import board.planner.CubeOptimizer;
 import board.planner.LinearOptimizer;
 import board.planner.PlanOptimizer;
+import board.planner.bias.FreqBiasOptimizer;
+import board.planner.bias.NopBiasOptimizer;
 import board.query.*;
 import org.apache.commons.math3.util.FastMath;
 import org.eclipse.collections.api.list.primitive.LongList;
@@ -95,10 +97,14 @@ public class FreqSketchGenFactory implements SketchGenFactory<Long, LongList> {
     @Override
     public PlanOptimizer<LongList> getPlanOptimizer(String sketch, boolean isCube) {
         if (isCube) {
-            CubeOptimizer<LongList> opt = new CubeOptimizer<>();
+            CubeOptimizer<LongList> opt;
             if (sketch.equals("pps_coop")) {
-                opt.setOptimizeBias(true);
+                opt = new CubeOptimizer<>(
+                        new FreqBiasOptimizer()
+                );
                 opt.setOptimizeSpace(true);
+            } else {
+                opt = new CubeOptimizer<>(new NopBiasOptimizer<>());
             }
             return opt;
         } else {

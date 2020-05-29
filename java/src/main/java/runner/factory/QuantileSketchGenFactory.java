@@ -3,6 +3,7 @@ package runner.factory;
 import board.planner.CubeOptimizer;
 import board.planner.LinearOptimizer;
 import board.planner.PlanOptimizer;
+import board.planner.bias.NopBiasOptimizer;
 import board.query.*;
 import org.apache.commons.math3.util.FastMath;
 import org.eclipse.collections.api.list.primitive.DoubleList;
@@ -89,9 +90,10 @@ public class QuantileSketchGenFactory implements SketchGenFactory<Double, Double
     @Override
     public PlanOptimizer<DoubleList> getPlanOptimizer(String sketch, boolean isCube) {
         if (isCube) {
-            CubeOptimizer<DoubleList> opt = new CubeOptimizer<>();
+            CubeOptimizer<DoubleList> opt = new CubeOptimizer<>(
+                    new NopBiasOptimizer<>()
+            );
             if (sketch.equals("coop_pps")) {
-                opt.setOptimizeBias(false);
                 opt.setOptimizeSpace(true);
             }
             return opt;

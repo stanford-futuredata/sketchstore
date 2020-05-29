@@ -1,5 +1,6 @@
 package board.planner;
 
+import board.planner.bias.BiasOptimizer;
 import org.eclipse.collections.api.PrimitiveIterable;
 import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.api.list.primitive.IntList;
@@ -15,11 +16,12 @@ import java.util.Map;
 public class CubeOptimizer<TL extends PrimitiveIterable> implements PlanOptimizer<TL> {
     public int totalSize;
     public IntArrayList segmentSpaces;
-    public DoubleArrayList segmentBiases;
+    public LongArrayList segmentBiases;
     public double workloadProb;
 
+    public BiasOptimizer<TL> biasOptimizer;
     boolean optimizeSpace = false;
-    boolean optimizeBias = false;
+
 
     @Override
     public IntList getSpaces() {
@@ -27,8 +29,14 @@ public class CubeOptimizer<TL extends PrimitiveIterable> implements PlanOptimize
     }
 
     @Override
-    public DoubleList getBiases() {
+    public LongList getBiases() {
         return segmentBiases;
+    }
+
+    public CubeOptimizer(
+        BiasOptimizer<TL> biasOptimizer
+    ) {
+        this.biasOptimizer = biasOptimizer;
     }
 
     @Override
@@ -63,14 +71,16 @@ public class CubeOptimizer<TL extends PrimitiveIterable> implements PlanOptimize
         int[] roundedSegmentSizes = SizeUtils.safeRound(scaledSizes);
         segmentSpaces = new IntArrayList(roundedSegmentSizes);
 
-        double[] biasArray = new double[numSegments];
-        segmentBiases = new DoubleArrayList(biasArray);
+        biasOptimizer.compute(
+                roundedSegmentSizes,
+                segments
+        );
+        double[] biasArray = biasOptimizer.getBias();
+        long[] roundedBiasArray = SizeUtils.safeRoundLong(biasArray);
+        segmentBiases = new LongArrayList(roundedBiasArray);
     }
 
     public void setOptimizeSpace(boolean flag) {
         optimizeSpace = flag;
-    }
-    public void setOptimizeBias(boolean flag) {
-        optimizeBias = flag;
     }
 }
