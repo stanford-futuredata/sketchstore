@@ -123,7 +123,7 @@ public class BFGSOptimizer {
 
         stepCount = ((Progress) progress).getNumSteps();
         converged = (retVal == LBFGS_CONVERGENCE);
-        System.out.println("retval: "+retVal);
+//        System.out.println("retval: "+retVal);
         return x;
     }
 }

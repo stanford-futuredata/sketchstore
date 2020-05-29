@@ -13,7 +13,7 @@ public class ErrorMetricTest {
         DoubleList x1 = DoubleLists.immutable.of(1.0, 2.0, 3.0);
         DoubleList x2 = DoubleLists.immutable.of(2.0, 4.0, 3.0);
         MutableMap<String, Double> results = ErrorMetric.calcErrors(x1, x2);
-        System.out.println(results);
+        assertEquals(2.0, results.get("max"), 1e-10);
     }
 
 }

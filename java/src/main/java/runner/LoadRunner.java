@@ -117,18 +117,18 @@ public class LoadRunner<T, TL extends PrimitiveIterable> {
 
 //            System.out.println("Generating with sizes: ");
 //            System.out.println(planOptimizer.getSpaces());
-            LongList biases = planOptimizer.getBiases();
-            IntList spaces = planOptimizer.getSpaces();
-            System.out.print("space: ");
-            for (int i = 0; i < 10; i++) {
-                System.out.print(spaces.get(i)+" ");
-            }
-            System.out.println();
-            System.out.print("bias: ");
-            for (int i = 0; i < 10; i++) {
-                System.out.print(biases.get(i)+" ");
-            }
-            System.out.println();
+//            LongList biases = planOptimizer.getBiases();
+//            IntList spaces = planOptimizer.getSpaces();
+//            System.out.print("space: ");
+//            for (int i = 0; i < 10; i++) {
+//                System.out.print(spaces.get(i)+" ");
+//            }
+//            System.out.println();
+//            System.out.print("bias: ");
+//            for (int i = 0; i < 10; i++) {
+//                System.out.print(biases.get(i)+" ");
+//            }
+//            System.out.println();
 
             SketchGen<T, TL> sGen = sketchGenFactory.getSketchGen(
                     curSketch,

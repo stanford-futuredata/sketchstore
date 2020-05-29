@@ -41,8 +41,8 @@ public class QuantileSketchGenFactory implements SketchGenFactory<Double, Double
             return new SeqCounterCompressorGen(new SkipQuantileCompressor(false, 0));
         } else if(sketch.equals("cooperative")) {
             CoopQuantileCompressor compressor = new CoopQuantileCompressor();
-            compressor.setMaxAccSize(20_000);
-            return new SeqCounterCompressorGen(new CoopQuantileCompressor());
+            compressor.setMaxAccSize(0);
+            return new SeqCounterCompressorGen(compressor);
         } else if(sketch.equals("kll")) {
             return new YahooKLLGen();
         } else if (sketch.equals("dyadic_truncation")) {
