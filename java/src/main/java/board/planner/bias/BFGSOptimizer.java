@@ -111,8 +111,7 @@ public class BFGSOptimizer {
         double[] x = xArg.clone();
         LbfgsConstant.LBFGS_Param params = Lbfgs.defaultParams();
         params.max_iterations = maxIter;
-        params.delta = gradTol;
-        params.epsilon = 0;
+        params.epsilon = gradTol;
 
         int dim = xArg.length;
         MutableDouble fx  = new MutableDouble();

@@ -1,5 +1,6 @@
 package board.planner.bias;
 
+import org.apache.commons.math3.util.FastMath;
 import org.eclipse.collections.api.tuple.primitive.DoubleDoublePair;
 import org.eclipse.collections.impl.list.mutable.FastList;
 
@@ -8,6 +9,8 @@ public class RMSErrorFunction implements FunctionWithGrad {
     double value;
     FastList<SegmentCCDF> segments;
     int[] segmentSpaces;
+
+    double[] xBuffer;
 
     public RMSErrorFunction(
             FastList<SegmentCCDF> segments,
@@ -18,24 +21,36 @@ public class RMSErrorFunction implements FunctionWithGrad {
         this.segmentSpaces = segmentSpaces;
         grad = new double[nSegs];
         value = 0;
+
+        xBuffer = new double[nSegs];
     }
 
     @Override
-    public void compute(double[] x) {
+    public void compute(double[] xl) {
         int nSeg = segments.size();
         double biasTerm = 0;
         double varTerm = 0;
+
         for (int i = 0; i < nSeg; i++) {
+            xBuffer[i] = FastMath.exp(xl[i]);
+        }
+
+        for (int i = 0; i < nSeg; i++) {
+            double x= xBuffer[i];
             SegmentCCDF segCDF = segments.get(i);
-            DoubleDoublePair p = segCDF.total(x[i]);
+            DoubleDoublePair p = segCDF.total(x);
             double ni = p.getOne();
             double dni = p.getTwo();
 
-            biasTerm += x[i];
+            biasTerm += x;
 
             double scaledTotal = ni/segmentSpaces[i];
             varTerm += .25*scaledTotal*scaledTotal;
-            grad[i] = 2*x[i] + .5*scaledTotal*dni/segmentSpaces[i];
+            grad[i] = .5*scaledTotal*dni/segmentSpaces[i];
+        }
+        for (int i = 0; i < nSeg; i++) {
+            grad[i] += 2*biasTerm;
+            grad[i] *= xBuffer[i];
         }
         value = biasTerm*biasTerm + varTerm;
     }

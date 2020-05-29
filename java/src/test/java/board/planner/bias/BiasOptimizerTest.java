@@ -1,6 +1,8 @@
 package board.planner.bias;
 
+import org.apache.commons.math3.util.FastMath;
 import org.eclipse.collections.api.list.primitive.LongList;
+import org.eclipse.collections.api.tuple.primitive.DoubleDoublePair;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
 import org.junit.Test;
@@ -28,11 +30,30 @@ public class BiasOptimizerTest {
                 segSpace
         );
 
+        double[] xLoc = new double[nSegments];
+        for (int i = 0; i <nSegments; i++) {
+            xLoc[i] = 2.0;
+        }
+        xLoc[0] = 1.0;
+
+        f.compute(xLoc);
+        double fval = f.getValue();
+        double[] fgrad = f.getGradient();
+
+        double gradDelta = 0.001;
+        xLoc[0] += gradDelta;
+        f.compute(xLoc);
+        double fval2 = f.getValue();
+        assertEquals((fval2-fval)/gradDelta, fgrad[0], 1);
+
         BFGSOptimizer opt = new BFGSOptimizer(f);
         opt.setVerbose(false);
         double[] xSolve = new double[nSegments];
         xSolve = opt.solve(xSolve, 1e-5);
         assertTrue(xSolve[0] > 0);
+        for(int i = 0; i < nSegments; i++) {
+            xSolve[i] = FastMath.exp(xSolve[i]);
+        }
 
         LongArrayList xs = new LongArrayList();
         int newItem = 0;
@@ -51,6 +72,6 @@ public class BiasOptimizerTest {
         BiasOptimizer<LongList> bopt = new FreqBiasOptimizer();
         bopt.compute(segSpace, rawSegments);
         double[] xSolve2 = bopt.getBias();
-        assertArrayEquals(xSolve, xSolve2, 1e-10);
+        assertArrayEquals(xSolve, xSolve2, 1e-4);
     }
 }

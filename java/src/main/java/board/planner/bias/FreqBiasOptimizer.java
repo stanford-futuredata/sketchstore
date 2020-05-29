@@ -1,7 +1,9 @@
 package board.planner.bias;
 
+import org.apache.commons.math3.util.FastMath;
 import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.list.mutable.FastList;
+import runner.factory.FreqSketchGenFactory;
 
 public class FreqBiasOptimizer implements BiasOptimizer<LongList> {
     double[] biasValues;
@@ -22,8 +24,11 @@ public class FreqBiasOptimizer implements BiasOptimizer<LongList> {
         BFGSOptimizer opt = new BFGSOptimizer(f);
         opt.setMaxIter(20);
         opt.setVerbose(true);
-        double[] xSolve = new double[nSegments];
-        biasValues = opt.solve(xSolve, 1e-5);
+        biasValues = new double[nSegments];
+        biasValues= opt.solve(biasValues, 1e-3);
+        for (int i = 0; i < nSegments; i++) {
+            biasValues[i] = FastMath.exp(biasValues[i]);
+        }
     }
 
     @Override
