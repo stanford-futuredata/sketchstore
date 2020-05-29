@@ -262,6 +262,11 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
                     queryTimer.end();
                     sketchTotalTimer.end();
 
+//                    System.out.println("true");
+//                    System.out.println(trueResults);
+//                    System.out.println("query");
+//                    System.out.println(queryResults);
+//
                     MutableMap<String, Double> errorQuantities = ErrorMetric.calcErrors(
                             trueResults,
                             queryResults

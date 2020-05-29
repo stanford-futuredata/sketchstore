@@ -15,6 +15,7 @@ import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.factory.primitive.DoubleLists;
 import summary.accumulator.Accumulator;
+import summary.accumulator.ListQuantileAccumulator;
 import summary.accumulator.MapQuantileAccumulator;
 import summary.accumulator.MergingAccumulator;
 import summary.compressor.quantile.CoopQuantileCompressor;
@@ -77,7 +78,8 @@ public class QuantileSketchGenFactory implements SketchGenFactory<Double, Double
                 || sketch.equals("random_sample_strat")
                 || sketch.equals("random_sample_prop")
         ) {
-            return new MapQuantileAccumulator();
+//            return new MapQuantileAccumulator();
+            return new ListQuantileAccumulator();
         } else if (sketch.equals("kll")) {
             return new MergingAccumulator<>(new YahooKLLGen(), DoubleLists.immutable.empty());
         }

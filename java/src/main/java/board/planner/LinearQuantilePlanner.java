@@ -11,6 +11,7 @@ import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
 import org.eclipse.collections.impl.list.mutable.primitive.IntArrayList;
 import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
 import org.eclipse.collections.impl.list.mutable.primitive.UnmodifiableLongList;
+import tech.tablesaw.api.DoubleColumn;
 import tech.tablesaw.api.LongColumn;
 import tech.tablesaw.api.Table;
 
@@ -29,7 +30,7 @@ public class LinearQuantilePlanner implements Planner<DoubleList> {
             Table t, String metricCol
     ) {
         Table data = t;
-        LongColumn col = (LongColumn)data.column(metricCol);
+        DoubleColumn col = (DoubleColumn)data.column(metricCol);
 
         segmentValues = new FastList<>(numSegments);
         segmentDimensions = new FastList<>(numSegments);
