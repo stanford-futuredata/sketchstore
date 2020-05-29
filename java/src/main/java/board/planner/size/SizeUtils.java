@@ -1,4 +1,4 @@
-package board.planner;
+package board.planner.size;
 
 import org.apache.commons.math3.util.FastMath;
 

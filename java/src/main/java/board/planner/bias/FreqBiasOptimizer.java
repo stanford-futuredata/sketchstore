@@ -22,10 +22,10 @@ public class FreqBiasOptimizer implements BiasOptimizer<LongList> {
                 segmentSpaces
         );
         BFGSOptimizer opt = new BFGSOptimizer(f);
-        opt.setMaxIter(10);
+        opt.setMaxIter(15);
         opt.setVerbose(false);
         biasValues = new double[nSegments];
-        biasValues= opt.solve(biasValues, 1e-3);
+        biasValues= opt.solve(biasValues, 1e-4);
         for (int i = 0; i < nSegments; i++) {
             biasValues[i] = FastMath.exp(biasValues[i]);
         }

@@ -1,34 +1,34 @@
-package board.planner;
+package board.planner.size;
 
 import org.apache.commons.math3.util.FastMath;
+import org.eclipse.collections.api.PrimitiveIterable;
 import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
 import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 
-import java.util.Arrays;
+public class CoopSizeOptimizer<TL extends PrimitiveIterable> implements SizeOptimizer<TL> {
+    double scalePower;
+    double[] scalings;
 
-public class SizePlanner {
-    LongList segmentSizes;
-    FastList<LongList> segmentDimensions;
-    long[] dimensionCardinalities;
-    double workloadProb;
-
-    public SizePlanner(
-            LongList segmentSizes,
-            FastList<LongList> segmentDimensions,
-            double workloadProb
+    public CoopSizeOptimizer(
+            double scalePower
     ) {
-        this.segmentDimensions = segmentDimensions;
-        this.segmentSizes = segmentSizes;
-        this.workloadProb = workloadProb;
+        this.scalePower = scalePower;
     }
-    public double[] calcScaling() {
+    public CoopSizeOptimizer() {
+        this.scalePower = 1.0/3;
+    }
+
+    @Override
+    public void compute(
+            LongList segmentSizes, FastList<LongList> segmentDimensions, double workloadProb
+    ) {
         int nSeg = segmentSizes.size();
         int nDim = segmentDimensions.get(0).size();
         MutableMap<LongList, Double> segmentA2s = new UnifiedMap<>(nSeg);
-        dimensionCardinalities = new long[nDim];
+        long[] dimensionCardinalities = new long[nDim];
         for (LongList curSeg : segmentDimensions) {
             segmentA2s.put(curSeg, 0.0);
             for (int j = 0; j < nDim; j++) {
@@ -83,20 +83,19 @@ public class SizePlanner {
             }
         }
 
-        double[] finalSize = new double[nSeg];
+        scalings = new double[nSeg];
         double totalSize = 0;
         for (int i = 0; i < nSeg; i++) {
             double curSegmentSize = segmentSizes.get(i);
-            finalSize[i] = FastMath.pow(
+            scalings[i] = FastMath.pow(
                     segmentA2s.get(segmentDimensions.get(i)) * curSegmentSize*curSegmentSize,
-                    1.0/3
+                    scalePower
             );
-            totalSize += finalSize[i];
+            totalSize += scalings[i];
         }
         for (int i = 0; i < nSeg; i++) {
-            finalSize[i] /= totalSize;
+            scalings[i] /= totalSize;
         }
-        return finalSize;
     }
     public static LongArrayList getGroupKey(LongList segDimensions, int[] filterOnDimFlags, int numFilterDims) {
         LongArrayList groupKey = new LongArrayList(numFilterDims);
@@ -106,5 +105,10 @@ public class SizePlanner {
             }
         }
         return groupKey;
+    }
+
+    @Override
+    public double[] getScaling() {
+        return scalings;
     }
 }

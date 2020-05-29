@@ -1,8 +1,7 @@
 package board.planner;
 
+import board.planner.size.SizeUtils;
 import org.junit.Test;
-
-import java.util.Arrays;
 
 import static org.junit.Assert.*;
 

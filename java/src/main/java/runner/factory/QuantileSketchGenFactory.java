@@ -3,7 +3,12 @@ package runner.factory;
 import board.planner.CubeOptimizer;
 import board.planner.LinearOptimizer;
 import board.planner.PlanOptimizer;
+import board.planner.bias.BiasOptimizer;
 import board.planner.bias.NopBiasOptimizer;
+import board.planner.size.CoopSizeOptimizer;
+import board.planner.size.NopSizeOptimizer;
+import board.planner.size.PropSizeOptimizer;
+import board.planner.size.SizeOptimizer;
 import board.query.*;
 import org.apache.commons.math3.util.FastMath;
 import org.eclipse.collections.api.list.primitive.DoubleList;
@@ -90,12 +95,23 @@ public class QuantileSketchGenFactory implements SketchGenFactory<Double, Double
     @Override
     public PlanOptimizer<DoubleList> getPlanOptimizer(String sketch, boolean isCube) {
         if (isCube) {
-            CubeOptimizer<DoubleList> opt = new CubeOptimizer<>(
-                    new NopBiasOptimizer<>()
-            );
-            if (sketch.equals("coop_pps")) {
-                opt.setOptimizeSpace(true);
+            SizeOptimizer<DoubleList> sizeOpt = null;
+            BiasOptimizer<DoubleList> biasOpt = new NopBiasOptimizer<>();
+
+            if (sketch.equals("pps_coop")) {
+                sizeOpt = new CoopSizeOptimizer<>(1.0/3);
+            } else if (sketch.equals("random_sample_prop")) {
+                sizeOpt = new PropSizeOptimizer<>();
+            } else if (sketch.equals("random_sample_strat")) {
+                sizeOpt = new CoopSizeOptimizer<>(1.0/2);
+            } else {
+                sizeOpt = new NopSizeOptimizer<>();
             }
+
+            CubeOptimizer<DoubleList> opt = new CubeOptimizer<>(
+                    sizeOpt,
+                    biasOpt
+            );
             return opt;
         } else {
             return new LinearOptimizer<>();

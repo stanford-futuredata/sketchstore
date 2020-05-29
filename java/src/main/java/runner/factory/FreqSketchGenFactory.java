@@ -3,8 +3,13 @@ package runner.factory;
 import board.planner.CubeOptimizer;
 import board.planner.LinearOptimizer;
 import board.planner.PlanOptimizer;
+import board.planner.bias.BiasOptimizer;
 import board.planner.bias.FreqBiasOptimizer;
 import board.planner.bias.NopBiasOptimizer;
+import board.planner.size.CoopSizeOptimizer;
+import board.planner.size.NopSizeOptimizer;
+import board.planner.size.PropSizeOptimizer;
+import board.planner.size.SizeOptimizer;
 import board.query.*;
 import org.apache.commons.math3.util.FastMath;
 import org.eclipse.collections.api.list.primitive.LongList;
@@ -48,7 +53,11 @@ public class FreqSketchGenFactory implements SketchGenFactory<Long, LongList> {
                     () -> new TruncationFreqCompressor(),
                     maxHeight
             );
-        } else if (sketch.equals("random_sample")) {
+        } else if (
+                sketch.equals("random_sample")
+                || sketch.equals("random_sample_prop")
+                || sketch.equals("random_sample_strat")
+        ) {
             return new ItemCounterCompressorGen(new USampleFreqCompressor(0));
         }
         throw new RuntimeException("Invalid sketch name");
@@ -63,6 +72,8 @@ public class FreqSketchGenFactory implements SketchGenFactory<Long, LongList> {
                 || sketch.equals("pps_coop")
                 || sketch.equals("dyadic_truncation")
                 || sketch.equals("random_sample")
+                || sketch.equals("random_sample_prop")
+                || sketch.equals("random_sample_strat")
         ) {
             return new MapFreqAccumulator();
         } else if (sketch.equals("yahoo_mg")) {
@@ -97,15 +108,31 @@ public class FreqSketchGenFactory implements SketchGenFactory<Long, LongList> {
     @Override
     public PlanOptimizer<LongList> getPlanOptimizer(String sketch, boolean isCube) {
         if (isCube) {
-            CubeOptimizer<LongList> opt;
+            SizeOptimizer<LongList> sizeOpt = null;
+            BiasOptimizer<LongList> biasOpt = null;
+
+            // size
             if (sketch.equals("pps_coop")) {
-                opt = new CubeOptimizer<>(
-                        new FreqBiasOptimizer()
-                );
-                opt.setOptimizeSpace(true);
+                sizeOpt = new CoopSizeOptimizer<>(1.0/3);
+            } else if (sketch.equals("random_sample_prop")) {
+                sizeOpt = new PropSizeOptimizer<>();
+            } else if (sketch.equals("random_sample_strat")) {
+                sizeOpt = new CoopSizeOptimizer<>(1.0/2);
             } else {
-                opt = new CubeOptimizer<>(new NopBiasOptimizer<>());
+                sizeOpt = new NopSizeOptimizer<>();
             }
+
+            // bias
+            if (sketch.equals("pps_coop")) {
+                biasOpt = new FreqBiasOptimizer();
+            } else {
+                biasOpt = new NopBiasOptimizer<>();
+            }
+
+            CubeOptimizer<LongList> opt = new CubeOptimizer<>(
+                    sizeOpt,
+                    biasOpt
+            );
             return opt;
         } else {
             return new LinearOptimizer<>();

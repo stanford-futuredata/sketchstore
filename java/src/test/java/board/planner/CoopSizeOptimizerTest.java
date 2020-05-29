@@ -1,17 +1,16 @@
 package board.planner;
 
+import board.planner.size.CoopSizeOptimizer;
 import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.factory.primitive.LongLists;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
 import org.junit.Test;
 
-import java.util.Arrays;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class SizePlannerTest {
+public class CoopSizeOptimizerTest {
     @Test
     public void testSimple() {
         LongArrayList segmentSizes = new LongArrayList();
@@ -25,21 +24,22 @@ public class SizePlannerTest {
         segmentDimensions.add(LongLists.mutable.of(1,1));
 
         double workloadProb = 1;
-        SizePlanner planner = new SizePlanner(
+        CoopSizeOptimizer<LongList> planner = new CoopSizeOptimizer<>(1.0/3);
+        planner.compute(
                 segmentSizes,
                 segmentDimensions,
                 workloadProb
         );
-        double[] sizes = planner.calcScaling();
+        double[] sizes = planner.getScaling();
         assertEquals(sizes[0], sizes[2], 1e-7);
 
         workloadProb = .5;
-        planner = new SizePlanner(
+        planner.compute(
                 segmentSizes,
                 segmentDimensions,
                 workloadProb
         );
-        sizes = planner.calcScaling();
+        sizes = planner.getScaling();
 //        System.out.println(Arrays.toString(sizes));
         assertTrue(sizes[0] * 1.5 < sizes[2]);
     }
