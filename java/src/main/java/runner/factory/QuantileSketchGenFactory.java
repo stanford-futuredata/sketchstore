@@ -50,9 +50,16 @@ public class QuantileSketchGenFactory implements SketchGenFactory<Double, Double
                     () -> new SkipQuantileCompressor(false, 0),
                     maxHeight
             );
-        } else if(sketch.equals("pps")) {
+        } else if(
+                sketch.equals("pps")
+                || sketch.equals("pps_coop")
+        ) {
             return new SeqCounterCompressorGen(new SkipQuantileCompressor(true, 0));
-        } else if (sketch.equals("random_sample")) {
+        } else if (
+                sketch.equals("random_sample")
+                || sketch.equals("random_sample_strat")
+                || sketch.equals("random_sample_prop")
+        ) {
             return new SeqCounterCompressorGen(new USampleQuantCompressor(0));
         }
         throw new RuntimeException("Unsupported Sketch: "+sketch);
@@ -65,7 +72,10 @@ public class QuantileSketchGenFactory implements SketchGenFactory<Double, Double
                 || sketch.equals("cooperative")
                 || sketch.equals("dyadic_truncation")
                 || sketch.equals("pps")
+                || sketch.equals("pps_coop")
                 || sketch.equals("random_sample")
+                || sketch.equals("random_sample_strat")
+                || sketch.equals("random_sample_prop")
         ) {
             return new MapQuantileAccumulator();
         } else if (sketch.equals("kll")) {

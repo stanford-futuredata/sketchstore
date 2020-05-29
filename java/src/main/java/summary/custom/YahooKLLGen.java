@@ -13,7 +13,8 @@ public class YahooKLLGen implements SketchGen<Double, DoubleList> {
     @Override
     public FastList<Sketch<Double>> generate(DoubleList xs, int size, double bias) {
         FastList<Sketch<Double>> out = new FastList<>(1);
-        KllFloatsSketch rawSketch = new KllFloatsSketch(size/3);
+        int effectiveSize = Math.max((int)Math.ceil(size/3.0), 8);
+        KllFloatsSketch rawSketch = new KllFloatsSketch(effectiveSize);
 
         int n = xs.size();
         for (int i = 0; i < n; i++) {

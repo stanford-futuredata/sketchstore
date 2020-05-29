@@ -188,7 +188,7 @@ public class LoadRunner<T, TL extends PrimitiveIterable> {
             SimpleCSVDataSource<Double> xTrackSource = new SimpleCSVDataSourceDouble();
             Planner<DoubleList> planner;
             if (loader.isCube) {
-                throw new RuntimeException("Planner not implemented");
+                planner = new CubeQuantilePlanner();
             } else {
                 planner = new LinearQuantilePlanner();
             }

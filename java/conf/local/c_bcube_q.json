@@ -1,10 +1,10 @@
 {
-  "experiment": "c_bcube_f",
-  "quantile": false,
+  "experiment": "c_bcube_q",
+  "quantile": true,
   "out_dir": "output/",
   "csv_path": "datasets/sketchstore_synth/bcube4_10M.csv",
   "col_types": [0,1,0,0,0,0,0],
-  "metric_col": "f",
+  "metric_col": "q",
 
   "dimension_cols": ["d0","d1","d2","d3"],
   "workload_prob": 0.2,
@@ -18,10 +18,9 @@
     "random_sample",
     "random_sample_prop",
     "random_sample_strat",
-    "cms_min",
-    "yahoo_mg"
+    "kll"
   ],
 
-  "x_to_track": "datasets/sketchstore_synth/bcube4_10M_f_track.csv",
+  "x_to_track": "datasets/sketchstore_synth/bcube4_10M_q_track.csv",
   "num_queries": 10000
 }
