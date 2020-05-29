@@ -8,7 +8,7 @@ import summary.compressor.freq.HaircombCompressor;
 
 import static org.junit.Assert.*;
 
-public class ItemDictCompressorGenTest {
+public class ItemCounterCompressorGenTest {
     @Test
     public void testSimple() {
         ItemCounterCompressorGen gen = new ItemCounterCompressorGen(
@@ -19,5 +19,4 @@ public class ItemDictCompressorGenTest {
         assertEquals(2.0, sketches.get(0).estimate(11L), 1e-10);
         assertEquals(0.0, sketches.get(0).estimate(1L), 1e-10);
     }
-
 }

@@ -72,6 +72,6 @@ public class BiasOptimizerTest {
         BiasOptimizer<LongList> bopt = new FreqBiasOptimizer();
         bopt.compute(segSpace, rawSegments);
         double[] xSolve2 = bopt.getBias();
-        assertArrayEquals(xSolve, xSolve2, 1e-4);
+        assertArrayEquals(xSolve, xSolve2, 1e-2);
     }
 }

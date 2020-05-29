@@ -6,6 +6,7 @@ import org.eclipse.collections.api.factory.Maps;
 import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.junit.Test;
+import summary.gen.ItemCounterCompressorGen;
 import summary.gen.ItemDictCompressorGen;
 import summary.gen.SketchGen;
 import summary.compressor.freq.CoopFreqCompressor;
@@ -32,7 +33,7 @@ public class LinearFreqPlannerTest {
                 t, "x"
         );
 
-        SketchGen<Long, LongList> sGen = new ItemDictCompressorGen(
+        SketchGen<Long, LongList> sGen = new ItemCounterCompressorGen(
                 new CoopFreqCompressor(0)
         );
         FastList<LongList> segments = planner.getSegments();

@@ -15,6 +15,7 @@ import org.eclipse.collections.impl.list.mutable.primitive.IntArrayList;
 import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
 import org.junit.Test;
 import runner.factory.FreqSketchGenFactory;
+import summary.gen.ItemCounterCompressorGen;
 import summary.gen.SketchGen;
 import summary.gen.ItemDictCompressorGen;
 import summary.accumulator.MapFreqAccumulator;
@@ -88,7 +89,7 @@ public class BoardGenTest {
 
     @Test
     public void testDirectGen() {
-        SketchGen<Long, LongList> sGen = new ItemDictCompressorGen(
+        SketchGen<Long, LongList> sGen = new ItemCounterCompressorGen(
                 new CoopFreqCompressor(0)
         );
         BoardGen<Long, LongList> bGen = new BoardGen<>(sGen);
