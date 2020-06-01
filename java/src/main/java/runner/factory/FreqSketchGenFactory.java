@@ -3,13 +3,8 @@ package runner.factory;
 import board.planner.CubeOptimizer;
 import board.planner.LinearOptimizer;
 import board.planner.PlanOptimizer;
-import board.planner.bias.BiasOptimizer;
-import board.planner.bias.FreqBiasOptimizer;
-import board.planner.bias.NopBiasOptimizer;
-import board.planner.size.CoopSizeOptimizer;
-import board.planner.size.NopSizeOptimizer;
-import board.planner.size.PropSizeOptimizer;
-import board.planner.size.SizeOptimizer;
+import board.planner.bias.*;
+import board.planner.size.*;
 import board.query.*;
 import org.apache.commons.math3.util.FastMath;
 import org.eclipse.collections.api.list.primitive.LongList;
@@ -118,8 +113,14 @@ public class FreqSketchGenFactory implements SketchGenFactory<Long, LongList> {
                 sizeOpt = new PropSizeOptimizer<>();
             } else if (sketch.equals("random_sample_strat")) {
                 sizeOpt = new CoopSizeOptimizer<>(1.0/2);
-            } else {
+            } else if (
+                sketch.equals("kll")
+                || sketch.equals("cms_min")
+                || sketch.equals("yahoo_mg")
+                )  {
                 sizeOpt = new NopSizeOptimizer<>();
+            } else {
+                sizeOpt = new RoundedSizeOptimizer<>();
             }
 
             // bias

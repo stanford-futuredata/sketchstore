@@ -126,9 +126,13 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
                 int endIdx = curInterval.get(1);
                 p_raw.setRange(startIdx, endIdx);
                 p_raw.query(board, xToTrack);
+                p_true.setRange(startIdx, endIdx);
+                p_true.query(trueBoard, xToTrack);
+                p_true.total(trueBoard);
             }
             System.runFinalization();
             System.gc();
+            System.out.println("Warmed Up");
 
             Timer sketchTotalTimer = new Timer();
             Timer queryTimer = new Timer();

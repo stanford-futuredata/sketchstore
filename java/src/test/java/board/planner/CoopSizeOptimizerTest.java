@@ -6,6 +6,7 @@ import org.eclipse.collections.impl.factory.primitive.LongLists;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
 import org.junit.Test;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -30,8 +31,8 @@ public class CoopSizeOptimizerTest {
                 segmentDimensions,
                 workloadProb
         );
-        double[] sizes = planner.getScaling();
-        assertEquals(sizes[0], sizes[2], 1e-7);
+        int[] sizes = planner.getSizes(100);
+        assertEquals(sizes[0], sizes[2], 1);
 
         workloadProb = .5;
         planner.compute(
@@ -39,8 +40,8 @@ public class CoopSizeOptimizerTest {
                 segmentDimensions,
                 workloadProb
         );
-        sizes = planner.getScaling();
-//        System.out.println(Arrays.toString(sizes));
+        sizes = planner.getSizes(100);
+        System.out.println(Arrays.toString(sizes));
         assertTrue(sizes[0] * 1.5 < sizes[2]);
     }
 

@@ -1,0 +1,32 @@
+{
+  "experiment": "c_mos_f",
+  "quantile": false,
+  "out_dir": "output/",
+  "csv_path": "datasets/msft/mb-10M.csv",
+  "col_types": [0,0,1,0,0,0,0],
+  "metric_col": "DeviceInfo_OsBuild",
+
+  "dimension_cols": [
+    "TenantId", 
+    "AppInfo_Version", 
+    "UserInfo_TimeZone", 
+    "DeviceInfo_NetworkType"
+  ],
+  "workload_prob": 0.2,
+  "query_workload_probs": [0.2],
+  "sizes": [100000],
+  "sketches": [
+    "top_values",
+    "truncation",
+    "pps",
+    "pps_coop",
+    "random_sample",
+    "random_sample_prop",
+    "random_sample_strat",
+    "cms_min",
+    "yahoo_mg"
+  ],
+
+  "x_to_track": "datasets/msft/mb-10M-os-track.csv",
+  "num_queries": 10000
+}

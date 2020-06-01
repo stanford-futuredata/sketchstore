@@ -5,7 +5,7 @@ import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.list.mutable.FastList;
 
 public interface SizeOptimizer<TL extends PrimitiveIterable> {
-    double[] getScaling();
+    int[] getSizes(int totalSize);
     void compute(
             LongList segmentSizes,
             FastList<LongList> segmentDimensions,

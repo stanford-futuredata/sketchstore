@@ -329,11 +329,11 @@ experiment_runs = [
         "workload_p": .2,
         "sketch_types": [
             # ("top_values", "uniform", False),
-            # ("pps", "weighted@20", True),
+            ("pps", "weighted@20", True),
             # ("random_sample", "uniform", False),
             # ("random_sample", "sweighted@20", False),
             # ("random_sample", "prop", False),
-            ("truncation", "uniform", False),
+            # ("truncation", "uniform", False),
             # ("cms_min", "uniform", False),
 
             # ("pps", "uniform", True),

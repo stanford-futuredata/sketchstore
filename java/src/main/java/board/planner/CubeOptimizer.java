@@ -56,15 +56,11 @@ public class CubeOptimizer<TL extends PrimitiveIterable> implements PlanOptimize
                 segDimensions,
                 workloadProb
         );
-        double[] scaledSizes = sizeOptimizer.getScaling();
-        for (int i = 0; i < scaledSizes.length; i++) {
-            scaledSizes[i] *= size;
-        }
-        int[] roundedSegmentSizes = SizeUtils.safeRound(scaledSizes);
-        segmentSpaces = new IntArrayList(roundedSegmentSizes);
+        int[] segmentSpaceArray = sizeOptimizer.getSizes(size);
+        segmentSpaces = new IntArrayList(segmentSpaceArray);
 
         biasOptimizer.compute(
-                roundedSegmentSizes,
+                segmentSpaceArray,
                 segments
         );
         double[] biasArray = biasOptimizer.getBias();

@@ -6,22 +6,22 @@ import org.eclipse.collections.impl.list.mutable.FastList;
 
 import java.util.Arrays;
 
-public class NopSizeOptimizer<TL extends PrimitiveIterable> implements SizeOptimizer<TL> {
-    double[] scalings;
+public class RoundedSizeOptimizer<TL extends PrimitiveIterable> implements SizeOptimizer<TL> {
+    int nSeg;
+    double rawValue = 0.0;
 
     @Override
     public int[] getSizes(int totalSize) {
-        int[] scaledSizes = new int[scalings.length];
-        for (int i = 0; i < scalings.length; i++) {
-            scaledSizes[i] = (int)(totalSize * scalings[i]);
+        double[] scaledSizes = new double[nSeg];
+        for (int i = 0; i < nSeg; i++) {
+            scaledSizes[i] = rawValue * totalSize;
         }
-        return scaledSizes;
+        return SizeUtils.safeRound(scaledSizes);
     }
 
     @Override
     public void compute(LongList segmentSizes, FastList<LongList> segmentDimensions, double workloadProb) {
-        int nSeg = segmentSizes.size();
-        scalings = new double[nSeg];
-        Arrays.fill(scalings, 1.0/nSeg);
+        nSeg = segmentSizes.size();
+        rawValue = 1.0/nSeg;
     }
 }

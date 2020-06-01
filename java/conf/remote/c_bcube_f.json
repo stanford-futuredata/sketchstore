@@ -1,0 +1,27 @@
+{
+  "experiment": "c_bcube_f",
+  "quantile": false,
+  "out_dir": "output/",
+  "csv_path": "datasets/sketchstore_synth/bcube4_10M.csv",
+  "col_types": [0,1,0,0,0,0,0],
+  "metric_col": "f",
+
+  "dimension_cols": ["d0","d1","d2","d3"],
+  "workload_prob": 0.2,
+  "query_workload_probs": [0.2],
+  "sizes": [200000],
+  "sketches": [
+    "top_values",
+    "truncation",
+    "pps",
+    "pps_coop",
+    "random_sample",
+    "random_sample_prop",
+    "random_sample_strat",
+    "cms_min",
+    "yahoo_mg"
+  ],
+
+  "x_to_track": "datasets/sketchstore_synth/bcube4_10M_f_track.csv",
+  "num_queries": 10000
+}
