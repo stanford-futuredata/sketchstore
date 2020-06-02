@@ -116,7 +116,7 @@ public class FreqSketchGenFactory implements SketchGenFactory<Long, LongList> {
             if (
                     sketch.equals("pps_coop")
                     || sketch.equals("pps_nobias")
-                    || sketch.equals("random_sample")
+                    || sketch.equals("random_sample_coop")
             ) {
                 sizeOpt = new CoopSizeOptimizer<>(1.0/3);
             } else if (sketch.equals("random_sample_prop")) {
@@ -134,7 +134,10 @@ public class FreqSketchGenFactory implements SketchGenFactory<Long, LongList> {
             }
 
             // bias
-            if (sketch.equals("pps_coop")) {
+            if (
+                    sketch.equals("pps_coop")
+                    || sketch.equals("pps_nosize")
+            ) {
                 biasOpt = new FreqBiasOptimizer();
             } else {
                 biasOpt = new NopBiasOptimizer<>();
