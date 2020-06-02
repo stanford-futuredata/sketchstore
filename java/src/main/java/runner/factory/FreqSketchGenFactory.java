@@ -40,6 +40,8 @@ public class FreqSketchGenFactory implements SketchGenFactory<Long, LongList> {
         } else if (
                 sketch.equals("pps")
                         || sketch.equals("pps_coop")
+                        || sketch.equals("pps_nobias")
+                        || sketch.equals("pps_nosize")
         ) {
             return new ItemCounterCompressorGen(new HaircombCompressor(0));
         } else if (sketch.equals("dyadic_truncation")) {
@@ -52,6 +54,7 @@ public class FreqSketchGenFactory implements SketchGenFactory<Long, LongList> {
                 sketch.equals("random_sample")
                 || sketch.equals("random_sample_prop")
                 || sketch.equals("random_sample_strat")
+                || sketch.equals("random_sample_coop")
         ) {
             return new ItemCounterCompressorGen(new USampleFreqCompressor(0));
         }
@@ -65,10 +68,13 @@ public class FreqSketchGenFactory implements SketchGenFactory<Long, LongList> {
                 || sketch.equals("cooperative")
                 || sketch.equals("pps")
                 || sketch.equals("pps_coop")
+                || sketch.equals("pps_nobias")
+                || sketch.equals("pps_nosize")
                 || sketch.equals("dyadic_truncation")
                 || sketch.equals("random_sample")
                 || sketch.equals("random_sample_prop")
                 || sketch.equals("random_sample_strat")
+                || sketch.equals("random_sample_coop")
         ) {
             return new MapFreqAccumulator();
         } else if (sketch.equals("yahoo_mg")) {
@@ -107,7 +113,11 @@ public class FreqSketchGenFactory implements SketchGenFactory<Long, LongList> {
             BiasOptimizer<LongList> biasOpt = null;
 
             // size
-            if (sketch.equals("pps_coop")) {
+            if (
+                    sketch.equals("pps_coop")
+                    || sketch.equals("pps_nobias")
+                    || sketch.equals("random_sample")
+            ) {
                 sizeOpt = new CoopSizeOptimizer<>(1.0/3);
             } else if (sketch.equals("random_sample_prop")) {
                 sizeOpt = new PropSizeOptimizer<>();

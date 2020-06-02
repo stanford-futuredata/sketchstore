@@ -51,7 +51,9 @@ public class ArgSort {
 
     public static int[] argSort(DoubleList xs, int startIdx, int endIdx) {
         int n = endIdx-startIdx;
-        if (n == 1) {
+        if (n <= 0) {
+            return new int[0];
+        } else if (n == 1) {
             int[] retVal = new int[1];
             retVal[0] = startIdx;
             return retVal;
