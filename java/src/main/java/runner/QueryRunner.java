@@ -284,6 +284,7 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
                     curResults.put("query_len", Integer.toString(numFilters));
                     curResults.put("total", Double.toString(trueTotal));
                     curResults.put("query_time", Double.toString(queryTimer.getTotalMs()));
+                    curResults.put("workload_query_prob", Double.toString(curWorkloadProbability));
                     errorQuantities.forEachKeyValue((String errType, Double errValue) -> {
                         curResults.put(errType, errValue.toString());
                     });
