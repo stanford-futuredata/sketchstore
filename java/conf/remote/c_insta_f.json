@@ -14,7 +14,7 @@
   ],
   "workload_prob": 0.2,
   "query_workload_probs": [0.2],
-  "sizes": [200000],
+  "sizes": [300000],
   "sketches": [
     "top_values",
     "truncation",
