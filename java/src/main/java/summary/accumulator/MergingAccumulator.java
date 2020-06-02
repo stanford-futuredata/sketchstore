@@ -51,7 +51,11 @@ public class MergingAccumulator<T, TL extends PrimitiveIterable> implements Accu
         int n = xToTrack.size();
         DoubleArrayList out = new DoubleArrayList(n);
         for (int i = 0; i < n; i++) {
-            out.add(merged.estimate(xToTrack.get(i)));
+            if (merged == null) {
+                out.add(0);
+            } else {
+                out.add(merged.estimate(xToTrack.get(i)));
+            }
         }
         return out;
     }

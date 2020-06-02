@@ -2,6 +2,7 @@ package runner;
 
 import board.StoryBoard;
 import io.IOUtil;
+import summary.Sketch;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -17,7 +18,7 @@ public class BoardDebug {
         List<Integer> sizes = config.get("sizes");
         int granularity = config.get("granularity", 0);
 
-        String curSketch = "truncation";
+        String curSketch = "cms_min";
         int curSize = sizes.get(0);
 
         Path boardDir = Paths.get(outputDir, "boards", experiment);
@@ -34,6 +35,7 @@ public class BoardDebug {
         int nCols = board.dimensionCols.size();
         int nRows = board.dimensionCols.get(0).size();
         int[] match = {0, 0, 0, 0};
+//        int[] match = {1, 5, 9, 2};
 
         for (int i = 0; i < nRows; i++) {
             boolean matches = true;
@@ -44,7 +46,8 @@ public class BoardDebug {
                 }
             }
             if (matches) {
-                System.out.println(board.sketchCol.get(i));
+                Sketch<Long> sketchObj =board.sketchCol.get(i);
+                System.out.println("Size: "+sketchObj.size());
             }
         }
     }

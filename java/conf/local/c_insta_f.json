@@ -1,0 +1,32 @@
+{
+  "experiment": "c_insta_f",
+  "quantile": false,
+  "out_dir": "output/",
+  "csv_path": "datasets/instacart/instacart.csv",
+  "col_types": [0,0,0,0,0],
+  "metric_col": "product_id",
+
+  "dimension_cols": [
+    "reordered",
+    "order_dow",
+    "order_hour_of_day",
+    "add_to_cart_order"
+  ],
+  "workload_prob": 0.2,
+  "query_workload_probs": [0.2],
+  "sizes": [200000],
+  "sketches": [
+    "top_values",
+    "truncation",
+    "pps",
+    "pps_coop",
+    "random_sample",
+    "random_sample_prop",
+    "random_sample_strat",
+    "cms_min",
+    "yahoo_mg"
+  ],
+
+  "x_to_track": "datasets/instacart/tracked.csv",
+  "num_queries": 10000
+}
