@@ -13,6 +13,7 @@
     "truncation",
     "cooperative",
     "kll",
+    "low_discrep",
     "pps",
     "random_sample",
     "dyadic_truncation"

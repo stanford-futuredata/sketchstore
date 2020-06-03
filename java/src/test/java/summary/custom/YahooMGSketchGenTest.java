@@ -2,6 +2,7 @@ package summary.custom;
 
 import board.StoryBoard;
 import io.IOUtil;
+import org.apache.commons.math3.util.FastMath;
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.factory.primitive.LongLists;
@@ -13,6 +14,13 @@ import java.io.*;
 import static org.junit.Assert.assertEquals;
 
 public class YahooMGSketchGenTest {
+    @Test
+    public void testPower2() {
+        int size = 7;
+        int adjustedSize = 1 << (int)(FastMath.ceil(FastMath.log(2.0, size)));
+        assertEquals(8, adjustedSize);
+    }
+
     @Test
     public void testSimple() throws IOException, ClassNotFoundException {
         YahooMGGen gen = new YahooMGGen();

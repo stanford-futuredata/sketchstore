@@ -23,7 +23,8 @@
     "random_sample",
     "random_sample_prop",
     "random_sample_strat",
-    "kll"
+    "kll",
+    "low_discrep"
   ],
 
   "x_to_track": "datasets/msft/mb-10M-records-track.csv",
