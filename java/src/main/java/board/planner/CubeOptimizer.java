@@ -9,6 +9,7 @@ import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.list.mutable.primitive.IntArrayList;
 import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
+import runner.Timer;
 
 import java.util.Map;
 
@@ -59,10 +60,14 @@ public class CubeOptimizer<TL extends PrimitiveIterable> implements PlanOptimize
         int[] segmentSpaceArray = sizeOptimizer.getSizes(size);
         segmentSpaces = new IntArrayList(segmentSpaceArray);
 
+        Timer biasOptTimer = new Timer();
+        biasOptTimer.start();
         biasOptimizer.compute(
                 segmentSpaceArray,
                 segments
         );
+        biasOptTimer.end();
+        System.out.println("Bias Opt: "+biasOptTimer.getTotalMs());
         double[] biasArray = biasOptimizer.getBias();
         long[] roundedBiasArray = SizeUtils.safeRoundLong(biasArray);
         segmentBiases = new LongArrayList(roundedBiasArray);
