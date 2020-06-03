@@ -2,6 +2,7 @@ package board.planner.bias;
 
 import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.api.tuple.primitive.DoubleDoublePair;
+import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
 import org.eclipse.collections.impl.map.mutable.primitive.DoubleLongHashMap;
 import org.eclipse.collections.impl.map.mutable.primitive.LongLongHashMap;
 import org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples;
@@ -16,20 +17,29 @@ public class SegmentCCDF {
     }
     public static SegmentCCDF fromItems(LongList xs) {
         int nItems = xs.size();
-        DoubleLongHashMap xCounts = new DoubleLongHashMap();
+        DoubleLongHashMap xCounts = new DoubleLongHashMap(xs.size());
         for (int i = 0; i < nItems; i++) {
             double curX = xs.get(i);
             xCounts.addToValue(curX, 1);
         }
-        LongLongHashMap countCounts = new LongLongHashMap();
+        LongLongHashMap countCounts = new LongLongHashMap(xCounts.size());
         xCounts.forEachValue((long count) -> {
             countCounts.addToValue(count, 1);
         });
-        long[] curCounts = countCounts.keySet().toSortedArray();
-        long[] curCountFrequencies = new long[curCounts.length];
-        for (int i = 0; i < curCounts.length; i++) {
-            curCountFrequencies[i] = countCounts.get(curCounts[i]);
-        }
+        LongArrayList curCountList = new LongArrayList(countCounts.size());
+        LongArrayList curCountFrequencyList = new LongArrayList(countCounts.size());
+        countCounts.forEachKeyValue((long key, long val) -> {
+            curCountList.add(key);
+            curCountFrequencyList.add(val);
+        });
+
+//        long[] curCounts = countCounts.keySet().toSortedArray();
+//        long[] curCountFrequencies = new long[curCounts.length];
+//        for (int i = 0; i < curCounts.length; i++) {
+//            curCountFrequencies[i] = countCounts.get(curCounts[i]);
+//        }
+        long[] curCounts = curCountList.toArray();
+        long[] curCountFrequencies = curCountFrequencyList.toArray();
         return new SegmentCCDF(curCounts, curCountFrequencies);
     }
     public DoubleDoublePair total(double bias) {
