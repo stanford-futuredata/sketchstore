@@ -3,6 +3,21 @@ package board.planner.size;
 import org.apache.commons.math3.util.FastMath;
 
 public class SizeUtils {
+    public static int[] safeScaleWithMin(double[] xs, int total, int min) {
+        int nSegments = xs.length;
+        total -= nSegments * min;
+
+        double[] xScaled = new double[nSegments];
+        for (int i = 0; i < nSegments; i++){
+            xScaled[i] = xs[i] * total;
+        }
+        int[] scaled = safeRound(xScaled);
+        for (int i = 0; i < nSegments; i++){
+            scaled[i] += min;
+        }
+        return scaled;
+    }
+
     public static int[] safeRound(double[] xs) {
         int n = xs.length;
         int[] rounded = new int[n];

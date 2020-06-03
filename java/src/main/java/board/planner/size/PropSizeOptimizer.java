@@ -12,18 +12,7 @@ public class PropSizeOptimizer<TL extends PrimitiveIterable> implements SizeOpti
 
     @Override
     public int[] getSizes(int totalSize) {
-        int nSegments = scalings.length;
-        double[] scaledSizes = new double[nSegments];
-        totalSize -= minSize*nSegments;
-
-        for (int i = 0; i < scalings.length; i++) {
-            scaledSizes[i] = scalings[i] * totalSize;
-        }
-        int[] finalSize = SizeUtils.safeRound(scaledSizes);
-        for (int i = 0; i < nSegments; i++){
-            finalSize[i] += minSize;
-        }
-        return finalSize;
+        return SizeUtils.safeScaleWithMin(scalings, totalSize, minSize);
     }
 
     @Override

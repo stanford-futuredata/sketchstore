@@ -109,10 +109,6 @@ public class CoopSizeOptimizer<TL extends PrimitiveIterable> implements SizeOpti
 
     @Override
     public int[] getSizes(int totalSize) {
-        double[] scaledSizes = new double[scalings.length];
-        for (int i = 0; i < scalings.length; i++) {
-            scaledSizes[i] = scalings[i] * totalSize;
-        }
-        return SizeUtils.safeRound(scaledSizes);
+        return SizeUtils.safeScaleWithMin(scalings, totalSize, 1);
     }
 }
