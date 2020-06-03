@@ -8,14 +8,22 @@ import java.util.Arrays;
 
 public class PropSizeOptimizer<TL extends PrimitiveIterable> implements SizeOptimizer<TL> {
     double[] scalings;
+    int minSize = 1;
 
     @Override
     public int[] getSizes(int totalSize) {
-        double[] scaledSizes = new double[scalings.length];
+        int nSegments = scalings.length;
+        double[] scaledSizes = new double[nSegments];
+        totalSize -= minSize*nSegments;
+
         for (int i = 0; i < scalings.length; i++) {
             scaledSizes[i] = scalings[i] * totalSize;
         }
-        return SizeUtils.safeRound(scaledSizes);
+        int[] finalSize = SizeUtils.safeRound(scaledSizes);
+        for (int i = 0; i < nSegments; i++){
+            finalSize[i] += minSize;
+        }
+        return finalSize;
     }
 
     @Override
