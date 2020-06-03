@@ -1,3 +1,10 @@
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake-build-debug/
+cmake_install.cmake
+cpp.cbp
+solver
 cp.txt
 .DS_Store
 *.iml

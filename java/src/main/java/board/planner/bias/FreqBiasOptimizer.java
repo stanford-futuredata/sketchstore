@@ -5,8 +5,38 @@ import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import runner.factory.FreqSketchGenFactory;
 
+import java.io.*;
+import java.nio.file.Path;
+import java.util.StringTokenizer;
+
 public class FreqBiasOptimizer implements BiasOptimizer<LongList> {
     double[] biasValues;
+
+    public void toFile(
+            Path fileName,
+            int[] segmentSpaces,
+            FastList<SegmentCCDF> segmentCCDFs
+    ) throws IOException {
+        PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(fileName.toFile())));
+        for (int x : segmentSpaces) {
+            out.print(x);
+            out.print(" ");
+        }
+        out.println();
+        for (SegmentCCDF ccdf : segmentCCDFs) {
+            for (long x : ccdf.occCounts) {
+                out.print(x);
+                out.print(" ");
+            }
+            out.println();
+            for (long x : ccdf.occCountFrequency) {
+                out.print(x);
+                out.print(" ");
+            }
+            out.println();
+        }
+        out.close();
+    }
 
     @Override
     public void compute(int[] segmentSpaces, FastList<LongList> segmentValues) {
@@ -17,17 +47,24 @@ public class FreqBiasOptimizer implements BiasOptimizer<LongList> {
                     SegmentCCDF.fromItems(curValues)
             );
         }
-        RMSErrorFunction f = new RMSErrorFunction(
-                segmentCCDFs,
-                segmentSpaces
-        );
-        BFGSOptimizer opt = new BFGSOptimizer(f);
-        opt.setMaxIter(15);
-        opt.setVerbose(false);
         biasValues = new double[nSegments];
-        biasValues= opt.solve(biasValues, 1e-4);
-        for (int i = 0; i < nSegments; i++) {
-            biasValues[i] = FastMath.exp(biasValues[i]);
+        try {
+            File tempFile = File.createTempFile("bias_opt", "temp");
+            System.out.println("temp file: "+tempFile.getAbsolutePath());
+            tempFile.deleteOnExit();
+            toFile(tempFile.toPath(), segmentSpaces, segmentCCDFs);
+
+            Runtime r=Runtime.getRuntime();
+            Process p = r.exec("../cpp/solver "+tempFile.getAbsolutePath());
+            InputStream pIn = p.getInputStream();
+            BufferedReader pReader = new BufferedReader(new InputStreamReader(pIn));
+            String line = pReader.readLine();
+            StringTokenizer tok = new StringTokenizer(line, " ");
+            for (int i = 0; i < nSegments; i++){
+                biasValues[i] = Double.parseDouble(tok.nextToken());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Call Failed: "+e.getMessage());
         }
     }
 
