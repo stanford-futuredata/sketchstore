@@ -107,6 +107,28 @@ public class LoadRunner<T, TL extends PrimitiveIterable> {
                     isCube
             );
             planOptimizer.setParams(plannerParams);
+            SketchGen<T, TL> sGen = sketchGenFactory.getSketchGen(
+                    curSketch,
+                    xToTrack,
+                    granularity
+            );
+            BoardGen<T, TL> bGen = new BoardGen<>(sGen);
+
+            // Warm up
+            planOptimizer.optimizePlan(
+                    planner.getSegments(),
+                    planner.getDimensions(),
+                    curSize
+            );
+            bGen.generate(
+                    planner.getSegments(),
+                    planner.getDimensions(),
+                    planOptimizer.getSpaces(),
+                    planOptimizer.getBiases()
+            );
+            System.runFinalization();
+            System.gc();
+
             optimizeTimer.start();
             planOptimizer.optimizePlan(
                     planner.getSegments(),
@@ -129,12 +151,6 @@ public class LoadRunner<T, TL extends PrimitiveIterable> {
             }
             System.out.println();
 
-            SketchGen<T, TL> sGen = sketchGenFactory.getSketchGen(
-                    curSketch,
-                    xToTrack,
-                    granularity
-            );
-            BoardGen<T, TL> bGen = new BoardGen<>(sGen);
             Timer constructTime = new Timer();
             constructTime.start();
             StoryBoard<T> board = bGen.generate(
