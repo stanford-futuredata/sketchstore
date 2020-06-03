@@ -61,10 +61,14 @@ public class FreqBiasOptimizer implements BiasOptimizer<LongList> {
             System.out.println("Serialized in: "+serTime.getTotalMs());
 
             Runtime r=Runtime.getRuntime();
+            serTime.reset();
+            serTime.start();
             Process p = r.exec("../cpp/solver "+tempFile.getAbsolutePath());
             InputStream pIn = p.getInputStream();
             BufferedReader pReader = new BufferedReader(new InputStreamReader(pIn));
             String line = pReader.readLine();
+            serTime.end();
+            System.out.println("Ran Cpp in: "+serTime);
             StringTokenizer tok = new StringTokenizer(line, " ");
             for (int i = 0; i < nSegments; i++){
                 biasValues[i] = Double.parseDouble(tok.nextToken());
