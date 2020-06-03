@@ -109,6 +109,6 @@ public class CoopSizeOptimizer<TL extends PrimitiveIterable> implements SizeOpti
 
     @Override
     public int[] getSizes(int totalSize) {
-        return SizeUtils.safeScaleWithMin(scalings, totalSize, 1);
+        return SizeUtils.safeScaleWithMin(scalings, totalSize, 0);
     }
 }
