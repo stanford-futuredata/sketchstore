@@ -116,7 +116,6 @@ public class LoadRunner<T, TL extends PrimitiveIterable> {
             optimizeTimer.end();
 
             System.out.println("Generating with sizes: ");
-            System.out.println(planOptimizer.getSpaces());
             LongList biases = planOptimizer.getBiases();
             IntList spaces = planOptimizer.getSpaces();
             System.out.print("space: ");
