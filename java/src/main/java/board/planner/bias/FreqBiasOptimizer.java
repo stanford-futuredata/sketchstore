@@ -3,6 +3,7 @@ package board.planner.bias;
 import org.apache.commons.math3.util.FastMath;
 import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.list.mutable.FastList;
+import runner.Timer;
 import runner.factory.FreqSketchGenFactory;
 
 import java.io.*;
@@ -50,9 +51,14 @@ public class FreqBiasOptimizer implements BiasOptimizer<LongList> {
         biasValues = new double[nSegments];
         try {
             File tempFile = File.createTempFile("bias_opt", "temp");
-            System.out.println("temp file: "+tempFile.getAbsolutePath());
+//            System.out.println("temp file: "+tempFile.getAbsolutePath());
             tempFile.deleteOnExit();
+
+            Timer serTime = new Timer();
+            serTime.start();
             toFile(tempFile.toPath(), segmentSpaces, segmentCCDFs);
+            serTime.end();
+            System.out.println("Serialized in: "+serTime.getTotalMs());
 
             Runtime r=Runtime.getRuntime();
             Process p = r.exec("../cpp/solver "+tempFile.getAbsolutePath());

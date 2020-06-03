@@ -5,6 +5,7 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include <chrono>
 
 using Eigen::VectorXd;
 using Eigen::MatrixXd;
