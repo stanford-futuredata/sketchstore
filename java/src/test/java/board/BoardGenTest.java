@@ -74,7 +74,8 @@ public class BoardGenTest {
             );
             LinearQueryProcessor<Long> qp = factory.getLinearQueryProcessor(
                     curSketchName,
-                    nSegments
+                    nSegments,
+                    0
             );
 
             qp.setRange(0, 3);

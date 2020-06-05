@@ -17,11 +17,13 @@ public interface SketchGenFactory<T, TL extends PrimitiveIterable> {
             int maxLength
     );
     Accumulator<T, TL> getAccumulator(
-            String sketch
+            String sketch,
+            int accSize
     );
     LinearQueryProcessor<T> getLinearQueryProcessor(
             String sketch,
-            int maxLength
+            int maxLength,
+            int accSize
     );
     CubeQueryProcessor<T> getCubeQueryProcessor(
             String sketch

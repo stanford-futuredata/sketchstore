@@ -40,6 +40,7 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
     List<Integer> sizes;
 
     int granularity;
+    List<Integer> accumulatorSizes;
 
     List<String> dimensionCols;
     List<Double> queryWorkloadProbs;
@@ -61,6 +62,7 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
         numQueries = config.get("num_queries");
 
         granularity = config.get("granularity", 0);
+        accumulatorSizes = config.get("accumulator_sizes", Lists.mutable.of(0));
         dimensionCols = config.get("dimension_cols", Lists.mutable.empty());
         queryWorkloadProbs = config.get("query_workload_probs", Lists.mutable.<Double>empty());
 
@@ -93,7 +95,8 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
         StoryBoard<T> trueBoard = IOUtil.loadBoard(fIn);
         LinearQueryProcessor<T> p_true = genFactory.getLinearQueryProcessor(
                 "top_values",
-                granularity
+                granularity,
+                0
         );
 
         FastList<Map<String, String>> results = new FastList<>();
@@ -115,59 +118,63 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
             fIn = new File(boardPath);
             StoryBoard<T> board = IOUtil.loadBoard(fIn);
 
-            LinearQueryProcessor<T> p_raw = genFactory.getLinearQueryProcessor(
-                    curSketch,
-                    granularity
-            );
-
-            // Warm-Up
-            for (IntList curInterval : workloadIntervals) {
-                int startIdx = curInterval.get(0);
-                int endIdx = curInterval.get(1);
-                p_raw.setRange(startIdx, endIdx);
-                p_raw.query(board, xToTrack);
-                p_true.setRange(startIdx, endIdx);
-                p_true.query(trueBoard, xToTrack);
-                p_true.total(trueBoard);
-            }
-            System.runFinalization();
-            System.gc();
-            System.out.println("Warmed Up");
-
             Timer sketchTotalTimer = new Timer();
-            Timer queryTimer = new Timer();
-            for (IntList curInterval : workloadIntervals) {
-                int startIdx = curInterval.get(0);
-                int endIdx = curInterval.get(1);
-                p_true.setRange(startIdx, endIdx);
-                DoubleList trueResults = p_true.query(trueBoard, xToTrack);
-                double trueTotal = p_true.total(trueBoard);
-                p_raw.setRange(startIdx, endIdx);
-
-                sketchTotalTimer.start();
-                queryTimer.reset();
-                queryTimer.start();
-                DoubleList queryResults = p_raw.query(board, xToTrack);
-                queryTimer.end();
-                sketchTotalTimer.end();
-
-                MutableMap<String, Double> errorQuantities = ErrorMetric.calcErrors(
-                        trueResults,
-                        queryResults
+            for (int accumulatorSize : accumulatorSizes) {
+                LinearQueryProcessor<T> p_raw = genFactory.getLinearQueryProcessor(
+                        curSketch,
+                        granularity,
+                        accumulatorSize
                 );
 
-                MutableMap<String, String> curResults = baseResults.clone();
-                curResults.put("sketch", curSketch);
-                curResults.put("size", Integer.toString(curSize));
-                curResults.put("start_idx", Integer.toString(startIdx));
-                curResults.put("end_idx", Integer.toString(endIdx));
-                curResults.put("query_len", Integer.toString(endIdx-startIdx));
-                curResults.put("total", Double.toString(trueTotal));
-                curResults.put("query_time", Double.toString(queryTimer.getTotalMs()));
-                errorQuantities.forEachKeyValue((String errType, Double errValue) -> {
-                    curResults.put(errType, errValue.toString());
-                });
-                results.add(curResults);
+                // Warm-Up
+                for (IntList curInterval : workloadIntervals) {
+                    int startIdx = curInterval.get(0);
+                    int endIdx = curInterval.get(1);
+                    p_raw.setRange(startIdx, endIdx);
+                    p_raw.query(board, xToTrack);
+                    p_true.setRange(startIdx, endIdx);
+                    p_true.query(trueBoard, xToTrack);
+                    p_true.total(trueBoard);
+                }
+                System.runFinalization();
+                System.gc();
+                System.out.println("Warmed Up");
+
+                Timer queryTimer = new Timer();
+                for (IntList curInterval : workloadIntervals) {
+                    int startIdx = curInterval.get(0);
+                    int endIdx = curInterval.get(1);
+                    p_true.setRange(startIdx, endIdx);
+                    DoubleList trueResults = p_true.query(trueBoard, xToTrack);
+                    double trueTotal = p_true.total(trueBoard);
+                    p_raw.setRange(startIdx, endIdx);
+
+                    sketchTotalTimer.start();
+                    queryTimer.reset();
+                    queryTimer.start();
+                    DoubleList queryResults = p_raw.query(board, xToTrack);
+                    queryTimer.end();
+                    sketchTotalTimer.end();
+
+                    MutableMap<String, Double> errorQuantities = ErrorMetric.calcErrors(
+                            trueResults,
+                            queryResults
+                    );
+
+                    MutableMap<String, String> curResults = baseResults.clone();
+                    curResults.put("sketch", curSketch);
+                    curResults.put("size", Integer.toString(curSize));
+                    curResults.put("start_idx", Integer.toString(startIdx));
+                    curResults.put("end_idx", Integer.toString(endIdx));
+                    curResults.put("query_len", Integer.toString(endIdx - startIdx));
+                    curResults.put("total", Double.toString(trueTotal));
+                    curResults.put("query_time", Double.toString(queryTimer.getTotalMs()));
+                    curResults.put("accumulator_size", Integer.toString(accumulatorSize));
+                    errorQuantities.forEachKeyValue((String errType, Double errValue) -> {
+                        curResults.put(errType, errValue.toString());
+                    });
+                    results.add(curResults);
+                }
             }
             System.out.println("Sketch Ran in Time: "+sketchTotalTimer.getTotalMs());
         }
