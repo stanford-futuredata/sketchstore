@@ -70,8 +70,10 @@ public class QuantileSketchGenFactory implements SketchGenFactory<Double, Double
     public Accumulator<Double, DoubleList> getAccumulator(
             String sketch
             ) {
-        if (sketch.equals("top_values")
-                || sketch.equals("truncation")
+        if (sketch.equals("top_values")) {
+            return new MapQuantileAccumulator();
+        } else if (
+                sketch.equals("truncation")
                 || sketch.equals("cooperative")
                 || sketch.equals("dyadic_truncation")
                 || sketch.equals("pps")
@@ -80,7 +82,6 @@ public class QuantileSketchGenFactory implements SketchGenFactory<Double, Double
                 || sketch.equals("random_sample_strat")
                 || sketch.equals("random_sample_prop")
         ) {
-//            return new MapQuantileAccumulator();
             return new ListQuantileAccumulator();
         } else if (
                 sketch.equals("kll")
