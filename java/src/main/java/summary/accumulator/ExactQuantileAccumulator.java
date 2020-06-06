@@ -8,6 +8,7 @@ import summary.CounterLongSketch;
 import summary.Sketch;
 
 import java.util.List;
+import java.util.Arrays;
 
 public class ExactQuantileAccumulator implements Accumulator<Double, DoubleList> {
     public double[] trackedItems;
@@ -56,17 +57,23 @@ public class ExactQuantileAccumulator implements Accumulator<Double, DoubleList>
 
     @Override
     public DoubleList estimate(List<Double> xToTrack) {
-        int size = xToTrack.size();
-        double[] cumWeights = new double[size];
-        for (int i = 0; i < size; i++) {
-            if (xToTrack.get(i) != trackedItems[i]) {
-                throw new RuntimeException("Tracker disagreement");
-            }
-            if (i > 0) {
-                cumWeights[i] = cumWeights[i-1];
-            }
-            cumWeights[i] += trackedWeights[i];
+        int nToTrack = xToTrack.size();
+        DoubleArrayList xRanks = new DoubleArrayList(nToTrack);
+        if (trackedItems == null) {
+            return xRanks;
         }
-        return new DoubleArrayList(cumWeights);
+        int nStored = trackedItems.length;
+
+        double curRank = 0.0;
+
+        int itemIdx = 0;
+        for (double x : xToTrack) {
+            while (itemIdx < nStored && trackedItems[itemIdx] <= x) {
+                curRank += trackedWeights[itemIdx];
+                itemIdx++;
+            }
+            xRanks.add(curRank);
+        }
+        return xRanks;
     }
 }

@@ -20,5 +20,5 @@
   ],
 
   "x_to_track": "datasets/power/power_tracked.csv",
-  "num_queries": 500
+  "num_queries": 1000
 }
