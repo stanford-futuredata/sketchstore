@@ -26,7 +26,7 @@ public class LinearWorkload {
     ) {
         FastList<IntList> intervals = new FastList<>(numQueries*10);
 
-        int maxPower = (int)Math.floor(FastMath.log(2, granularity-100));
+        int maxPower = (int)Math.floor(FastMath.log(2, granularity-10));
         FastList<Integer> queryLengths = new FastList<>(maxPower+1);
         for (int i = 0; i <= maxPower; i++) {
             queryLengths.add((int)FastMath.pow(2, i));
