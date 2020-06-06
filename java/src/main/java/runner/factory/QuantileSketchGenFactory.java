@@ -11,10 +11,7 @@ import org.apache.commons.math3.util.FastMath;
 import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.factory.primitive.DoubleLists;
-import summary.accumulator.Accumulator;
-import summary.accumulator.ListQuantileAccumulator;
-import summary.accumulator.MapQuantileAccumulator;
-import summary.accumulator.MergingAccumulator;
+import summary.accumulator.*;
 import summary.compressor.quantile.CoopQuantileCompressor;
 import summary.compressor.quantile.SkipQuantileCompressor;
 import summary.compressor.quantile.TrackedQuantileCompressor;
@@ -71,7 +68,7 @@ public class QuantileSketchGenFactory implements SketchGenFactory<Double, Double
             String sketch
             ) {
         if (sketch.equals("top_values")) {
-            return new MapQuantileAccumulator();
+            return new ExactQuantileAccumulator();
         } else if (
                 sketch.equals("truncation")
                 || sketch.equals("cooperative")

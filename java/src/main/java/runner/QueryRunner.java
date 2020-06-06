@@ -273,8 +273,8 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
                     }
                     p_true.setDimensions(curFilterDimensions);
                     DoubleList trueResults = p_true.query(trueBoard, xToTrack);
-//                    double trueTotal = p_true.total();
-//                    int trueSpan = p_true.span();
+                    double trueTotal = p_true.total();
+                    int trueSpan = p_true.span();
 
                     p_raw.setDimensions(curFilterDimensions);
                     sketchTotalTimer.start();
@@ -284,34 +284,29 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
                     queryTimer.end();
                     sketchTotalTimer.end();
 
-//                    System.out.println("true");
-//                    System.out.println(trueResults);
-//                    System.out.println("query");
-//                    System.out.println(queryResults);
-//
-//                    MutableMap<String, Double> errorQuantities = ErrorMetric.calcErrors(
-//                            trueResults,
-//                            queryResults
-//                    );
-//
-//                    int numFilters = curFilterDimensions.select((long x) -> (x >= 0)).size();
-//
-//                    MutableMap<String, String> curResults = baseResults.clone();
-//                    curResults.put("sketch", curSketch);
-//                    curResults.put("size", Integer.toString(curSize));
-//                    curResults.put("query_len", Integer.toString(numFilters));
-//                    curResults.put("total", Double.toString(trueTotal));
-//                    curResults.put("query_time", Double.toString(queryTimer.getTotalMs()));
-//                    curResults.put("segment_span", Integer.toString(trueSpan));
-//                    curResults.put("workload_query_prob", Double.toString(curWorkloadProbability));
-//                    errorQuantities.forEachKeyValue((String errType, Double errValue) -> {
-//                        curResults.put(errType, errValue.toString());
-//                    });
-//                    results.add(curResults);
-//                    queryNum++;
-//                    if (cacheQueries) {
-//                        memoized.put(curFilterDimensions, curResults);
-//                    }
+                    MutableMap<String, Double> errorQuantities = ErrorMetric.calcErrors(
+                            trueResults,
+                            queryResults
+                    );
+
+                    int numFilters = curFilterDimensions.select((long x) -> (x >= 0)).size();
+
+                    MutableMap<String, String> curResults = baseResults.clone();
+                    curResults.put("sketch", curSketch);
+                    curResults.put("size", Integer.toString(curSize));
+                    curResults.put("query_len", Integer.toString(numFilters));
+                    curResults.put("total", Double.toString(trueTotal));
+                    curResults.put("query_time", Double.toString(queryTimer.getTotalMs()));
+                    curResults.put("segment_span", Integer.toString(trueSpan));
+                    curResults.put("workload_query_prob", Double.toString(curWorkloadProbability));
+                    errorQuantities.forEachKeyValue((String errType, Double errValue) -> {
+                        curResults.put(errType, errValue.toString());
+                    });
+                    results.add(curResults);
+                    queryNum++;
+                    if (cacheQueries) {
+                        memoized.put(curFilterDimensions, curResults);
+                    }
                 }
                 System.out.println("Query Runner #: "+queryNum);
             }
