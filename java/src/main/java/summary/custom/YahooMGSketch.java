@@ -47,14 +47,17 @@ public class YahooMGSketch implements Sketch<Long>, Externalizable {
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeInt(size);
-        out.write(sketch.toByteArray());
+        out.writeUTF(sketch.serializeToString());
+//        out.write(sketch.toByteArray());
     }
 
     @Override
     public void readExternal(ObjectInput in) throws IOException {
         size = in.readInt();
-        byte[] bytes = new byte[in.available()];
-        in.read(bytes);
-        sketch = LongsSketch.getInstance(Memory.wrap(bytes));
+        String objStr = in.readUTF();
+        sketch = LongsSketch.getInstance(objStr);
+//        byte[] bytes = new byte[in.available()];
+//        in.read(bytes);
+//        sketch = LongsSketch.getInstance(Memory.wrap(bytes));
     }
 }

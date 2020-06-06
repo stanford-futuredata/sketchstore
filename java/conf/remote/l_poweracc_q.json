@@ -21,5 +21,5 @@
   "accumulator_sizes": [64, 128, 512, 1000, 2000, 10000, 100000, 1000000],
 
   "x_to_track": "datasets/power/power_tracked.csv",
-  "num_queries": 500
+  "num_queries": 100
 }
