@@ -149,8 +149,9 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
                         p_true.setRange(startIdx, endIdx);
                         DoubleList trueResults = p_true.query(trueBoard, xToTrack);
                         double trueTotal = p_true.total(trueBoard);
-                        p_raw.setRange(startIdx, endIdx);
+                        int trueSpan = p_true.span();
 
+                        p_raw.setRange(startIdx, endIdx);
                         sketchTotalTimer.start();
                         queryTimer.reset();
                         queryTimer.start();
@@ -169,6 +170,7 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
                         curResults.put("start_idx", Integer.toString(startIdx));
                         curResults.put("end_idx", Integer.toString(endIdx));
                         curResults.put("query_len", Integer.toString(endIdx - startIdx));
+                        curResults.put("segment_span", Integer.toString(trueSpan));
                         curResults.put("granularity", Integer.toString(granularity));
                         curResults.put("total", Double.toString(trueTotal));
                         curResults.put("query_time", Double.toString(queryTimer.getTotalMs()));
@@ -267,6 +269,7 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
                     p_true.setDimensions(curFilterDimensions);
                     DoubleList trueResults = p_true.query(trueBoard, xToTrack);
                     double trueTotal = p_true.total(trueBoard);
+                    int trueSpan = p_true.span();
                     p_raw.setDimensions(curFilterDimensions);
 
                     sketchTotalTimer.start();
@@ -294,6 +297,7 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
                     curResults.put("query_len", Integer.toString(numFilters));
                     curResults.put("total", Double.toString(trueTotal));
                     curResults.put("query_time", Double.toString(queryTimer.getTotalMs()));
+                    curResults.put("segment_span", Integer.toString(trueSpan));
                     curResults.put("workload_query_prob", Double.toString(curWorkloadProbability));
                     errorQuantities.forEachKeyValue((String errType, Double errValue) -> {
                         curResults.put(errType, errValue.toString());

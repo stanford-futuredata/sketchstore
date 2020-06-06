@@ -9,4 +9,5 @@ import java.util.List;
 public interface QueryProcessor<T> {
     DoubleList query(StoryBoard<T> board, List<T> xToTrack);
     double total(StoryBoard<T> board);
+    int span();
 }

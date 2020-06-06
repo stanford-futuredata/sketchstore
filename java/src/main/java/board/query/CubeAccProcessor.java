@@ -16,11 +16,13 @@ public class CubeAccProcessor<T, TL extends PrimitiveIterable> implements
         CubeQueryProcessor<T> {
     public long[] dimensionFilters;
     public Accumulator<T, TL> acc;
+    public int span;
 
     public CubeAccProcessor(
             Accumulator<T, TL> acc
     ) {
         this.acc = acc;
+        this.span = 0;
     }
 
     @Override
@@ -29,6 +31,7 @@ public class CubeAccProcessor<T, TL extends PrimitiveIterable> implements
             List<T> xToTrack
     ) {
         acc.reset();
+        span=0;
         FastList<Sketch<T>> sketchCol = board.sketchCol;
         int nRows = sketchCol.size();
         int nDims = dimensionFilters.length;
@@ -42,6 +45,7 @@ public class CubeAccProcessor<T, TL extends PrimitiveIterable> implements
                 }
             }
             if (matches) {
+                span++;
                 acc.addSketch(sketchCol.get(i));
             }
         }
@@ -51,6 +55,7 @@ public class CubeAccProcessor<T, TL extends PrimitiveIterable> implements
     @Override
     public double total(StoryBoard<T> board) {
         double result = 0;
+        span = 0;
         DoubleArrayList totalCol = board.totalCol;
         int nRows = totalCol.size();
         int nDims = dimensionFilters.length;
@@ -64,11 +69,17 @@ public class CubeAccProcessor<T, TL extends PrimitiveIterable> implements
                 }
             }
             if (matches) {
+                span++;
                 result += totalCol.get(i);
             }
         }
 
         return result;
+    }
+
+    @Override
+    public int span() {
+        return span;
     }
 
     @Override

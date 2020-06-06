@@ -17,6 +17,7 @@ public class DyadicLinearAccProcessor<T, TL extends PrimitiveIterable> implement
     public int base = 2;
     public int maxHeight;
     public int accumulatorSize;
+    public int span;
 
     public DyadicLinearAccProcessor(
             Accumulator<T, TL> acc, int maxHeight, int accumulatorSize
@@ -24,6 +25,7 @@ public class DyadicLinearAccProcessor<T, TL extends PrimitiveIterable> implement
         this.acc = acc;
         this.maxHeight = maxHeight;
         this.accumulatorSize = accumulatorSize;
+        this.span = 0;
     }
 
     public FastList<LongArrayList> getDyadicBreakdown(int startIdx, int endIdx) {
@@ -54,6 +56,7 @@ public class DyadicLinearAccProcessor<T, TL extends PrimitiveIterable> implement
             List<T> xToTrack
     ) {
         acc.reset();
+        span=0;
         LongList tValues = board.dimensionCols.get(0);
         FastList<LongArrayList> tierIndices = getDyadicBreakdown(startIdx, endIdx);
         for (int i = 0; i < tValues.size(); i++) {
@@ -63,6 +66,7 @@ public class DyadicLinearAccProcessor<T, TL extends PrimitiveIterable> implement
             boolean matched = curTierLocations.anySatisfy((long x) -> (x == curT));
             if (matched) {
                 acc.addSketch(board.sketchCol.get(i));
+                span++;
                 if (accumulatorSize > 0) {
                     acc.compress(accumulatorSize);
                 }
@@ -74,6 +78,7 @@ public class DyadicLinearAccProcessor<T, TL extends PrimitiveIterable> implement
     @Override
     public double total(StoryBoard<T> board) {
         double result = 0;
+        span=0;
         LongList tValues = board.dimensionCols.get(0);
         for (int i = 0; i < tValues.size(); i++) {
             if (board.tierCol.get(i) > 0) {
@@ -81,10 +86,16 @@ public class DyadicLinearAccProcessor<T, TL extends PrimitiveIterable> implement
             }
             long curT = tValues.get(i);
             if (curT >= startIdx && curT < endIdx) {
+                span++;
                 result += board.totalCol.get(i);
             }
         }
         return result;
+    }
+
+    @Override
+    public int span() {
+        return span;
     }
 
     @Override
