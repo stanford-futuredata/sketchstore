@@ -169,6 +169,7 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
                         curResults.put("start_idx", Integer.toString(startIdx));
                         curResults.put("end_idx", Integer.toString(endIdx));
                         curResults.put("query_len", Integer.toString(endIdx - startIdx));
+                        curResults.put("granularity", Integer.toString(granularity));
                         curResults.put("total", Double.toString(trueTotal));
                         curResults.put("query_time", Double.toString(queryTimer.getTotalMs()));
                         curResults.put("accumulator_size", Integer.toString(accumulatorSize));
