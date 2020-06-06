@@ -45,6 +45,8 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
     List<String> dimensionCols;
     List<Double> queryWorkloadProbs;
 
+    boolean cacheQueries;
+
     boolean isCube;
 
 
@@ -65,6 +67,8 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
         accumulatorSizes = config.get("accumulator_sizes", Lists.mutable.of(0));
         dimensionCols = config.get("dimension_cols", Lists.mutable.empty());
         queryWorkloadProbs = config.get("query_workload_probs", Lists.mutable.<Double>empty());
+
+        cacheQueries = config.get("cache_queries", true);
 
         isCube = (!dimensionCols.isEmpty());
     }
@@ -262,7 +266,7 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
 
                 int queryNum = 0;
                 for (LongList curFilterDimensions: workloadDimensions) {
-                    if (memoized.containsKey(curFilterDimensions)) {
+                    if (cacheQueries && memoized.containsKey(curFilterDimensions)) {
                         results.add(memoized.get(curFilterDimensions));
                         continue;
                     }
