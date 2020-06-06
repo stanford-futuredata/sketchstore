@@ -26,6 +26,7 @@
     "cms_min",
     "yahoo_mg"
   ],
+  "cache_queries": false,
 
   "x_to_track": "datasets/msft/mb-10M-network-track.csv",
   "num_queries": 10000

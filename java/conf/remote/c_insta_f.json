@@ -26,7 +26,8 @@
     "cms_min",
     "yahoo_mg"
   ],
+  "cache_queries": false,
 
   "x_to_track": "datasets/instacart/tracked.csv",
-  "num_queries": 10000
+  "num_queries": 4000
 }

@@ -59,6 +59,10 @@ public class ExactFreqAccumulator implements Accumulator<Long, LongList> {
     @Override
     public DoubleList estimate(List<Long> xToTrack) {
         int size = xToTrack.size();
+        if (trackedItems == null) {
+            trackedWeights = new double[size];
+            return new DoubleArrayList(trackedWeights);
+        }
         for (int i = 0; i < size; i++) {
             if (xToTrack.get(i) != trackedItems[i]) {
                 throw new RuntimeException("Tracker disagreement");
