@@ -4,6 +4,7 @@ import board.StoryBoard;
 import org.eclipse.collections.api.PrimitiveIterable;
 import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.api.list.primitive.LongList;
+import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
 import summary.Sketch;
 import summary.accumulator.Accumulator;
 
@@ -15,6 +16,7 @@ public class LinearAccProcessor<T, TL extends PrimitiveIterable> implements
     public Accumulator<T, TL> acc;
     public int accumulatorSize;
     public int span;
+    public double total;
 
     public LinearAccProcessor(
             Accumulator<T, TL> acc,
@@ -23,6 +25,7 @@ public class LinearAccProcessor<T, TL extends PrimitiveIterable> implements
         this.acc = acc;
         this.accumulatorSize = accumulatorSize;
         this.span = 0;
+        this.total = 0;
     }
 
     @Override
@@ -32,13 +35,16 @@ public class LinearAccProcessor<T, TL extends PrimitiveIterable> implements
     ) {
         acc.reset();
         span = 0;
+        total = 0;
         LongList tValues = board.dimensionCols.get(0);
+        DoubleArrayList totalCol = board.totalCol;
         for (int i = 0; i < tValues.size(); i++) {
             long curT = tValues.get(i);
             if (curT >= startIdx && curT < endIdx) {
                 Sketch<T> curSketch = board.sketchCol.get(i);
                 acc.addSketch(curSketch);
                 span++;
+                total += totalCol.get(i);
                 if (accumulatorSize > 0) {
                     acc.compress(accumulatorSize);
                 }
@@ -48,18 +54,8 @@ public class LinearAccProcessor<T, TL extends PrimitiveIterable> implements
     }
 
     @Override
-    public double total(StoryBoard<T> board) {
-        double result = 0;
-        span = 0;
-        LongList tValues = board.dimensionCols.get(0);
-        for (int i = 0; i < tValues.size(); i++) {
-            long curT = tValues.get(i);
-            if (curT >= startIdx && curT < endIdx) {
-                span++;
-                result += board.totalCol.get(i);
-            }
-        }
-        return result;
+    public double total() {
+        return total;
     }
 
     @Override

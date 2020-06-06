@@ -140,7 +140,7 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
                         p_raw.query(board, xToTrack);
                         p_true.setRange(startIdx, endIdx);
                         p_true.query(trueBoard, xToTrack);
-                        p_true.total(trueBoard);
+                        p_true.total();
                     }
                     System.runFinalization();
                     System.gc();
@@ -152,7 +152,7 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
                         int endIdx = curInterval.get(1);
                         p_true.setRange(startIdx, endIdx);
                         DoubleList trueResults = p_true.query(trueBoard, xToTrack);
-                        double trueTotal = p_true.total(trueBoard);
+                        double trueTotal = p_true.total();
                         int trueSpan = p_true.span();
 
                         p_raw.setRange(startIdx, endIdx);
@@ -273,7 +273,7 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
                     }
                     p_true.setDimensions(curFilterDimensions);
                     DoubleList trueResults = p_true.query(trueBoard, xToTrack);
-                    double trueTotal = p_true.total(trueBoard);
+                    double trueTotal = p_true.total();
                     int trueSpan = p_true.span();
                     p_raw.setDimensions(curFilterDimensions);
 

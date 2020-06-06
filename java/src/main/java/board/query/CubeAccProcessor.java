@@ -18,6 +18,7 @@ public class CubeAccProcessor<T, TL extends PrimitiveIterable> implements
     public long[] dimensionFilters;
     public Accumulator<T, TL> acc;
     public int span;
+    public double total;
 
     public CubeAccProcessor(
             Accumulator<T, TL> acc
@@ -33,6 +34,7 @@ public class CubeAccProcessor<T, TL extends PrimitiveIterable> implements
     ) {
         acc.reset();
         span=0;
+        total=0;
         FastList<Sketch<T>> sketchCol = board.sketchCol;
         int nRows = sketchCol.size();
         int nDims = dimensionFilters.length;
@@ -50,38 +52,21 @@ public class CubeAccProcessor<T, TL extends PrimitiveIterable> implements
             }
         }
 
+        DoubleArrayList totalCol = board.totalCol;
         for (int i = 0; i < nRows; i++) {
             if (failedConditions[i] == 0) {
                 span++;
-                acc.addSketch(sketchCol.get(i));
+                Sketch<T> curSketch = sketchCol.get(i);
+                acc.addSketch(curSketch);
+                total += totalCol.get(i);
             }
         }
         return acc.estimate(xToTrack);
     }
 
     @Override
-    public double total(StoryBoard<T> board) {
-        double result = 0;
-        span = 0;
-        DoubleArrayList totalCol = board.totalCol;
-        int nRows = totalCol.size();
-        int nDims = dimensionFilters.length;
-        for (int i = 0; i < nRows; i++) {
-            boolean matches = true;
-            for (int j = 0; j < nDims; j++) {
-                long curFilterValue = dimensionFilters[j];
-                if (curFilterValue >= 0 && curFilterValue != board.dimensionCols.get(j).get(i)) {
-                    matches = false;
-                    break;
-                }
-            }
-            if (matches) {
-                span++;
-                result += totalCol.get(i);
-            }
-        }
-
-        return result;
+    public double total() {
+        return total;
     }
 
     @Override

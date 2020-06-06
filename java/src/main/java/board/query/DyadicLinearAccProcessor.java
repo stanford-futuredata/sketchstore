@@ -5,6 +5,7 @@ import org.eclipse.collections.api.PrimitiveIterable;
 import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.list.mutable.FastList;
+import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
 import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
 import summary.accumulator.Accumulator;
 
@@ -18,6 +19,7 @@ public class DyadicLinearAccProcessor<T, TL extends PrimitiveIterable> implement
     public int maxHeight;
     public int accumulatorSize;
     public int span;
+    public double total;
 
     public DyadicLinearAccProcessor(
             Accumulator<T, TL> acc, int maxHeight, int accumulatorSize
@@ -26,6 +28,7 @@ public class DyadicLinearAccProcessor<T, TL extends PrimitiveIterable> implement
         this.maxHeight = maxHeight;
         this.accumulatorSize = accumulatorSize;
         this.span = 0;
+        this.total = 0;
     }
 
     public FastList<LongArrayList> getDyadicBreakdown(int startIdx, int endIdx) {
@@ -57,7 +60,10 @@ public class DyadicLinearAccProcessor<T, TL extends PrimitiveIterable> implement
     ) {
         acc.reset();
         span=0;
+        total = 0;
         LongList tValues = board.dimensionCols.get(0);
+        DoubleArrayList totalCol = board.totalCol;
+
         FastList<LongArrayList> tierIndices = getDyadicBreakdown(startIdx, endIdx);
         for (int i = 0; i < tValues.size(); i++) {
             long curT = tValues.get(i);
@@ -76,21 +82,8 @@ public class DyadicLinearAccProcessor<T, TL extends PrimitiveIterable> implement
     }
 
     @Override
-    public double total(StoryBoard<T> board) {
-        double result = 0;
-        span=0;
-        LongList tValues = board.dimensionCols.get(0);
-        for (int i = 0; i < tValues.size(); i++) {
-            if (board.tierCol.get(i) > 0) {
-                continue;
-            }
-            long curT = tValues.get(i);
-            if (curT >= startIdx && curT < endIdx) {
-                span++;
-                result += board.totalCol.get(i);
-            }
-        }
-        return result;
+    public double total() {
+        return total;
     }
 
     @Override
