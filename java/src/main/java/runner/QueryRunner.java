@@ -309,7 +309,9 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
                     });
                     results.add(curResults);
                     queryNum++;
-                    memoized.put(curFilterDimensions, curResults);
+                    if (cacheQueries) {
+                        memoized.put(curFilterDimensions, curResults);
+                    }
                 }
                 System.out.println("Query Runner #: "+queryNum);
             }
