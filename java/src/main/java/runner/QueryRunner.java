@@ -261,6 +261,7 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
                 }
                 System.runFinalization();
                 System.gc();
+                System.out.println("Warmed Up");
 
                 MutableMap<LongList, Map<String, String>> memoized = new UnifiedMap<>();
 
