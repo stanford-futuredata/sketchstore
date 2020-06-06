@@ -97,7 +97,8 @@ public class FreqSketchGenFactory implements SketchGenFactory<Long, LongList> {
             int maxHeight = (int) FastMath.log(2.0, maxLength);
             return new DyadicLinearAccProcessor<>(
                     this.getAccumulator(sketch),
-                    maxHeight
+                    maxHeight,
+                    accSize
             );
         } else {
             return new LinearAccProcessor<>(this.getAccumulator(sketch), accSize);

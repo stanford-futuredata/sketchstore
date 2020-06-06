@@ -16,12 +16,14 @@ public class DyadicLinearAccProcessor<T, TL extends PrimitiveIterable> implement
     public Accumulator<T, TL> acc;
     public int base = 2;
     public int maxHeight;
+    public int accumulatorSize;
 
     public DyadicLinearAccProcessor(
-            Accumulator<T, TL> acc, int maxHeight
+            Accumulator<T, TL> acc, int maxHeight, int accumulatorSize
     ) {
         this.acc = acc;
         this.maxHeight = maxHeight;
+        this.accumulatorSize = accumulatorSize;
     }
 
     public FastList<LongArrayList> getDyadicBreakdown(int startIdx, int endIdx) {
@@ -61,6 +63,9 @@ public class DyadicLinearAccProcessor<T, TL extends PrimitiveIterable> implement
             boolean matched = curTierLocations.anySatisfy((long x) -> (x == curT));
             if (matched) {
                 acc.addSketch(board.sketchCol.get(i));
+                if (accumulatorSize > 0) {
+                    acc.compress(accumulatorSize);
+                }
             }
         }
         return acc.estimate(xToTrack);

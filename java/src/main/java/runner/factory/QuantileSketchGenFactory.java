@@ -110,7 +110,8 @@ public class QuantileSketchGenFactory implements SketchGenFactory<Double, Double
             int maxHeight = (int) FastMath.log(2.0, maxLength);
             return new DyadicLinearAccProcessor<>(
                     this.getAccumulator(sketch),
-                    maxHeight
+                    maxHeight,
+                    accumulatorSize
             );
         } else {
             return new LinearAccProcessor<>(this.getAccumulator(sketch), accumulatorSize);

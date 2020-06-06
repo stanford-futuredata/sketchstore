@@ -1,5 +1,5 @@
 {
-  "experiment": "l_caida_f",
+  "experiment": "l_caidasize_f",
   "quantile": false,
   "out_dir": "output/",
   "csv_path": "datasets/caida/caida10M-ipdst.csv",
