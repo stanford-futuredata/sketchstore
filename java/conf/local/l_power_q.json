@@ -20,5 +20,5 @@
   ],
 
   "x_to_track": "../../../datasets/storyboard/power/power_tracked.csv",
-  "num_queries": 100
+  "num_queries": 500
 }
