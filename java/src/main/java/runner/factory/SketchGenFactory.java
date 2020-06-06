@@ -17,8 +17,7 @@ public interface SketchGenFactory<T, TL extends PrimitiveIterable> {
             int maxLength
     );
     Accumulator<T, TL> getAccumulator(
-            String sketch,
-            int accSize
+            String sketch
     );
     LinearQueryProcessor<T> getLinearQueryProcessor(
             String sketch,

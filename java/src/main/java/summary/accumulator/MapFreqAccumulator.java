@@ -12,6 +12,7 @@ import java.util.List;
 
 public class MapFreqAccumulator implements Accumulator<Long, LongList> {
     public LongDoubleHashMap values;
+    public double floor = 0;
     public MapFreqAccumulator() {
         values = new LongDoubleHashMap();
     }
@@ -22,11 +23,30 @@ public class MapFreqAccumulator implements Accumulator<Long, LongList> {
     @Override
     public void reset() {
         values.clear();
+        floor = 0;
     }
 
     @Override
     public int compress(int size) {
-        return 0;
+        int curSize = values.size();
+        if (curSize <= size) {
+            return curSize;
+        } else {
+            int newSize = (int)(.7 * size);
+            double[] sortedWeights = values.toSortedArray();
+            double cutoff = sortedWeights[sortedWeights.length - newSize];
+            LongDoubleHashMap newValues = new LongDoubleHashMap(newSize);
+            int[] sizeCounter = new int[1];
+            values.forEachKeyValue((long k, double v) -> {
+                if (v >= cutoff &&  sizeCounter[0] < newSize) {
+                    newValues.put(k, v-cutoff);
+                    sizeCounter[0]++;
+                }
+            });
+            values = newValues;
+            floor = floor + cutoff;
+            return values.size();
+        }
     }
 
     @Override
@@ -60,7 +80,7 @@ public class MapFreqAccumulator implements Accumulator<Long, LongList> {
         int size = xToTrack.size();
         for (int i = 0; i < size; i++) {
             long aLong = xToTrack.get(i);
-            xCounts.add(values.getIfAbsent(aLong, 0));
+            xCounts.add(values.getIfAbsent(aLong, -floor)+floor);
         }
         return xCounts;
     }

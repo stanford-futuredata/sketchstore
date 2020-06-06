@@ -13,11 +13,14 @@ public class LinearAccProcessor<T, TL extends PrimitiveIterable> implements
         LinearQueryProcessor<T> {
     public int startIdx=0, endIdx=0;
     public Accumulator<T, TL> acc;
+    public int accumulatorSize;
 
     public LinearAccProcessor(
-            Accumulator<T, TL> acc
+            Accumulator<T, TL> acc,
+            int accumulatorSize
     ) {
         this.acc = acc;
+        this.accumulatorSize = accumulatorSize;
     }
 
     @Override
@@ -32,6 +35,9 @@ public class LinearAccProcessor<T, TL extends PrimitiveIterable> implements
             if (curT >= startIdx && curT < endIdx) {
                 Sketch<T> curSketch = board.sketchCol.get(i);
                 acc.addSketch(curSketch);
+                if (accumulatorSize > 0) {
+                    acc.compress(accumulatorSize);
+                }
             }
         }
         return acc.estimate(xToTrack);

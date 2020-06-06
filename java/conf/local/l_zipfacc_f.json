@@ -1,0 +1,25 @@
+{
+  "experiment": "l_zipfacc_f",
+  "quantile": false,
+  "out_dir": "output/",
+  "csv_path": "../../../datasets/storyboard/zipf/zipf10M.csv",
+  "col_types": [0],
+  "metric_col": "x",
+
+  "granularity": 2048,
+  "sizes": [64],
+  "sketches": [
+    "top_values",
+    "truncation",
+    "cooperative",
+    "yahoo_mg",
+    "cms_min",
+    "pps",
+    "random_sample",
+    "dyadic_truncation"
+  ],
+  "accumulator_sizes": [64, 128, 512, 1000, 2000, 10000, 100000, 1000000],
+
+  "x_to_track": "../../../datasets/storyboard/zipf/zipf10M-xtrack.csv",
+  "num_queries": 100
+}

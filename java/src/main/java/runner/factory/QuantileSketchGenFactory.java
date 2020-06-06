@@ -67,7 +67,9 @@ public class QuantileSketchGenFactory implements SketchGenFactory<Double, Double
     }
 
     @Override
-    public Accumulator<Double, DoubleList> getAccumulator(String sketch) {
+    public Accumulator<Double, DoubleList> getAccumulator(
+            String sketch
+            ) {
         if (sketch.equals("top_values")
                 || sketch.equals("truncation")
                 || sketch.equals("cooperative")
@@ -99,7 +101,11 @@ public class QuantileSketchGenFactory implements SketchGenFactory<Double, Double
     }
 
     @Override
-    public LinearQueryProcessor<Double> getLinearQueryProcessor(String sketch, int maxLength) {
+    public LinearQueryProcessor<Double> getLinearQueryProcessor(
+            String sketch,
+            int maxLength,
+            int accumulatorSize
+            ) {
         if (sketch.equals("dyadic_truncation")) {
             int maxHeight = (int) FastMath.log(2.0, maxLength);
             return new DyadicLinearAccProcessor<>(
@@ -107,7 +113,7 @@ public class QuantileSketchGenFactory implements SketchGenFactory<Double, Double
                     maxHeight
             );
         } else {
-            return new LinearAccProcessor<>(this.getAccumulator(sketch));
+            return new LinearAccProcessor<>(this.getAccumulator(sketch), accumulatorSize);
         }
     }
 

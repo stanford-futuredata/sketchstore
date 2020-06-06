@@ -63,8 +63,7 @@ public class FreqSketchGenFactory implements SketchGenFactory<Long, LongList> {
 
     @Override
     public Accumulator<Long, LongList> getAccumulator(
-            String sketch,
-            int accSize
+            String sketch
     ) {
         if (sketch.equals("top_values")
                 || sketch.equals("truncation")
@@ -97,17 +96,17 @@ public class FreqSketchGenFactory implements SketchGenFactory<Long, LongList> {
         if (sketch.equals("dyadic_truncation")) {
             int maxHeight = (int) FastMath.log(2.0, maxLength);
             return new DyadicLinearAccProcessor<>(
-                    this.getAccumulator(sketch, accSize),
+                    this.getAccumulator(sketch),
                     maxHeight
             );
         } else {
-            return new LinearAccProcessor<>(this.getAccumulator(sketch, accSize));
+            return new LinearAccProcessor<>(this.getAccumulator(sketch), accSize);
         }
     }
 
     @Override
     public CubeQueryProcessor<Long> getCubeQueryProcessor(String sketch) {
-        return new CubeAccProcessor<>(getAccumulator(sketch, 0));
+        return new CubeAccProcessor<>(getAccumulator(sketch));
     }
 
     @Override

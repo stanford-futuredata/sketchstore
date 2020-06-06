@@ -1,0 +1,24 @@
+{
+  "experiment": "l_caida_f",
+  "quantile": false,
+  "out_dir": "output/",
+  "csv_path": "datasets/caida/caida10M-ipdst.csv",
+  "col_types": [0],
+  "metric_col": "ip.dst",
+
+  "granularity": 2048,
+  "sizes": [4, 8, 16, 32, 64, 128, 256, 512],
+  "sketches": [
+    "top_values",
+    "truncation",
+    "cooperative",
+    "yahoo_mg",
+    "cms_min",
+    "pps",
+    "random_sample",
+    "dyadic_truncation"
+  ],
+
+  "x_to_track": "datasets/caida/caida10M-ipdst-xtrack.csv",
+  "num_queries": 500
+}

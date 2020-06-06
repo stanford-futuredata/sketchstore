@@ -164,13 +164,18 @@ public class SortedQuantileAccumulator implements Accumulator<Double, DoubleList
     }
 
     public int compress(int size) {
-        double wTotal = weights.sum();
-        double sectionWeight = wTotal / size;
-        double randCutoff = rng.nextDouble()*sectionWeight;
         int n = items.size();
+        if (n <= size) {
+            return n;
+        }
+        int newSize = size;
 
-        DoubleArrayList newItems = new DoubleArrayList(size);
-        DoubleArrayList newWeights = new DoubleArrayList(size);
+        double wTotal = weights.sum();
+        double sectionWeight = wTotal / newSize;
+        double randCutoff = rng.nextDouble()*sectionWeight;
+
+        DoubleArrayList newItems = new DoubleArrayList(newSize);
+        DoubleArrayList newWeights = new DoubleArrayList(newSize);
 
         double totalWeight = 0;
         for (int i = 0; i < n; i++) {

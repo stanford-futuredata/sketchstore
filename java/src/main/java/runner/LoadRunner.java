@@ -92,7 +92,6 @@ public class LoadRunner<T, TL extends PrimitiveIterable> {
         );
 
         Map<String, Object> plannerParams = getPlannerParams();
-        int curSize = sizes.get(0);
         planner.setParams(plannerParams);
         planner.plan(t, metricCol);
 
@@ -114,74 +113,77 @@ public class LoadRunner<T, TL extends PrimitiveIterable> {
             );
             BoardGen<T, TL> bGen = new BoardGen<>(sGen);
 
-            // Warm up
-            planOptimizer.optimizePlan(
-                    planner.getSegments(),
-                    planner.getDimensions(),
-                    curSize
-            );
-            bGen.generate(
-                    planner.getSegments(),
-                    planner.getDimensions(),
-                    planOptimizer.getSpaces(),
-                    planOptimizer.getBiases()
-            );
-            System.runFinalization();
-            System.gc();
+            for (int curSize : sizes) {
+                System.out.println("Size: "+curSize);
+                // Warm up
+                planOptimizer.optimizePlan(
+                        planner.getSegments(),
+                        planner.getDimensions(),
+                        curSize
+                );
+                bGen.generate(
+                        planner.getSegments(),
+                        planner.getDimensions(),
+                        planOptimizer.getSpaces(),
+                        planOptimizer.getBiases()
+                );
+                System.runFinalization();
+                System.gc();
 
-            optimizeTimer.start();
-            planOptimizer.optimizePlan(
-                    planner.getSegments(),
-                    planner.getDimensions(),
-                    curSize
-            );
-            optimizeTimer.end();
+                optimizeTimer.start();
+                planOptimizer.optimizePlan(
+                        planner.getSegments(),
+                        planner.getDimensions(),
+                        curSize
+                );
+                optimizeTimer.end();
 
-            System.out.println("Generating with sizes: ");
-            LongList biases = planOptimizer.getBiases();
-            IntList spaces = planOptimizer.getSpaces();
-            System.out.print("space: ");
-            for (int i = 0; i < 10; i++) {
-                System.out.print(spaces.get(i)+" ");
-            }
-            System.out.println();
-            System.out.print("bias: ");
-            for (int i = 0; i < 10; i++) {
-                System.out.print(biases.get(i)+" ");
-            }
-            System.out.println();
-
-            Timer constructTime = new Timer();
-            constructTime.start();
-            StoryBoard<T> board = bGen.generate(
-                    planner.getSegments(),
-                    planner.getDimensions(),
-                    planOptimizer.getSpaces(),
-                    planOptimizer.getBiases()
-            );
-            constructTime.end();
-
-            String outputPath = String.format("%s/%s",
-                    boardDir.toString(),
-                    IOUtil.getBoardName(
-                            curSketch,
-                            curSize,
-                            granularity
-                    ));
-            File outFile = new File(outputPath);
-            IOUtil.writeBoard(board, outFile);
-
-            HashMap<String, String> curResults = new HashMap<>();
-            curResults.put("sketch", curSketch);
-            curResults.put("size", Integer.toString(curSize));
-            curResults.put("construct_time", Double.toString(constructTime.getTotalMs()));
-            curResults.put("plan_time", Double.toString(optimizeTimer.getTotalMs()));
-            plannerParams.forEach((String k, Object v) -> {
-                if (v instanceof Number) {
-                    curResults.put(k, v.toString());
+                System.out.println("Generating with sizes: ");
+                LongList biases = planOptimizer.getBiases();
+                IntList spaces = planOptimizer.getSpaces();
+                System.out.print("space: ");
+                for (int i = 0; i < 10; i++) {
+                    System.out.print(spaces.get(i) + " ");
                 }
-            });
-            results.add(curResults);
+                System.out.println();
+                System.out.print("bias: ");
+                for (int i = 0; i < 10; i++) {
+                    System.out.print(biases.get(i) + " ");
+                }
+                System.out.println();
+
+                Timer constructTime = new Timer();
+                constructTime.start();
+                StoryBoard<T> board = bGen.generate(
+                        planner.getSegments(),
+                        planner.getDimensions(),
+                        planOptimizer.getSpaces(),
+                        planOptimizer.getBiases()
+                );
+                constructTime.end();
+
+                String outputPath = String.format("%s/%s",
+                        boardDir.toString(),
+                        IOUtil.getBoardName(
+                                curSketch,
+                                curSize,
+                                granularity
+                        ));
+                File outFile = new File(outputPath);
+                IOUtil.writeBoard(board, outFile);
+
+                HashMap<String, String> curResults = new HashMap<>();
+                curResults.put("sketch", curSketch);
+                curResults.put("size", Integer.toString(curSize));
+                curResults.put("construct_time", Double.toString(constructTime.getTotalMs()));
+                curResults.put("plan_time", Double.toString(optimizeTimer.getTotalMs()));
+                plannerParams.forEach((String k, Object v) -> {
+                    if (v instanceof Number) {
+                        curResults.put(k, v.toString());
+                    }
+                });
+                results.add(curResults);
+            }
         }
 
         Path resultsDir = Paths.get(outputDir, "results", experiment);

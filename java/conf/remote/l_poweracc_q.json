@@ -1,0 +1,25 @@
+{
+  "experiment": "l_poweracc_q",
+  "quantile": true,
+  "out_dir": "output/",
+  "csv_path": "datasets/power/power.csv",
+  "col_types": [1],
+  "metric_col": "Global_active_power",
+
+  "granularity": 2048,
+  "sizes": [64],
+  "sketches": [
+    "top_values",
+    "truncation",
+    "cooperative",
+    "kll",
+    "low_discrep",
+    "pps",
+    "random_sample",
+    "dyadic_truncation"
+  ],
+  "accumulator_sizes": [64, 128, 512, 1000, 2000, 10000, 100000, 1000000],
+
+  "x_to_track": "datasets/power/power_tracked.csv",
+  "num_queries": 500
+}

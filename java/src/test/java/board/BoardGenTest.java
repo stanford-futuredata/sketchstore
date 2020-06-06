@@ -112,7 +112,8 @@ public class BoardGenTest {
         );
 
         LinearQueryProcessor<Long> qp = new LinearAccProcessor<Long, LongList>(
-                new MapFreqAccumulator()
+                new MapFreqAccumulator(),
+                0
         );
         qp.setRange(0, 2);
         FastList<Long> xToTrack = FastList.newListWith(5L, 1L, 2L);

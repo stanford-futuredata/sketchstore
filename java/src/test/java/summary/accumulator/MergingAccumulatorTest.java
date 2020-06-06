@@ -14,7 +14,9 @@ public class MergingAccumulatorTest {
     @Test
     public void testNull() {
         FreqSketchGenFactory factory = new FreqSketchGenFactory();
-        MergingAccumulator<Long, LongList> acc = (MergingAccumulator<Long, LongList>) factory.getAccumulator("cms_min");
+        MergingAccumulator<Long, LongList> acc = (MergingAccumulator<Long, LongList>) factory.getAccumulator(
+                "cms_min"
+                );
         DoubleList results = acc.estimate(Lists.mutable.of(1L, 2L, 3L));
         assertEquals(0, results.get(0), 1e-10);
     }

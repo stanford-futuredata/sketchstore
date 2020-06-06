@@ -8,14 +8,20 @@ import summary.Sketch;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 public class ListQuantileAccumulator implements Accumulator<Double, DoubleList>{
     public DoubleArrayList items;
     public DoubleArrayList weights;
+    public Random rng;
 
-    public ListQuantileAccumulator() {
+    public ListQuantileAccumulator(int seed) {
         items = new DoubleArrayList();
         weights = new DoubleArrayList();
+        rng = new Random(seed);
+    }
+    public ListQuantileAccumulator() {
+        this(0);
     }
 
     @Override
@@ -26,7 +32,45 @@ public class ListQuantileAccumulator implements Accumulator<Double, DoubleList>{
 
     @Override
     public int compress(int size) {
-        return 0;
+        int n = items.size();
+        if (n <= size) {
+            return n;
+        }
+        else {
+            reIndex();
+            n = items.size();
+            int newSize = (int) (.7 * size);
+            if (n <= newSize) {
+                return n;
+            } else {
+                double wTotal = weights.sum();
+                double sectionWeight = wTotal / newSize;
+                double randCutoff = rng.nextDouble()*sectionWeight;
+
+                DoubleArrayList newItems = new DoubleArrayList(newSize);
+                DoubleArrayList newWeights = new DoubleArrayList(newSize);
+
+                double totalWeight = 0;
+                for (int i = 0; i < n; i++) {
+                    double curItem = items.get(i);
+                    double curWeight = weights.get(i);
+                    if (curWeight >= sectionWeight) {
+                        newItems.add(curItem);
+                        newWeights.add(curWeight);
+                    } else {
+                        totalWeight += curWeight;
+                        if (totalWeight >= randCutoff) {
+                            newItems.add(curItem);
+                            newWeights.add(sectionWeight);
+                            totalWeight -= sectionWeight;
+                        }
+                    }
+                }
+                items = newItems;
+                weights = newWeights;
+                return items.size();
+            }
+        }
     }
 
     @Override
