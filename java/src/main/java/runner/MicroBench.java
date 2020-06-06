@@ -7,6 +7,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.eclipse.collections.api.map.primitive.MutableLongDoubleMap;
 import org.eclipse.collections.impl.list.mutable.primitive.IntArrayList;
 import org.eclipse.collections.impl.map.mutable.primitive.LongDoubleHashMap;
+import org.eclipse.collections.impl.set.mutable.primitive.IntHashSet;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -23,7 +24,31 @@ public class MicroBench
 //      CoopRuntimeBench.prepare();
 //    CoopRuntimeBench.runSB();
 //    CoopRuntimeBench.run();
-      generateZipf();
+      generateZipfTrack();
+  }
+
+  public static void generateZipfTrack() throws IOException {
+    RandomGenerator rng = new MersenneTwister(1337);
+    ZipfDistribution dist = new ZipfDistribution(rng, 100_000_000, 1.1);
+    int nTracked = 200;
+    IntHashSet trackedInts = new IntHashSet(nTracked);
+    while (trackedInts.size() < nTracked) {
+      int newX = dist.sample();
+      if (!trackedInts.contains(newX)) {
+        System.out.println(newX);
+        trackedInts.add(newX);
+      }
+    }
+    int[] sortedTracked = trackedInts.toSortedArray();
+
+    String dirPath = "datasets/zipfbig";
+    Path filePath = Paths.get(dirPath, "zipf-xtrack.csv");
+    PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(filePath.toString())));
+    out.println("x_track");
+    for (int x : sortedTracked) {
+      out.println(x);
+    }
+    out.close();
   }
 
   public static void generateZipf() throws IOException {
