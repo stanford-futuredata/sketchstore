@@ -4,15 +4,13 @@ import org.apache.commons.math3.distribution.EnumeratedDistribution;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.RandomGeneratorFactory;
 import org.apache.commons.math3.util.Pair;
-import org.eclipse.collections.api.list.MutableList;
-import org.eclipse.collections.api.tuple.primitive.LongDoublePair;
 import org.eclipse.collections.impl.list.mutable.FastList;
-import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
 import org.eclipse.collections.impl.map.mutable.primitive.LongDoubleHashMap;
+import summary.CounterLongSketch;
 
 import java.util.Random;
 
-public class USampleFreqCompressor implements ItemDictCompressor{
+public class USampleFreqCompressor implements ItemCounterCompressor {
     public RandomGenerator rng;
 
     public USampleFreqCompressor(int seed) {
@@ -20,10 +18,10 @@ public class USampleFreqCompressor implements ItemDictCompressor{
     }
 
     @Override
-    public LongDoubleHashMap compress(LongDoubleHashMap xs, int size) {
+    public CounterLongSketch compress(LongDoubleHashMap xs, int size) {
         int nItems = xs.size();
         if (nItems == 0) {
-            return xs;
+            return new CounterLongSketch(new long[0], new double[0]);
         }
 
         FastList<Pair<Long, Double>> pmf = new FastList<>(nItems);
@@ -38,6 +36,6 @@ public class USampleFreqCompressor implements ItemDictCompressor{
         for (int i = 0; i < size; i++) {
             newMap.addToValue(xDist.sample(), weightPerSample);
         }
-        return newMap;
+        return CounterLongSketch.fromMap(newMap);
     }
 }

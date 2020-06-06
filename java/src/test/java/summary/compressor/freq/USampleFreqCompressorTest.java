@@ -2,6 +2,7 @@ package summary.compressor.freq;
 
 import org.eclipse.collections.impl.map.mutable.primitive.LongDoubleHashMap;
 import org.junit.Test;
+import summary.CounterLongSketch;
 
 import static org.junit.Assert.*;
 
@@ -15,7 +16,7 @@ public class USampleFreqCompressorTest {
         xv.put(4, 33.0);
         xv.put(5, 20.0);
         USampleFreqCompressor tc = new USampleFreqCompressor(0);
-        LongDoubleHashMap xc = tc.compress(xv, 10);
+        CounterLongSketch xc = tc.compress(xv, 10);
         assertTrue(xc.size() <= 10);
     }
 }

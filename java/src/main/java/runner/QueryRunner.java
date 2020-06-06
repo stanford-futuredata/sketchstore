@@ -78,8 +78,6 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
             SketchGenFactory<T, TL> genFactory
     ) throws Exception {
         Path boardDir = Paths.get(outputDir, "boards", experiment);
-//        int curSize = sizes.get(0);
-
         xTrackSource.setHasHeader(true);
         FastList<T> xToTrack = xTrackSource.get(
                 xToTrackPath, 0
@@ -88,20 +86,8 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
         LinearWorkload workloadGen = new LinearWorkload(0);
         FastList<IntList> workloadIntervals = workloadGen.generate(granularity, numQueries);
 
-        String boardPath = String.format("%s/%s",
-                boardDir,
-                IOUtil.getBoardName(
-                        "top_values",
-                        sizes.get(0),
-                        granularity
-                ));
-        File fIn = new File(boardPath);
-        StoryBoard<T> trueBoard = IOUtil.loadBoard(fIn);
-        LinearQueryProcessor<T> p_true = genFactory.getLinearQueryProcessor(
-                "top_values",
-                granularity,
-                0
-        );
+        MutableMap<IntList, DoubleList> memoizedTrueResults = new UnifiedMap<>();
+        MutableMap<IntList, Double> memoizedTrueTotals = new UnifiedMap<>();
 
         FastList<Map<String, String>> results = new FastList<>();
         MutableMap<String, String> baseResults = Maps.mutable.empty();
@@ -110,18 +96,15 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
         for (int curSize : sizes) {
             System.out.println("Size: " + curSize);
             for (String curSketch : sketches) {
-                if (curSketch.equals("top_values")) {
-                    continue;
-                }
                 System.out.println("Running Sketch: " + curSketch);
-                boardPath = String.format("%s/%s",
+                String boardPath = String.format("%s/%s",
                         boardDir,
                         IOUtil.getBoardName(
                                 curSketch,
                                 curSize,
                                 granularity
                         ));
-                fIn = new File(boardPath);
+                File fIn = new File(boardPath);
                 StoryBoard<T> board = IOUtil.loadBoard(fIn);
 
                 Timer sketchTotalTimer = new Timer();
@@ -138,9 +121,6 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
                         int endIdx = curInterval.get(1);
                         p_raw.setRange(startIdx, endIdx);
                         p_raw.query(board, xToTrack);
-                        p_true.setRange(startIdx, endIdx);
-                        p_true.query(trueBoard, xToTrack);
-                        p_true.total();
                     }
                     System.runFinalization();
                     System.gc();
@@ -150,10 +130,6 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
                     for (IntList curInterval : workloadIntervals) {
                         int startIdx = curInterval.get(0);
                         int endIdx = curInterval.get(1);
-                        p_true.setRange(startIdx, endIdx);
-                        DoubleList trueResults = p_true.query(trueBoard, xToTrack);
-                        double trueTotal = p_true.total();
-                        int trueSpan = p_true.span();
 
                         p_raw.setRange(startIdx, endIdx);
                         sketchTotalTimer.start();
@@ -162,6 +138,14 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
                         DoubleList queryResults = p_raw.query(board, xToTrack);
                         queryTimer.end();
                         sketchTotalTimer.end();
+
+                        if (curSketch.equals("top_values") && !memoizedTrueResults.containsKey(curInterval)) {
+                            memoizedTrueResults.put(curInterval, queryResults);
+                            memoizedTrueTotals.put(curInterval, p_raw.total());
+                        }
+                        DoubleList trueResults = memoizedTrueResults.get(curInterval);
+                        double trueTotal = memoizedTrueTotals.get(curInterval);
+                        int curSpan = p_raw.span();
 
                         MutableMap<String, Double> errorQuantities = ErrorMetric.calcErrors(
                                 trueResults,
@@ -174,7 +158,7 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
                         curResults.put("start_idx", Integer.toString(startIdx));
                         curResults.put("end_idx", Integer.toString(endIdx));
                         curResults.put("query_len", Integer.toString(endIdx - startIdx));
-                        curResults.put("segment_span", Integer.toString(trueSpan));
+                        curResults.put("segment_span", Integer.toString(curSpan));
                         curResults.put("granularity", Integer.toString(granularity));
                         curResults.put("total", Double.toString(trueTotal));
                         curResults.put("query_time", Double.toString(queryTimer.getTotalMs()));
@@ -209,36 +193,23 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
                 xToTrackPath, 0
         );
 
-        String boardPath = String.format("%s/%s",
-                boardDir,
-                IOUtil.getBoardName(
-                        "top_values",
-                        curSize,
-                        granularity
-                ));
-        File fIn = new File(boardPath);
-        StoryBoard<T> trueBoard = IOUtil.loadBoard(fIn);
-        LongList dimensionCardinalities = trueBoard.getDimCardinalities();
-
-        CubeQueryProcessor<T> p_true = genFactory.getCubeQueryProcessor("top_values");
+        MutableMap<LongList, DoubleList> memoizedTrueResults = new UnifiedMap<>();
+        MutableMap<LongList, Double> memoizedTrueTotals = new UnifiedMap<>();
 
         FastList<Map<String, String>> results = new FastList<>();
         MutableMap<String, String> baseResults = Maps.mutable.empty();
         baseResults.put("experiment", experiment);
 
         for (String curSketch: sketches) {
-            if (curSketch.equals("top_values")) {
-                continue;
-            }
             System.out.println("Running Sketch: "+curSketch);
-            boardPath = String.format("%s/%s",
+            String boardPath = String.format("%s/%s",
                     boardDir,
                     IOUtil.getBoardName(
                             curSketch,
                             curSize,
                             granularity
                     ));
-            fIn = new File(boardPath);
+            File fIn = new File(boardPath);
             StoryBoard<T> board = IOUtil.loadBoard(fIn);
 
             CubeQueryProcessor<T> p_raw = genFactory.getCubeQueryProcessor(curSketch);
@@ -248,6 +219,7 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
             for (double curWorkloadProbability : queryWorkloadProbs) {
                 System.out.println("Running with Workload Prob: "+curWorkloadProbability);
                 CubeWorkload workloadGen = new CubeWorkload(0);
+                LongList dimensionCardinalities = board.getDimCardinalities();
                 FastList<LongList> workloadDimensions = workloadGen.generate(
                         dimensionCardinalities,
                         curWorkloadProbability,
@@ -271,12 +243,8 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
                         results.add(memoized.get(curFilterDimensions));
                         continue;
                     }
-                    p_true.setDimensions(curFilterDimensions);
-                    DoubleList trueResults = p_true.query(trueBoard, xToTrack);
-                    double trueTotal = p_true.total();
-                    int trueSpan = p_true.span();
-                    p_raw.setDimensions(curFilterDimensions);
 
+                    p_raw.setDimensions(curFilterDimensions);
                     sketchTotalTimer.start();
                     queryTimer.reset();
                     queryTimer.start();
@@ -284,11 +252,14 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
                     queryTimer.end();
                     sketchTotalTimer.end();
 
-//                    System.out.println("true");
-//                    System.out.println(trueResults);
-//                    System.out.println("query");
-//                    System.out.println(queryResults);
-//
+                    if (curSketch.equals("top_values") && !memoizedTrueResults.containsKey(curFilterDimensions)) {
+                        memoizedTrueResults.put(curFilterDimensions, queryResults);
+                        memoizedTrueTotals.put(curFilterDimensions, p_raw.total());
+                    }
+                    DoubleList trueResults = memoizedTrueResults.get(curFilterDimensions);
+                    double trueTotal = memoizedTrueTotals.get(curFilterDimensions);
+                    int curSpan = p_raw.span();
+
                     MutableMap<String, Double> errorQuantities = ErrorMetric.calcErrors(
                             trueResults,
                             queryResults
@@ -302,7 +273,7 @@ public class QueryRunner<T, TL extends PrimitiveIterable> {
                     curResults.put("query_len", Integer.toString(numFilters));
                     curResults.put("total", Double.toString(trueTotal));
                     curResults.put("query_time", Double.toString(queryTimer.getTotalMs()));
-                    curResults.put("segment_span", Integer.toString(trueSpan));
+                    curResults.put("segment_span", Integer.toString(curSpan));
                     curResults.put("workload_query_prob", Double.toString(curWorkloadProbability));
                     errorQuantities.forEachKeyValue((String errType, Double errValue) -> {
                         curResults.put(errType, errValue.toString());

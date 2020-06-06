@@ -5,21 +5,20 @@ import org.eclipse.collections.api.list.primitive.LongList;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.map.mutable.primitive.LongDoubleHashMap;
 import summary.CounterLongSketch;
-import summary.DictSketch;
 import summary.Sketch;
 import summary.accumulator.MapFreqAccumulator;
-import summary.compressor.freq.ItemDictCompressor;
+import summary.compressor.freq.ItemCounterCompressor;
 
 import java.util.function.Supplier;
 
-public class DyadicItemDictCompressorGen implements SketchGen<Long, LongList> {
+public class DyadicItemCounterCompressorGen implements SketchGen<Long, LongList> {
     public int maxHeight;
-    public FastList<ItemDictCompressor> compressorStack;
+    public FastList<ItemCounterCompressor> compressorStack;
     public FastList<MapFreqAccumulator> segmentStack;
     public long[] countdowns;
     public double base = 2.0;
 
-    public DyadicItemDictCompressorGen(Supplier<ItemDictCompressor> cGen, int maxHeight) {
+    public DyadicItemCounterCompressorGen(Supplier<ItemCounterCompressor> cGen, int maxHeight) {
         this.maxHeight = maxHeight;
         compressorStack = new FastList<>(maxHeight);
         segmentStack = new FastList<>(maxHeight);
@@ -41,10 +40,10 @@ public class DyadicItemDictCompressorGen implements SketchGen<Long, LongList> {
             countdowns[levelIdx]--;
             if (countdowns[levelIdx] == 0) {
                 int currentSize = (int)Math.round((scaledSize * FastMath.pow(base, levelIdx)));
-                LongDoubleHashMap compressedMap = compressorStack.get(levelIdx).compress(
+                Sketch<Long> compressedSketch = compressorStack.get(levelIdx).compress(
                         curSegment.values, currentSize
                 );
-                sketches.add(CounterLongSketch.fromMap(compressedMap));
+                sketches.add(compressedSketch);
                 countdowns[levelIdx] = (long) FastMath.pow(base, levelIdx);
                 curSegment.reset();
             }

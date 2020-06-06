@@ -2,10 +2,11 @@ package summary.compressor.freq;
 
 import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
 import org.eclipse.collections.impl.map.mutable.primitive.LongDoubleHashMap;
+import summary.CounterLongSketch;
 
 import java.util.List;
 
-public class TrackedFreqCompressor implements ItemDictCompressor{
+public class TrackedFreqCompressor implements ItemCounterCompressor {
     public LongArrayList xToTrack;
 
     public TrackedFreqCompressor(List<Long> xToTrack) {
@@ -16,13 +17,16 @@ public class TrackedFreqCompressor implements ItemDictCompressor{
     }
 
     @Override
-    public LongDoubleHashMap compress(LongDoubleHashMap xs, int size) {
-        LongDoubleHashMap newMap = new LongDoubleHashMap(xToTrack.size());
-        int n = xToTrack.size();
-        for (int i = 0; i < n; i++){
+    public CounterLongSketch compress(LongDoubleHashMap xs, int size) {
+        int nTrack = xToTrack.size();
+        long[] itemsToStore = new long[nTrack];
+        double[] weightsToStore = new double[nTrack];
+        for (int i = 0; i < nTrack; i++){
             long curX = xToTrack.get(i);
-            newMap.put(curX, xs.get(curX));
+            double curXWeight = xs.getIfAbsent(curX, 0.0);
+            itemsToStore[i] = curX;
+            weightsToStore[i] = curXWeight;
         }
-        return newMap;
+        return new CounterLongSketch(itemsToStore, weightsToStore);
     }
 }
