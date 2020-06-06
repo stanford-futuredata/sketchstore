@@ -15,7 +15,7 @@ import summary.accumulator.MergingAccumulator;
 import summary.compressor.freq.*;
 import summary.custom.CMSSketchGen;
 import summary.custom.YahooMGGen;
-import summary.gen.DyadicItemDictCompressorGen;
+import summary.gen.DyadicItemCounterCompressorGen;
 import summary.gen.ItemCounterCompressorGen;
 import summary.gen.SketchGen;
 
@@ -46,7 +46,7 @@ public class FreqSketchGenFactory implements SketchGenFactory<Long, LongList> {
             return new ItemCounterCompressorGen(new HaircombCompressor(0));
         } else if (sketch.equals("dyadic_truncation")) {
             int maxHeight = (int) FastMath.log(2.0, maxLength);
-            return new DyadicItemDictCompressorGen(
+            return new DyadicItemCounterCompressorGen(
                     () -> new TruncationFreqCompressor(),
                     maxHeight
             );

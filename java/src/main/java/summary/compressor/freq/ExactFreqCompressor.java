@@ -1,10 +1,11 @@
 package summary.compressor.freq;
 
 import org.eclipse.collections.impl.map.mutable.primitive.LongDoubleHashMap;
+import summary.CounterLongSketch;
 
-public class ExactFreqCompressor implements ItemDictCompressor{
+public class ExactFreqCompressor implements ItemCounterCompressor {
     @Override
-    public LongDoubleHashMap compress(LongDoubleHashMap xs, int size) {
-        return new LongDoubleHashMap(xs);
+    public CounterLongSketch compress(LongDoubleHashMap xs, int size) {
+        return CounterLongSketch.fromMap(xs);
     }
 }

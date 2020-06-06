@@ -2,6 +2,7 @@ package summary.compressor.freq;
 
 import org.eclipse.collections.impl.map.mutable.primitive.LongDoubleHashMap;
 import org.junit.Test;
+import summary.CounterLongSketch;
 import summary.compressor.freq.TruncationFreqCompressor;
 
 import static org.junit.Assert.*;
@@ -16,9 +17,9 @@ public class TruncationFreqCompressorTest {
         xv.put(4, 33.0);
         xv.put(5, 20.0);
         TruncationFreqCompressor tc = new TruncationFreqCompressor();
-        LongDoubleHashMap xc = tc.compress(xv, 3);
+        CounterLongSketch xc = tc.compress(xv, 3);
         assertEquals(3,xc.size());
-        assertTrue(xc.containsKey(1));
+        assertEquals(100.0, xc.estimate(1L), 1e-10);
     }
 
 }

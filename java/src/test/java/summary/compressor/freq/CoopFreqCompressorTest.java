@@ -2,6 +2,7 @@ package summary.compressor.freq;
 
 import org.eclipse.collections.impl.map.mutable.primitive.LongDoubleHashMap;
 import org.junit.Test;
+import summary.CounterLongSketch;
 import summary.compressor.freq.CoopFreqCompressor;
 
 import static org.junit.Assert.*;
@@ -18,10 +19,10 @@ public class CoopFreqCompressorTest {
         counts.put(3, 3.0);
         counts.put(4, 2.0);
 
-        LongDoubleHashMap out;
+        CounterLongSketch out;
         out = cf.compress(counts, size);
-        assertEquals(10.0, out.get(1), 1e-10);
+        assertEquals(10.0, out.estimate(1L), 1e-10);
         out = cf.compress(counts, size);
-        assertEquals(6.0, out.get(3), 1e-10);
+        assertEquals(6.0, out.estimate(3L), 1e-10);
     }
 }

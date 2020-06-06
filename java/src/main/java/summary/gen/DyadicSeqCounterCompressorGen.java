@@ -2,16 +2,10 @@ package summary.gen;
 
 import org.apache.commons.math3.util.FastMath;
 import org.eclipse.collections.api.list.primitive.DoubleList;
-import org.eclipse.collections.api.list.primitive.LongList;
-import org.eclipse.collections.api.list.primitive.MutableDoubleList;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
-import org.eclipse.collections.impl.map.mutable.primitive.LongDoubleHashMap;
 import summary.CounterDoubleSketch;
-import summary.CounterLongSketch;
 import summary.Sketch;
-import summary.accumulator.MapFreqAccumulator;
-import summary.compressor.freq.ItemDictCompressor;
 import summary.compressor.quantile.SeqCounterCompressor;
 
 import java.util.function.Supplier;
