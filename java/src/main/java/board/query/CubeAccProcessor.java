@@ -10,6 +10,7 @@ import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
 import summary.Sketch;
 import summary.accumulator.Accumulator;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class CubeAccProcessor<T, TL extends PrimitiveIterable> implements
@@ -35,16 +36,22 @@ public class CubeAccProcessor<T, TL extends PrimitiveIterable> implements
         FastList<Sketch<T>> sketchCol = board.sketchCol;
         int nRows = sketchCol.size();
         int nDims = dimensionFilters.length;
-        for (int i = 0; i < nRows; i++) {
-            boolean matches = true;
-            for (int j = 0; j < nDims; j++) {
-                long curFilterValue = dimensionFilters[j];
-                if (curFilterValue >= 0 && curFilterValue != board.dimensionCols.get(j).get(i)) {
-                    matches = false;
-                    break;
+
+        int[] failedConditions = new int[nRows];
+        for (int j = 0; j < nDims; j++) {
+            long curFilterValue = dimensionFilters[j];
+            if (curFilterValue >= 0) {
+                LongArrayList curDimCol = board.dimensionCols.get(j);
+                for (int i = 0; i < nRows; i++) {
+                    if (curDimCol.get(i) != curFilterValue) {
+                        failedConditions[i]++;
+                    }
                 }
             }
-            if (matches) {
+        }
+
+        for (int i = 0; i < nRows; i++) {
+            if (failedConditions[i] == 0) {
                 span++;
                 acc.addSketch(sketchCol.get(i));
             }

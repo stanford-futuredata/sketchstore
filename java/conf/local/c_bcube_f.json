@@ -21,7 +21,8 @@
     "cms_min",
     "yahoo_mg"
   ],
+  "cache_queries": true,
 
   "x_to_track": "datasets/sketchstore_synth/bcube4_10M_f_track.csv",
-  "num_queries": 10000
+  "num_queries": 2000
 }
