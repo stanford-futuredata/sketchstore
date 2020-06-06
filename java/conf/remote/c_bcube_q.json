@@ -22,6 +22,8 @@
     "low_discrep"
   ],
 
+  "cache_queries": false,
+
   "x_to_track": "datasets/sketchstore_synth/bcube4_10M_q_track.csv",
   "num_queries": 1000
 }
