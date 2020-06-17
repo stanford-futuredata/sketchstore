@@ -1,14 +1,22 @@
-# Storyboard
-Algorithms for compressing and merging large collections of sketches
-Datasets used for evaluation not included
+# CoopStore
+Prototype implementation and evaluation for Cooperative summaries.
+Full datasets used for evaluation not included.
 
-All relevant code is in the python/ subdirectory
-Build the cython libraries by running `make` in the python directory.
-
-cube_board.py constructs storyboards for cubes
-cube_rquery.py evaluates storyboard accuracy for cubes
-
-linear_board.py constructs storyboards for intervals
-linear_rquery.py evaluates storyboard accuracy for intervals
-
+The main implementation is in the java/ subdirectory
+LBGFS-B optimization for cube summaries in the cpp/ subdirectory
 Code for preparing datasets and generating plots is in the notebooks/ directory
+
+# Building + Running
+```
+cd cpp/
+cmake .
+make
+cd ..
+
+cd java/
+mvn package
+./genCP.sh
+
+./loadRunner.sh conf/l_small_f.json
+./queryRunner.sh conf/l_small_f.json
+```
