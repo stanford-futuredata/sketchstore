@@ -2,9 +2,9 @@
 Prototype implementation and evaluation for Cooperative summaries.
 Full datasets used for evaluation not included.
 
-The main implementation is in the java/ subdirectory
-LBGFS-B optimization for cube summaries in the cpp/ subdirectory
-Code for preparing datasets and generating plots is in the notebooks/ directory
+The main implementation is in the java/ subdirectory. 
+LBGFS-B optimization for cube summaries is in the cpp/ subdirectory.
+Code for preparing datasets and generating plots is in the notebooks/ directory.
 
 # Building + Running
 ```
