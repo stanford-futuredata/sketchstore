@@ -6,6 +6,8 @@ The main implementation is in the java/ subdirectory.
 LBGFS-B optimization for cube summaries is in the cpp/ subdirectory.
 Code for preparing datasets and generating plots is in the notebooks/ directory.
 
+tests
+
 # Building + Running
 ```
 cd cpp/
